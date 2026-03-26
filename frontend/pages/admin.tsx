@@ -1,0 +1,1078 @@
+import { useState, useEffect } from 'react';
+
+const AdminPanel = () => {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminPass, setAdminPass] = useState('');
+  const [activeTab, setActiveTab] = useState('requests');
+  
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAdmin(true);
+    }
+    setActiveTab(localStorage.getItem('adminActiveTab') || 'requests');
+  }, []);
+  
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    localStorage.setItem('adminActiveTab', tab);
+  };
+  
+  // --- DATABASE STATES ---
+  const [users, setUsers] = useState<any[]>([]);
+  const [lockedAccounts, setLockedAccounts] = useState<any[]>([]);
+
+  const [paymentRequests, setPaymentRequests] = useState<any[]>([]);
+  const [allPayments, setAllPayments] = useState<any[]>([]);
+
+  // Fetch users
+  useEffect(() => {
+    const fetchUsers = () => {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      fetch('http://localhost:5000/api/admin/users', { headers })
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setUsers(data);
+          } else {
+            console.error('Expected array of users, got:', data);
+            setUsers([]);
+          }
+        })
+        .catch(err => console.log('Error fetching users:', err));
+    };
+    fetchUsers();
+  }, []);
+
+  // Fetch payment requests
+  useEffect(() => {
+    const fetchPayments = () => {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      fetch('http://localhost:5000/api/admin/pending-payments', { headers })
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setPaymentRequests(data);
+          } else if (data && Array.isArray((data as any).pendingPayments)) {
+            setPaymentRequests((data as any).pendingPayments);
+          } else {
+            console.error('Expected array for pending payments, got:', data);
+            setPaymentRequests([]);
+          }
+        })
+        .catch(err => console.log('Error fetching payments:', err));
+    };
+    fetchPayments();
+    const interval = setInterval(fetchPayments, 10000); // Refresh every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch all payments (pending, approved, rejected)
+  useEffect(() => {
+    const fetchAllPayments = () => {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      fetch('http://localhost:5000/api/admin/all-payments', { headers })
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setAllPayments(data);
+          } else {
+            console.error('Expected array for all payments, got:', data);
+            setAllPayments([]);
+          }
+        })
+        .catch(err => console.log('Error fetching all payments:', err));
+    };
+    fetchAllPayments();
+    const interval = setInterval(fetchAllPayments, 15000); // Refresh every 15 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Fetch locked accounts
+  useEffect(() => {
+    const fetchLockedAccounts = () => {
+      const token = localStorage.getItem('token');
+      const headers: any = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      fetch('http://localhost:5000/api/admin/locked-accounts', { headers })
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            setLockedAccounts(data);
+          } else {
+            console.error('Expected array for locked accounts, got:', data);
+            setLockedAccounts([]);
+          }
+        })
+        .catch(err => console.log('Error fetching locked accounts:', err));
+    };
+    fetchLockedAccounts();
+    const interval = setInterval(fetchLockedAccounts, 20000); // Refresh every 20 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // --- SETTINGS STATES ---
+  const [settings, setSettings] = useState({
+    jazzcash: '0300-1234567',
+    easypaisa: '0345-1234567',
+    withdrawLimit: '500',
+    ytLink: '', ytSlogan: 'Subscribe for Updates',
+    ttLink: '', ttSlogan: 'Follow for Fun',
+    twLink: '', twSlogan: 'Latest Updates',
+    fbLink: '', fbSlogan: 'Join Our Community',
+    liLink: '', liSlogan: 'Professional Network',
+    waLink: '', waSlogan: 'Get Alerts on WhatsApp',
+    igLink: '', igSlogan: 'See Our Stories',
+    notice: ''
+  });
+
+  const [newsText, setNewsText] = useState('');
+
+  // Fetch settings on component mount
+  useEffect(() => {
+    fetch('http://localhost:5000/api/admin/get-settings')
+      .then(res => res.json())
+      .then(data => {
+        console.log("Settings Data:", data);
+        if (data && Object.keys(data).length > 0) {
+          setSettings(prevSettings => ({ ...prevSettings, ...data }));
+        }
+      })
+      .catch(err => console.log('Error fetching settings:', err));
+    setActiveTab(localStorage.getItem('adminActiveTab') || 'requests');
+  }, []);
+
+  // --- FUNCTIONS ---
+  const handlePaymentAction = async (id: string, action: string, type: string) => {
+    if (action === 'approve') {
+      try {
+        const token = localStorage.getItem('token');
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        // All payment types (Activation, 1st Chance, 2nd Chance) use approve-payment endpoint
+        const response = await fetch('http://localhost:5000/api/admin/approve-payment', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ paymentId: id })
+        });
+        if (response.ok) {
+          alert('✅ Payment approved!');
+          // Refresh the list
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('❌ Error: ' + (data.error || 'Failed to approve payment'));
+        }
+      } catch (err) {
+        alert('❌ Error approving payment: ' + err);
+      }
+    } else if (action === 'reject') {
+      try {
+        const token = localStorage.getItem('token');
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        // Call reject-payment endpoint
+        const response = await fetch('http://localhost:5000/api/admin/reject-payment', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ paymentId: id })
+        });
+        if (response.ok) {
+          alert('✅ Payment rejected!');
+          // Refresh the list
+          window.location.reload();
+        } else {
+          const data = await response.json();
+          alert('❌ Error: ' + (data.error || 'Failed to reject payment'));
+        }
+      } catch (err) {
+        alert('❌ Error rejecting payment: ' + err);
+      }
+    }
+  };
+
+  const banUser = async (id: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      await fetch(`http://localhost:5000/api/admin/ban-user/${id}`, {
+        method: 'PUT',
+        headers
+      });
+      alert("User Banned!");
+      // Refresh users
+      window.location.reload();
+    } catch (err) {
+      alert('Error banning user');
+    }
+  };
+
+  const reactiveUser = async (id: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      await fetch(`http://localhost:5000/api/admin/unban-user/${id}`, {
+        method: 'PUT',
+        headers
+      });
+      alert("User Unbanned!");
+      // Refresh users
+      window.location.reload();
+    } catch (err) {
+      alert('Error unbanning user');
+    }
+  };
+
+  const updateUser = async (userId: string, updatedData: any) => {
+    try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      await fetch('http://localhost:5000/api/admin/update-user', {
+        method: 'PUT',
+        headers,
+        body: JSON.stringify({ userId, ...updatedData })
+      });
+      alert("User Updated!");
+      // Refresh users
+      window.location.reload();
+    } catch (err) {
+      alert('Error updating user');
+    }
+  };
+
+  const handleSaveSettings = async () => {
+    console.log('Saving Settings:', settings);
+    try {
+        const token = localStorage.getItem('token');
+        const headers: any = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const response = await fetch('http://localhost:5000/api/admin/update-settings', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(settings)
+        });
+
+        const data = await response.json();
+        console.log('Update settings response:', response.status, data);
+
+        if (response.ok) {
+            alert('✅ Mubarak Ho! Saari Settings Database mein save ho gayi hain.');
+        } else {
+            console.error('Failed to save settings:', data);
+            alert(`Error saving settings: ${data.error || data.message || 'Unknown error'}`);
+        }
+    } catch (error: any) {
+        console.error('Network error saving settings:', error);
+        alert(`❌ Connection Fail! ${error.message || 'Check backend server and network.'}`);
+    }
+  };
+
+  const handlePostNews = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Please login first');
+      window.location.href = '/login';
+      return;
+    }
+    if (!newsText.trim()) {
+      alert("Please enter news content.");
+      return;
+    }
+    try {
+        const response = await fetch('http://localhost:5000/api/admin/post-news', {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ content: newsText })
+        });
+        
+        const data = await response.json();
+        console.log('Post news response:', response.status, data);
+        
+        if (response.ok) {
+            alert("✅ News Posted Successfully!");
+            setNewsText('');
+        } else {
+            console.error('Failed to post news:', data);
+            if (response.status === 403) {
+              alert('Admin access required');
+            } else {
+              alert(`Error posting news: ${data.message || 'Unknown error'}`);
+            }
+        }
+    } catch (error) {
+        console.error('Network error posting news:', error);
+        alert("❌ Network error. Check console for details.");
+    }
+  };
+
+  const handleAdminLogin = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: adminPass })
+      });
+      const data = await response.json();
+      if (response.ok) {
+        localStorage.setItem('token', data.token);
+        setIsAdmin(true);
+      } else {
+        alert('Invalid admin key');
+      }
+    } catch (error) {
+      alert('Login failed');
+    }
+  };
+
+  // Backfill locked account records for existing locked users
+  const handleBackfillLockedAccounts = async () => {
+    if (!confirm('This will create missing LockedAccount records for all locked users. Continue?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const response = await fetch('http://localhost:5000/api/admin/backfill-locked-accounts', {
+        method: 'POST',
+        headers
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(`✅ Backfill Complete!\nCreated: ${data.created}\nSkipped: ${data.skipped}\nTotal: ${data.total}`);
+        window.location.reload();
+      } else {
+        alert('❌ Error during backfill: ' + data.error);
+      }
+    } catch (err) {
+      alert('❌ Backfill failed');
+    }
+  };
+
+  // Process expired users (timers that have ended)
+  const handleExpireOverdueUsers = async () => {
+    if (!confirm('This will lock users whose 2-hour timer has expired and referral count < 11. Continue?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const response = await fetch('http://localhost:5000/api/admin/expire-overdue-users', {
+        method: 'POST',
+        headers
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(`✅ Processing Complete!\nUsers Processed: ${data.processed}`);
+        window.location.reload();
+      } else {
+        alert('❌ Error during processing: ' + data.error);
+      }
+    } catch (err) {
+      alert('❌ Processing failed');
+    }
+  };
+
+  // Refresh locked accounts list
+  const handleRefreshLockedAccounts = async () => {
+    const token = localStorage.getItem('token');
+    const headers: any = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    try {
+      const response = await fetch('http://localhost:5000/api/admin/locked-accounts', { headers });
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setLockedAccounts(data);
+        alert(`✅ Refreshed! Found ${data.length} locked accounts`);
+      }
+    } catch (err) {
+      alert('❌ Error refreshing');
+    }
+  };
+
+  // Create test locked account record
+  const handleCreateTestLockedAccount = async () => {
+    if (!confirm('This will create a LockedAccount record for the first locked user in database. Continue?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      const response = await fetch('http://localhost:5000/api/admin/create-test-locked-account', {
+        method: 'POST',
+        headers
+      });
+      const data = await response.json();
+      if (response.ok) {
+        alert(`✅ Test record created!\nUsername: ${data.record.username}`);
+        handleRefreshLockedAccounts();
+      } else {
+        alert('❌ Error: ' + data.error);
+      }
+    } catch (err) {
+      alert('❌ Failed to create test record');
+    }
+  };
+
+  if (!isAdmin) {
+    return (
+      <div style={styles.loginOverlay}>
+        <div style={styles.loginBox}>
+          <h1 style={{color: 'gold'}}>ADMIN ACCESS</h1>
+          <input type="password" placeholder="Admin Key" style={styles.loginInput} onChange={(e)=>setAdminPass(e.target.value)} />
+          <button onClick={handleAdminLogin} style={styles.goldBtnLarge}>UNLOCK</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: '#050505', color: '#fff', minHeight: '100vh', display: 'flex', fontFamily: 'sans-serif' }}>
+      
+      {/* SIDEBAR */}
+      <div style={styles.sidebar}>
+        <h2 style={{color: 'gold', textAlign: 'center'}}>ADMIN</h2>
+        <button onClick={() => handleTabChange('requests')} style={activeTab === 'requests' ? styles.navBtnActive : styles.navBtn}>💰 Payment Requests</button>
+        <button onClick={() => handleTabChange('withdraw_approvals')} style={activeTab === 'withdraw_approvals' ? styles.navBtnActive : styles.navBtn}>💎 Mega Withdrawals</button>
+        <button onClick={() => handleTabChange('txn_history')} style={activeTab === 'txn_history' ? styles.navBtnActive : styles.navBtn}>🧾 Transaction History</button>
+        <button onClick={() => handleTabChange('register')} style={activeTab === 'register' ? styles.navBtnActive : styles.navBtn}>📝 Registered Users</button>
+        <button onClick={() => handleTabChange('locked_accounts')} style={activeTab === 'locked_accounts' ? styles.navBtnActive : styles.navBtn}>🔒 Locked Accounts</button>
+        <button onClick={() => handleTabChange('social_settings')} style={activeTab === 'social_settings' ? styles.navBtnActive : styles.navBtn}>🌐 Social Settings</button>
+        <button onClick={() => handleTabChange('manage_news')} style={activeTab === 'manage_news' ? styles.navBtnActive : styles.navBtn}>📰 Manage News</button>
+        <button onClick={() => handleTabChange('maintenance')} style={activeTab === 'maintenance' ? styles.navBtnActive : styles.navBtn}>🛠️ Maintenance</button>
+        <button onClick={() => handleTabChange('change_password')} style={activeTab === 'change_password' ? styles.navBtnActive : styles.navBtn}>🔑 Change Password</button>
+        <button onClick={() => { localStorage.removeItem('token'); setIsAdmin(false); window.location.href='/'; }} style={styles.logoutBtn}>🚪 Logout Admin</button>
+      </div>
+
+      <div style={styles.main}>
+        {/* 1. PAYMENT REQUESTS */}
+        {activeTab === 'requests' && (
+          <div style={styles.card}>
+            <h2 style={{color: 'gold', marginBottom: '20px'}}>💰 All Payment Requests</h2>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
+              {Array.isArray(allPayments) && allPayments.length > 0 ? (
+                allPayments.map(req => (
+                  <div key={req._id} style={{
+                    background: '#0a0a0a',
+                    border: `1px solid ${req.status === 'Pending' ? '#FFD700' : req.status === 'Approved' ? '#32CD32' : '#FF6347'}`,
+                    borderRadius: '10px',
+                    padding: '15px',
+                    boxShadow: '0 0 10px rgba(255,215,0,0.1)'
+                  }}>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '15px', marginBottom: '12px'}}>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>👤 USER</div><div style={{fontSize: '13px', color: 'gold', fontWeight: 'bold'}}>{req.username}</div><div style={{fontSize: '11px', color: '#666'}}>{req.email}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>📝 TYPE</div><div style={{fontSize: '13px', color: '#ccc'}}>{req.type}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>💵 AMOUNT</div><div style={{fontSize: '14px', color: '#FFD700', fontWeight: 'bold'}}>RS {req.amountType}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>🧾 TID</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.transactionId || 'N/A'}</div></div>
+                    </div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>{req.screenshotUrl ? <a href={`http://localhost:5000${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline'}}>View File</a> : <span style={{color: '#888'}}>N/A</span>}</div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>📅 CREATED</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A'}</div></div>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                      {req.status === 'Pending' && (
+                        <>
+                          <button onClick={() => handlePaymentAction(req._id, 'approve', req.type)} style={{...styles.approveBtn, flex: 1}}>✅ Approve</button>
+                          <button onClick={() => handlePaymentAction(req._id, 'reject', req.type)} style={{...styles.rejectBtn, flex: 1}}>❌ Reject</button>
+                        </>
+                      )}
+                      {req.status !== 'Pending' && <div style={{flex: 1, textAlign: 'center', color: '#666', fontSize: '12px'}}>Status: {req.status}</div>}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                  <div style={{fontSize: '30px', marginBottom: '10px'}}>📭</div>
+                  <div>No payment requests found</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* WITHDRAWAL REQUESTS TAB FOR ADMIN */}
+        {activeTab === 'withdraw_approvals' && (
+          <div style={styles.card}>
+            <h2 style={{color: 'gold', marginBottom: '20px'}}>💎 Mega Withdrawal Requests</h2>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
+              {Array.isArray(allPayments) && allPayments.filter(p => p.type === 'Withdraw').length > 0 ? (
+                allPayments.filter(p => p.type === 'Withdraw').map(req => (
+                  <div key={req._id} style={{
+                    background: '#0a0a0a',
+                    border: `1px solid ${req.status === 'Pending' ? '#FFD700' : req.status === 'Approved' ? '#32CD32' : '#FF6347'}`,
+                    borderRadius: '10px',
+                    padding: '15px',
+                    boxShadow: '0 0 15px rgba(255,215,0,0.15)'
+                  }}>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px'}}>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>👤 USER</div><div style={{fontSize: '13px', color: 'gold', fontWeight: 'bold'}}>{req.username}</div><div style={{fontSize: '11px', color: '#666'}}>{req.email}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>💰 AMOUNT</div><div style={{fontSize: '16px', color: '#FFD700', fontWeight: 'bold'}}>RS {req.amountType}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
+                    </div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>🏦 PAYMENT METHOD</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.withdrawMethod || 'N/A'}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>💳 ACCOUNT</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.withdrawAccount || 'N/A'}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>📅 REQUESTED</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A'}</div></div>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                      {req.status === 'Pending' && (
+                        <>
+                          <button onClick={() => handlePaymentAction(req._id, 'approve', req.type)} style={{...styles.approveBtn, flex: 1}}>✅ Approve Withdrawal</button>
+                          <button onClick={() => handlePaymentAction(req._id, 'reject', req.type)} style={{...styles.rejectBtn, flex: 1}}>❌ Reject</button>
+                        </>
+                      )}
+                      {req.status !== 'Pending' && <div style={{flex: 1, textAlign: 'center', color: '#666', fontSize: '12px'}}>Status: {req.status}</div>}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                  <div style={{fontSize: '30px', marginBottom: '10px'}}>💎</div>
+                  <div>No withdrawal requests found</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 2. REGISTERED USERS */}
+        {activeTab === 'register' && (
+          <div style={styles.card}>
+            <h2 style={{color: 'gold', marginBottom: '20px'}}>👥 Manage All Users ({users.length})</h2>
+            <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px', maxHeight: '80vh', overflowY: 'auto'}}>
+              {users && users.length > 0 ? (
+                users.map(u => (
+                  <div key={u._id} style={{
+                    background: '#0a0a0a',
+                    border: `1px solid ${u.banned ? '#FF6347' : '#333'}`,
+                    borderRadius: '10px',
+                    padding: '15px',
+                    opacity: u.banned ? 0.6 : 1
+                  }}>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '15px', marginBottom: '12px'}}>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>📝 NAME</div>
+                        <input type="text" defaultValue={u.name} id={`name-${u._id}`} style={{...styles.inputField, fontSize: '13px'}} />
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>👤 USERNAME</div>
+                        <input type="text" defaultValue={u.username} id={`username-${u._id}`} style={{...styles.inputField, fontSize: '13px', color: 'gold'}} />
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>📞 PHONE</div>
+                        <input type="text" defaultValue={u.phone} id={`phone-${u._id}`} style={{...styles.inputField, fontSize: '13px'}} />
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>📧 EMAIL</div>
+                        <input type="email" defaultValue={u.email} id={`email-${u._id}`} style={{...styles.inputField, fontSize: '13px'}} />
+                      </div>
+                    </div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '15px', marginBottom: '12px'}}>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>📍 CITY</div>
+                        <input type="text" defaultValue={u.city} id={`city-${u._id}`} style={{...styles.inputField, fontSize: '13px'}} />
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>🔗 REFERRED BY</div>
+                        <input type="text" defaultValue={u.referredBy || ''} id={`referredBy-${u._id}`} style={{...styles.inputField, fontSize: '13px'}} />
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>🔐 STATUS</div>
+                        <div style={{fontSize: '13px', color: u.banned ? '#FF6347' : '#32CD32', fontWeight: 'bold', padding: '8px', background: '#1a1a1a', borderRadius: '4px'}}>
+                          {u.banned ? '🚫 BANNED' : '✅ ACTIVE'}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                      <button onClick={() => {
+                        const updatedData = {
+                          name: (document.getElementById(`name-${u._id}`) as HTMLInputElement).value,
+                          username: (document.getElementById(`username-${u._id}`) as HTMLInputElement).value,
+                          phone: (document.getElementById(`phone-${u._id}`) as HTMLInputElement).value,
+                          email: (document.getElementById(`email-${u._id}`) as HTMLInputElement).value,
+                          city: (document.getElementById(`city-${u._id}`) as HTMLInputElement).value,
+                          referredBy: (document.getElementById(`referredBy-${u._id}`) as HTMLInputElement).value
+                        };
+                        updateUser(u._id, updatedData);
+                      }} style={{...styles.approveBtn, flex: 1}}>💾 Save Changes</button>
+                      {u.banned ? (
+                        <button onClick={() => reactiveUser(u._id)} style={{...styles.approveBtn, flex: 1}}>↩️ Unban User</button>
+                      ) : (
+                        <button onClick={() => banUser(u._id)} style={{...styles.rejectBtn, flex: 1}}>🚫 Ban User</button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                  <div style={{fontSize: '30px', marginBottom: '10px'}}>👥</div>
+                  <div>No users found</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* 3. LOCKED ACCOUNTS */}
+        {activeTab === 'locked_accounts' && (
+          <div style={styles.card}>
+            <h2 style={{color: 'gold', marginBottom: '20px'}}>🔒 Locked Accounts - Challenge Failed</h2>
+            <p style={{fontSize: '13px', color: '#aaa', marginBottom: '10px'}}>Users who were unable to complete 11 direct referrals within the 2-hour time limit</p>
+            
+            {/* Action Buttons */}
+            <div style={{marginBottom: '20px', display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+              <button onClick={handleRefreshLockedAccounts} style={{...styles.approveBtn, background: '#1e90ff'}}>🔄 Refresh List</button>
+              <button onClick={handleCreateTestLockedAccount} style={{...styles.approveBtn, background: '#ff8c00'}}>🧪 Create Test Record</button>
+              <span style={{fontSize: '12px', color: '#666', alignSelf: 'center', fontWeight: 'bold'}}>📊 Total: {lockedAccounts.length} locked accounts</span>
+            </div>
+
+            {/* Locked Accounts Cards */}
+            <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
+              {lockedAccounts && lockedAccounts.length > 0 ? (
+                lockedAccounts.map(account => (
+                  <div key={account._id} style={{
+                    background: '#0a0a0a',
+                    border: '1px solid #333',
+                    borderRadius: '10px',
+                    padding: '18px',
+                    boxShadow: '0 0 10px rgba(255,215,0,0.1)'
+                  }}>
+                    {/* Header Row */}
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #333'}}>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>👤 USERNAME</div>
+                        <div style={{fontSize: '16px', color: 'gold', fontWeight: 'bold'}}>{account.username}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>📧 EMAIL</div>
+                        <div style={{fontSize: '13px', color: '#ccc'}}>{account.email}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>📍 CITY</div>
+                        <div style={{fontSize: '13px', color: '#ccc'}}>{account.city}</div>
+                      </div>
+                    </div>
+
+                    {/* Contact & Location */}
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '15px', marginBottom: '15px'}}>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>📞 PHONE</div>
+                        <div style={{fontSize: '13px', color: '#ccc'}}>{account.phone}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>🔗 REFERRED BY</div>
+                        <div style={{fontSize: '13px', color: '#ccc'}}>{account.referredBy || 'Direct Signup'}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>🌐 NETWORK SIZE</div>
+                        <div style={{fontSize: '14px', color: '#FFD700', fontWeight: 'bold'}}>{account.totalNetworkSize || 0}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>📅 LOCKED DATE</div>
+                        <div style={{fontSize: '13px', color: '#ccc'}}>{account.lockedAt ? new Date(account.lockedAt).toLocaleDateString() : 'N/A'}</div>
+                      </div>
+                    </div>
+
+                    {/* Referral Status */}
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '15px', padding: '12px', background: '#1a1a1a', borderRadius: '8px'}}>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>✅ REFERRAL COUNT</div>
+                        <div style={{fontSize: '18px', color: '#FF6347', fontWeight: 'bold'}}>
+                          {account.referralCount} <span style={{fontSize: '14px', color: '#888'}}>/11</span>
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>⚠️ REASON LOCKED</div>
+                        <div style={{fontSize: '12px', color: '#FFD700'}}>{account.reasonLocked || 'Challenge Failed'}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>🎁 2ND CHANCE STATUS</div>
+                        <div style={{fontSize: '16px', fontWeight: 'bold'}}>
+                          {account.secondChanceGiven ? <span style={{color: '#32CD32'}}>✅ GIVEN</span> : <span style={{color: '#FF6347'}}>❌ NOT GIVEN</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
+                      {!account.secondChanceGiven ? (
+                        <button onClick={async () => {
+                          try {
+                            const token = localStorage.getItem('token');
+                            const headers: any = { 'Content-Type': 'application/json' };
+                            if (token) headers['Authorization'] = `Bearer ${token}`;
+                            const response = await fetch('http://localhost:5000/api/admin/give-second-chance-locked', {
+                              method: 'POST',
+                              headers,
+                              body: JSON.stringify({ lockedAccountId: account._id })
+                            });
+                            if (response.ok) {
+                              alert('✅ Second chance given successfully!');
+                              handleRefreshLockedAccounts();
+                            } else {
+                              const data = await response.json();
+                              alert('❌ Error: ' + (data.error || 'Failed to give second chance'));
+                            }
+                          } catch (err) {
+                            alert('❌ Error giving second chance: ' + err);
+                          }
+                        }} style={{...styles.approveBtn, flex: 1, minWidth: '150px'}}>
+                          🎁 Give 2nd Chance
+                        </button>
+                      ) : (
+                        <button disabled style={{...styles.approveBtn, flex: 1, minWidth: '150px', opacity: 0.5, background: '#666'}}>
+                          ✅ Already Given
+                        </button>
+                      )}
+                      <button onClick={async () => {
+                        if (!confirm('Are you sure you want to ban this account?')) return;
+                        try {
+                          const token = localStorage.getItem('token');
+                          const headers: any = { 'Content-Type': 'application/json' };
+                          if (token) headers['Authorization'] = `Bearer ${token}`;
+                          const response = await fetch(`http://localhost:5000/api/admin/ban-user/${account.userId}`, {
+                            method: 'PUT',
+                            headers
+                          });
+                          if (response.ok) {
+                            alert('✅ Account banned successfully!');
+                            handleRefreshLockedAccounts();
+                          } else {
+                            const data = await response.json();
+                            alert('❌ Error: ' + (data.error || 'Failed to ban account'));
+                          }
+                        } catch (err) {
+                          alert('❌ Error banning account: ' + err);
+                        }
+                      }} style={{...styles.rejectBtn, flex: 1, minWidth: '100px'}}>
+                        🚫 Ban Account
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                  <div style={{fontSize: '40px', marginBottom: '10px'}}>🎉</div>
+                  <div style={{fontSize: '16px'}}>No locked accounts found</div>
+                  <div style={{fontSize: '12px', color: '#555', marginTop: '10px'}}>Use "Create Test Record" or "Backfill" to populate data</div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Manage Banned section removed as per request */}
+
+        {/* 5. SOCIAL SETTINGS (FILE 2) */}
+        {activeTab === 'social_settings' && (
+           <div style={styles.card}>
+    <h2 style={{color: 'gold', marginBottom: '20px'}}>🌐 Social Media Connectivity</h2>
+    
+    <div style={styles.socialGrid}>
+      {/* Row 1: YouTube */}
+      <div style={styles.linkRow}>
+        <label>🔴 YouTube</label>
+        <input value={settings.ytLink} onChange={(e) => setSettings({...settings, ytLink: e.target.value})} placeholder="Channel Link" style={styles.loginInput} />
+        <input value={settings.ytSlogan} onChange={(e) => setSettings({...settings, ytSlogan: e.target.value})} placeholder="Slogan (e.g. Watch Tutorials)" style={styles.loginInput} />
+      </div>
+
+      {/* Row 2: TikTok */}
+      <div style={styles.linkRow}>
+        <label>📱 TikTok</label>
+        <input value={settings.ttLink} onChange={(e) => setSettings({...settings, ttLink: e.target.value})} placeholder="TikTok Profile Link" style={styles.loginInput} />
+        <input value={settings.ttSlogan} onChange={(e) => setSettings({...settings, ttSlogan: e.target.value})} placeholder="Slogan (e.g. Follow for Fun)" style={styles.loginInput} />
+      </div>
+
+      {/* Row 3: Twitter (X) */}
+      <div style={styles.linkRow}>
+        <label>🐦 Twitter (X)</label>
+        <input value={settings.twLink} onChange={(e) => setSettings({...settings, twLink: e.target.value})} placeholder="Twitter Link" style={styles.loginInput} />
+        <input value={settings.twSlogan} onChange={(e) => setSettings({...settings, twSlogan: e.target.value})} placeholder="Slogan (e.g. Latest Updates)" style={styles.loginInput} />
+      </div>
+
+      {/* Row 4: Facebook */}
+      <div style={styles.linkRow}>
+        <label>📘 Facebook</label>
+        <input value={settings.fbLink} onChange={(e) => setSettings({...settings, fbLink: e.target.value})} placeholder="Page Link" style={styles.loginInput} />
+        <input value={settings.fbSlogan} onChange={(e) => setSettings({...settings, fbSlogan: e.target.value})} placeholder="Slogan (e.g. Join Our Community)" style={styles.loginInput} />
+      </div>
+
+      {/* Row 5: LinkedIn */}
+      <div style={styles.linkRow}>
+        <label>💼 LinkedIn</label>
+        <input value={settings.liLink} onChange={(e) => setSettings({...settings, liLink: e.target.value})} placeholder="LinkedIn Profile" style={styles.loginInput} />
+        <input value={settings.liSlogan} onChange={(e) => setSettings({...settings, liSlogan: e.target.value})} placeholder="Slogan (e.g. Professional Network)" style={styles.loginInput} />
+      </div>
+
+      {/* Row 6: WhatsApp Channel */}
+      <div style={styles.linkRow}>
+        <label>💬 WhatsApp Channel</label>
+        <input value={settings.waLink} onChange={(e) => setSettings({...settings, waLink: e.target.value})} placeholder="Channel Link" style={styles.loginInput} />
+        <input value={settings.waSlogan} onChange={(e) => setSettings({...settings, waSlogan: e.target.value})} placeholder="Slogan (e.g. Get Alerts on WhatsApp)" style={styles.loginInput} />
+      </div>
+
+      {/* Row 7: Instagram */}
+      <div style={styles.linkRow}>
+        <label>📸 Instagram</label>
+        <input value={settings.igLink} onChange={(e) => setSettings({...settings, igLink: e.target.value})} placeholder="Instagram Link" style={styles.loginInput} />
+        <input value={settings.igSlogan} onChange={(e) => setSettings({...settings, igSlogan: e.target.value})} placeholder="Slogan (e.g. See Our Stories)" style={styles.loginInput} />
+      </div>
+    </div>
+
+    <button onClick={handleSaveSettings} style={styles.goldBtnLarge}>SAVE ALL SOCIAL LINKS</button>
+  </div>
+)}
+
+{/* MANAGE NEWS TAB */}
+{activeTab === 'manage_news' && (
+  <div style={styles.card}>
+    <h2 style={{color: 'go ld', marginBottom: '20px'}}>📰 Manage Daily News</h2>
+    <p style={{fontSize: '12px', color: '#888'}}>Post news that will appear in the user dashboard.</p>
+    <textarea value={newsText} onChange={(e) => setNewsText(e.target.value)} placeholder="Write your news here..." style={{...styles.tidInput, height: '100px', marginTop: '15px'}} />
+    <button onClick={handlePostNews} style={styles.goldBtnLarge}>POST NEWS</button>
+  </div>
+)}
+
+{/* MAINTENANCE TAB */}
+{activeTab === 'maintenance' && (
+  <div style={styles.card}>
+    <h2 style={{color: 'gold', marginBottom: '20px'}}>🛠️ System Maintenance Hub</h2>
+    <p style={{fontSize: '13px', color: '#aaa', marginBottom: '20px'}}>Admin maintenance tools for system management & quick navigation</p>
+    
+    {/* Locked Accounts Section */}
+    <div style={{marginBottom: '30px'}}>
+      <h3 style={{color: '#FFD700', marginBottom: '15px', fontSize: '14px'}}>🔒 Locked Accounts Management</h3>
+      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px'}}>
+        <div style={{...styles.inputGroup, padding: '15px', border: '1px solid #333', borderRadius: '8px'}}>
+          <h4 style={{color: '#FFD700', marginBottom: '8px', fontSize: '12px'}}>📋 Backfill Locked Accounts</h4>
+          <p style={{fontSize: '11px', color: '#888', marginBottom: '12px'}}>Creates records for already-locked users</p>
+          <button onClick={handleBackfillLockedAccounts} style={{...styles.goldBtnLarge, width: '100%', fontSize: '12px'}}>START BACKFILL</button>
+        </div>
+
+        <div style={{...styles.inputGroup, padding: '15px', border: '1px solid #333', borderRadius: '8px'}}>
+          <h4 style={{color: '#FFD700', marginBottom: '8px', fontSize: '12px'}}>⏰ Process Expired Timers</h4>
+          <p style={{fontSize: '11px', color: '#888', marginBottom: '12px'}}>Auto-lock users whose 2-hour timer ended</p>
+          <button onClick={handleExpireOverdueUsers} style={{...styles.goldBtnLarge, width: '100%', fontSize: '12px'}}>PROCESS EXPIRED</button>
+        </div>
+
+        <div style={{...styles.inputGroup, padding: '15px', border: '1px solid #333', borderRadius: '8px'}}>
+          <h4 style={{color: '#FFD700', marginBottom: '8px', fontSize: '12px'}}>🧪 Create Test Record</h4>
+          <p style={{fontSize: '11px', color: '#888', marginBottom: '12px'}}>Create test data for demo</p>
+          <button onClick={handleCreateTestLockedAccount} style={{...styles.goldBtnLarge, width: '100%', fontSize: '12px', background: '#ff8c00'}}>CREATE TEST</button>
+        </div>
+      </div>
+    </div>
+
+    {/* Quick Navigation Section */}
+    <div>
+      <h3 style={{color: '#FFD700', marginBottom: '15px', fontSize: '14px'}}>⚡ Quick Navigation</h3>
+      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px'}}>
+        <button onClick={() => {
+          handleTabChange('requests');
+          alert('✅ Switched to Payment Requests tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto'}}>
+          💰 Payment Requests
+        </button>
+
+        <button onClick={() => {
+          handleTabChange('withdraw_approvals');
+          alert('✅ Switched to Mega Withdrawals tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#1e90ff'}}>
+          💎 Mega Withdrawals
+        </button>
+
+        <button onClick={() => {
+          handleTabChange('register');
+          alert('✅ Switched to Registered Users tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#32CD32'}}>
+          👥 All Users
+        </button>
+
+        <button onClick={() => {
+          handleTabChange('txn_history');
+          alert('✅ Switched to Transaction History tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#ff8c00'}}>
+          🧾 Payment History
+        </button>
+
+        <button onClick={() => {
+          handleTabChange('locked_accounts');
+          alert('✅ Switched to Locked Accounts tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#FF6347'}}>
+          🔒 Locked Accounts
+        </button>
+
+        <button onClick={() => {
+          handleTabChange('manage_news');
+          alert('✅ Switched to Manage News tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#9370DB'}}>
+          📰 Manage News
+        </button>
+
+        <button onClick={() => {
+          handleTabChange('social_settings');
+          alert('✅ Switched to Social Settings tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#20B2AA'}}>
+          🌐 Social Settings
+        </button>
+
+        <button onClick={() => {
+          handleTabChange('change_password');
+          alert('✅ Switched to Change Password tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#FFB6C1'}}>
+          🔐 Change Password
+        </button>
+      </div>
+    </div>
+
+    <div style={{marginTop: '30px', padding: '15px', background: '#1a1a1a', borderRadius: '8px', borderLeft: '4px solid #FFD700'}}>
+      <h3 style={{color: '#FFD700', marginBottom: '10px', fontSize: '14px'}}>⚠️ Important Notes:</h3>
+      <ul style={{fontSize: '12px', color: '#aaa', listStylePosition: 'inside'}}>
+        <li>✅ All tabs now have improved card-based formatting for better readability</li>
+        <li>✅ Backfill is safe to run multiple times - duplicates are prevented</li>
+        <li>✅ Use Quick Navigation buttons to jump between tabs instantly</li>
+        <li>✅ All data tables have been converted to card format for easier viewing</li>
+      </ul>
+    </div>
+  </div>
+)}
+
+{/* NOTIFICATION TAB removed as requested */}
+
+{/* CHANGE PASSWORD TAB */}
+{activeTab === 'change_password' && (
+  <div style={styles.card}>
+    <h2 style={{color: 'gold'}}>🔐 Update Admin Password</h2>
+    <div style={{maxWidth: '400px', marginTop: '20px'}}>
+      <label style={styles.fieldLabel}>Current Password:</label>
+      <input type="password" style={styles.tidInput} />
+      
+      <label style={styles.fieldLabel}>New Password:</label>
+      <input type="password" style={styles.tidInput} />
+      
+      <button style={styles.goldBtnLarge} onClick={() => alert("Password Updated!")}>UPDATE PASSWORD</button>
+    </div>
+  </div>
+)}
+
+{/* Manage Users section removed as per request */}
+
+{/* TRANSACTION HISTORY TAB */}
+{activeTab === 'txn_history' && (
+  <div style={styles.card}>
+    <h2 style={{color: 'gold', marginBottom: '20px'}}>🧾 Payment History</h2>
+    <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '12px', maxHeight: '70vh', overflowY: 'auto'}}>
+      <div style={{
+        background: '#0a0a0a',
+        border: '1px solid #333',
+        borderRadius: '10px',
+        padding: '15px',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto auto',
+        gap: '15px',
+        alignItems: 'center'
+      }}>
+        <div>
+          <div style={{fontSize: '13px', color: '#ccc'}}>💸 Paid to M-105 via EasyPaisa</div>
+          <div style={{fontSize: '11px', color: '#666', marginTop: '3px'}}>Payment processed on: Mar 24, 2026</div>
+        </div>
+        <div style={{textAlign: 'right'}}>
+          <div style={{fontSize: '16px', color: '#32CD32', fontWeight: 'bold'}}>+ RS 1,000,000</div>
+          <div style={{fontSize: '11px', color: '#666'}}>Completed</div>
+        </div>
+        <div style={{fontSize: '11px', color: '#888'}}>🕐</div>
+      </div>
+      <div style={{
+        background: '#0a0a0a',
+        border: '1px solid #333',
+        borderRadius: '10px',
+        padding: '15px',
+        display: 'grid',
+        gridTemplateColumns: '1fr auto auto',
+        gap: '15px',
+        alignItems: 'center'
+      }}>
+        <div>
+          <div style={{fontSize: '13px', color: '#ccc'}}>📥 Received from User-40 via JazzCash</div>
+          <div style={{fontSize: '11px', color: '#666', marginTop: '3px'}}>Payment processed on: Mar 24, 2026</div>
+        </div>
+        <div style={{textAlign: 'right'}}>
+          <div style={{fontSize: '16px', color: '#FFD700', fontWeight: 'bold'}}>+ RS 1,000</div>
+          <div style={{fontSize: '11px', color: '#666'}}>Completed</div>
+        </div>
+        <div style={{fontSize: '11px', color: '#888'}}>🕐</div>
+      </div>
+      <div style={{
+        background: '#1a1a1a',
+        border: '1px solid #333',
+        borderRadius: '10px',
+        padding: '15px',
+        textAlign: 'center',
+        color: '#666',
+        fontSize: '12px'
+      }}>
+        <div style={{marginBottom: '5px'}}>📊</div>
+        Load more transactions in the database
+      </div>
+    </div>
+  </div>
+)}
+        
+      </div>
+    </div>
+  );
+};
+
+const styles: any = {
+  loginOverlay: { background: '#000', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' },
+  loginBox: { background: '#0a0a0a', padding: '40px', border: '1px solid gold', borderRadius: '15px', textAlign: 'center' },
+  sidebar: { width: '250px', background: '#0a0a0a', borderRight: '1px solid #222', height: '100vh', position: 'fixed', padding: '20px' },
+  main: { marginLeft: '290px', padding: '40px', flex: 1 },
+  loginInput: { padding: '12px', width: '100%', background: '#111', border: '1px solid #333', color: '#fff', borderRadius: '8px', marginBottom: '15px', display: 'block' },
+  navBtn: { background: 'none', border: 'none', color: '#666', width: '100%', textAlign: 'left', padding: '15px', cursor: 'pointer' },
+  navBtnActive: { background: 'rgba(255,215,0,0.1)', color: 'gold', width: '100%', textAlign: 'left', padding: '15px', cursor: 'pointer', fontWeight: 'bold', borderLeft: '4px solid gold' },
+  card: { background: '#0a0a0a', border: '1px solid #222', padding: '25px', borderRadius: '15px' },
+  table: { width: '100%', borderCollapse: 'collapse', textAlign: 'left' },
+  th: { padding: '12px', borderBottom: '1px solid #333', fontWeight: 'bold' },
+  td: { padding: '12px', borderBottom: '1px solid #222' },
+  tr: { borderBottom: '1px solid #222' },
+  approveBtn: { background: 'green', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer', marginRight: '5px' },
+  rejectBtn: { background: 'red', color: 'white', border: 'none', padding: '8px 15px', borderRadius: '5px', cursor: 'pointer' },
+  goldBtnLarge: { background: 'gold', border: 'none', padding: '12px 40px', fontWeight: 'bold', cursor: 'pointer', borderRadius: '8px' },
+  inputGroup: { marginBottom: '25px', borderBottom: '1px solid #222', paddingBottom: '10px' },
+  fieldLabel: {
+    display: 'block',
+    fontSize: '12px',
+    color: '#888',
+    marginBottom: '5px',
+    marginTop: '10px'
+  },
+  logoutBtn: { background: '#ff4444', color: 'white', border: 'none', width: '100%', padding: '10px', borderRadius: '5px', cursor: 'pointer', marginTop: '20px' },
+  inputField: { padding: '8px', background: '#111', border: '1px solid #333', color: '#fff', borderRadius: '4px', width: '100%' },
+};
+
+export default AdminPanel;
