@@ -21,7 +21,7 @@ const ForgotPassword = () => {
           setMessage('Please enter your email address');
           return;
         }
-        const response = await fetch('http://localhost:5000/api/auth/forgot-password', {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/forgot-password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ const ForgotPassword = () => {
           setMessage('Please enter the OTP');
           return;
         }
-        const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/verify-otp', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -59,7 +59,7 @@ const ForgotPassword = () => {
           setMessage('Please enter a new password');
           return;
         }
-        const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/reset-password', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -219,3 +219,5 @@ const styles = {
 };
 
 export default ForgotPassword;
+
+
