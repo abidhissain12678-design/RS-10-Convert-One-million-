@@ -33,7 +33,7 @@ const AdminPanel = () => {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      fetch('http://localhost:5000/api/admin/users', { headers })
+      fetch('https://rs-10-convert-one-million.onrender.com/api/admin/users', { headers })
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
@@ -56,7 +56,7 @@ const AdminPanel = () => {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      fetch('http://localhost:5000/api/admin/pending-payments', { headers })
+      fetch('https://rs-10-convert-one-million.onrender.com/api/admin/pending-payments', { headers })
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
@@ -83,7 +83,7 @@ const AdminPanel = () => {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      fetch('http://localhost:5000/api/admin/all-payments', { headers })
+      fetch('https://rs-10-convert-one-million.onrender.com/api/admin/all-payments', { headers })
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
@@ -108,7 +108,7 @@ const AdminPanel = () => {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      fetch('http://localhost:5000/api/admin/locked-accounts', { headers })
+      fetch('https://rs-10-convert-one-million.onrender.com/api/admin/locked-accounts', { headers })
         .then(res => res.json())
         .then(data => {
           if (Array.isArray(data)) {
@@ -144,7 +144,7 @@ const AdminPanel = () => {
 
   // Fetch settings on component mount
   useEffect(() => {
-    fetch('http://localhost:5000/api/admin/get-settings')
+    fetch('https://rs-10-convert-one-million.onrender.com/api/admin/get-settings')
       .then(res => res.json())
       .then(data => {
         console.log("Settings Data:", data);
@@ -166,7 +166,7 @@ const AdminPanel = () => {
           headers['Authorization'] = `Bearer ${token}`;
         }
         // All payment types (Activation, 1st Chance, 2nd Chance) use approve-payment endpoint
-        const response = await fetch('http://localhost:5000/api/admin/approve-payment', {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/approve-payment', {
           method: 'POST',
           headers,
           body: JSON.stringify({ paymentId: id })
@@ -190,7 +190,7 @@ const AdminPanel = () => {
           headers['Authorization'] = `Bearer ${token}`;
         }
         // Call reject-payment endpoint
-        const response = await fetch('http://localhost:5000/api/admin/reject-payment', {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/reject-payment', {
           method: 'POST',
           headers,
           body: JSON.stringify({ paymentId: id })
@@ -214,7 +214,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      await fetch(`http://localhost:5000/api/admin/ban-user/${id}`, {
+      await fetch(`https://rs-10-convert-one-million.onrender.com/api/admin/ban-user/${id}`, {
         method: 'PUT',
         headers
       });
@@ -231,7 +231,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      await fetch(`http://localhost:5000/api/admin/unban-user/${id}`, {
+      await fetch(`https://rs-10-convert-one-million.onrender.com/api/admin/unban-user/${id}`, {
         method: 'PUT',
         headers
       });
@@ -248,7 +248,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      await fetch('http://localhost:5000/api/admin/update-user', {
+      await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/update-user', {
         method: 'PUT',
         headers,
         body: JSON.stringify({ userId, ...updatedData })
@@ -268,7 +268,7 @@ const AdminPanel = () => {
         const headers: any = { 'Content-Type': 'application/json' };
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const response = await fetch('http://localhost:5000/api/admin/update-settings', {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/update-settings', {
             method: 'POST',
             headers,
             body: JSON.stringify(settings)
@@ -301,7 +301,7 @@ const AdminPanel = () => {
       return;
     }
     try {
-        const response = await fetch('http://localhost:5000/api/admin/post-news', {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/post-news', {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json',
@@ -332,7 +332,7 @@ const AdminPanel = () => {
 
   const handleAdminLogin = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/auth/admin-login', {
+      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/admin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: adminPass })
@@ -356,7 +356,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      const response = await fetch('http://localhost:5000/api/admin/backfill-locked-accounts', {
+      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/backfill-locked-accounts', {
         method: 'POST',
         headers
       });
@@ -379,7 +379,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      const response = await fetch('http://localhost:5000/api/admin/expire-overdue-users', {
+      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/expire-overdue-users', {
         method: 'POST',
         headers
       });
@@ -403,7 +403,7 @@ const AdminPanel = () => {
       headers['Authorization'] = `Bearer ${token}`;
     }
     try {
-      const response = await fetch('http://localhost:5000/api/admin/locked-accounts', { headers });
+      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/locked-accounts', { headers });
       const data = await response.json();
       if (Array.isArray(data)) {
         setLockedAccounts(data);
@@ -421,7 +421,7 @@ const AdminPanel = () => {
       const token = localStorage.getItem('token');
       const headers: any = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
-      const response = await fetch('http://localhost:5000/api/admin/create-test-locked-account', {
+      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/create-test-locked-account', {
         method: 'POST',
         headers
       });
@@ -489,7 +489,7 @@ const AdminPanel = () => {
                       <div><div style={{fontSize: '11px', color: '#888'}}>🧾 TID</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.transactionId || 'N/A'}</div></div>
                     </div>
                     <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
-                      <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>{req.screenshotUrl ? <a href={`http://localhost:5000${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline'}}>View File</a> : <span style={{color: '#888'}}>N/A</span>}</div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>{req.screenshotUrl ? <a href={`https://rs-10-convert-one-million.onrender.com${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline'}}>View File</a> : <span style={{color: '#888'}}>N/A</span>}</div>
                       <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
                       <div><div style={{fontSize: '11px', color: '#888'}}>📅 CREATED</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A'}</div></div>
                     </div>
@@ -725,7 +725,7 @@ const AdminPanel = () => {
                             const token = localStorage.getItem('token');
                             const headers: any = { 'Content-Type': 'application/json' };
                             if (token) headers['Authorization'] = `Bearer ${token}`;
-                            const response = await fetch('http://localhost:5000/api/admin/give-second-chance-locked', {
+                            const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/give-second-chance-locked', {
                               method: 'POST',
                               headers,
                               body: JSON.stringify({ lockedAccountId: account._id })
@@ -754,7 +754,7 @@ const AdminPanel = () => {
                           const token = localStorage.getItem('token');
                           const headers: any = { 'Content-Type': 'application/json' };
                           if (token) headers['Authorization'] = `Bearer ${token}`;
-                          const response = await fetch(`http://localhost:5000/api/admin/ban-user/${account.userId}`, {
+                          const response = await fetch(`https://rs-10-convert-one-million.onrender.com/api/admin/ban-user/${account.userId}`, {
                             method: 'PUT',
                             headers
                           });
@@ -1076,3 +1076,5 @@ const styles: any = {
 };
 
 export default AdminPanel;
+
+

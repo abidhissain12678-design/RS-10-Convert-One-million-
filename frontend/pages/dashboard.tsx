@@ -7,7 +7,10 @@ const styles = {
   picContainer: { position: 'relative' as const, width: '80px', height: '80px', margin: '0 auto' },
   imgCircle: { width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' as const, border: '2px solid gold' },
   imgPlaceholder: { width: '100%', height: '100%', borderRadius: '50%', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '40px', border: '2px solid gold' },
-  uploadLabel: { position: 'absolute' as const, bottom: '0', right: '0', background: 'gold', color: 'black', width: '25px', height: '25px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold' as const, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px' },
+  uploadLabel: { position: 'absolute' as const, bottom: '0', right: '0', background: 'gold', color: 'black', width: '28px', height: '28px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold' as const, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', boxShadow: '0 0 8px rgba(0,0,0,0.45)' },
+  urduText: { fontFamily: "'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif", color: '#C1A25F' },
+  navSection: { marginTop: '25px', borderTop: '1px solid #222', paddingTop: '15px' },
+  sidebarSectionTitle: { fontSize: '10px', color: '#FFD700', marginBottom: '12px', letterSpacing: '1px', textTransform: 'uppercase' },
   navBtn: { background: 'none', border: 'none', color: '#888', width: '100%', textAlign: 'left' as const, padding: '15px 0', cursor: 'pointer', fontSize: '15px' },
   navBtnActive: { background: 'none', border: 'none', color: 'gold', width: '100%', textAlign: 'left' as const, padding: '15px 0', cursor: 'pointer', fontSize: '15px', fontWeight: 'bold' as const },
   main: { marginLeft: '250px', flex: 1, padding: '40px' },
@@ -53,6 +56,11 @@ const styles = {
     opacity: 0.8
   },
   card: { background: '#0a0a0a', border: '1px solid #222', padding: '25px', borderRadius: '15px' },
+  trophyBox: { background: 'linear-gradient(135deg, #0f1f3e, #06102a)', border: '1px solid gold', borderRadius: '18px', padding: '22px', marginBottom: '20px', boxShadow: '0 0 20px rgba(255, 215, 0, 0.3)' },
+  trophyTitle: { fontSize: '22px', color: '#FFD700', fontWeight: 'bold' as const, marginBottom: '6px' },
+  trophyText: { color: '#ccc', fontSize: '13px', lineHeight: 1.5, marginBottom: '12px' },
+  trophyMeter: { height: '10px', width: '100%', borderRadius: '8px', background: '#192a52', border: '1px solid #223450', overflow: 'hidden' as const },
+  trophyMeterFill: { height: '100%', borderRadius: '8px', background: 'linear-gradient(90deg, #FFD700, #FF9F00)' },
   modalOverlay: { position: 'fixed' as const, top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' },
   modalContent: { background: '#111', padding: '40px', borderRadius: '15px', border: '2px solid gold', maxWidth: '600px', width: '90%', maxHeight: '80vh', overflowY: 'auto' as const, fontFamily: "'Noto Nastaliq Urdu', serif", lineHeight: 1.8 },
   modalHeading: { color: '#FFD700', fontSize: '28px', textAlign: 'center' as const, marginBottom: '20px', fontWeight: 'bold' as const, fontFamily: "'Noto Nastaliq Urdu', serif" },
@@ -152,6 +160,16 @@ const Dashboard = () => {
         setEditUsername(parsed.username || 'AbidMillionaire'); // Default ya saved username
         setNetworkReferrals(parsed.networkReferrals || Array.from({ length: 11 }, (_, i) => ({ position: i + 1, referralCode: '', status: 'locked', paymentApproved: false })));
       }
+
+      try {
+        const storedProfilePic = localStorage.getItem('profilePic');
+        if (storedProfilePic) {
+          setProfilePic(storedProfilePic);
+        }
+      } catch (readErr) {
+        console.warn('Could not read profilePic from localStorage:', readErr);
+      }
+
       setActiveTab(localStorage.getItem('dashboardActiveTab') || 'home');
 
       // Load timer states
@@ -184,7 +202,7 @@ const Dashboard = () => {
           window.location.href = '/login';
           return;
         }
-        fetch(`http://localhost:5000/api/auth/user/${user._id}`, {
+        fetch(`https://rs-10-convert-one-million.onrender.com/api/auth/user/${user._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
           .then(res => {
@@ -304,7 +322,7 @@ const Dashboard = () => {
     const fetchPaymentStatus = () => {
       const token = localStorage.getItem('token');
       if (token) {
-        fetch('http://localhost:5000/api/payment/user-payments', {
+        fetch('https://rs-10-convert-one-million.onrender.com/api/payment/user-payments', {
           headers: { 'Authorization': `Bearer ${token}` }
         })
           .then(res => res.json())
@@ -353,7 +371,7 @@ const [news, setNews] = useState<any[]>([]);
 
 useEffect(() => {
   const fetchSettings = () => {
-    fetch('http://localhost:5000/api/admin/get-settings')
+    fetch('https://rs-10-convert-one-million.onrender.com/api/admin/get-settings')
       .then(res => res.json())
       .then(data => {
         console.log("Settings Data:", data);
@@ -371,7 +389,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  fetch('http://localhost:5000/api/admin/notifications-history')
+  fetch('https://rs-10-convert-one-million.onrender.com/api/admin/notifications-history')
     .then(res => res.json())
     .then(data => {
       console.log("Notifications History:", data);
@@ -381,7 +399,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  fetch('http://localhost:5000/api/admin/get-news')
+  fetch('https://rs-10-convert-one-million.onrender.com/api/admin/get-news')
     .then(res => res.json())
     .then(data => {
       console.log("News:", data);
@@ -438,7 +456,7 @@ useEffect(() => {
 
   const handleBuyChance = (tid: string) => {
     const amount = chanceLevel === 0 ? 50 : 100;
-    fetch('http://localhost:5000/api/admin/buy-chance', {
+    fetch('https://rs-10-convert-one-million.onrender.com/api/admin/buy-chance', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user._id, tid, amount })
@@ -474,7 +492,7 @@ useEffect(() => {
 
       console.log('Submitting activation request with TID:', tid, 'Token:', token.substring(0, 20) + '...');
 
-      const response = await fetch('http://localhost:5000/api/payment/request-activation', {
+      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/payment/request-activation', {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`
@@ -488,7 +506,7 @@ useEffect(() => {
       if (response.ok) {
         alert('Payment request submitted successfully! Waiting for admin approval...');
         // Refresh user data and payments
-        const userRes = await fetch(`http://localhost:5000/api/auth/user/${user._id}`, {
+        const userRes = await fetch(`https://rs-10-convert-one-million.onrender.com/api/auth/user/${user._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (userRes.ok) {
@@ -529,7 +547,7 @@ useEffect(() => {
     setWithdrawalMessage('Sending withdrawal request, wait...');
 
     try {
-      const response = await fetch('http://localhost:5000/api/payment/request-withdrawal', {
+      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/payment/request-withdrawal', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -573,7 +591,7 @@ useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
     
-    fetch('http://localhost:5000/api/auth/referred-users', {
+    fetch('https://rs-10-convert-one-million.onrender.com/api/auth/referred-users', {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -587,11 +605,28 @@ useEffect(() => {
 
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setProfilePic(reader.result as string);
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Prevent localStorage quota overflow by limiting file size
+    const maxSizeMB = 0.8; // ~800 KB
+    if (file.size > maxSizeMB * 1024 * 1024) {
+      alert(`Image too large for local storage. Please select a smaller image under ${maxSizeMB} MB.`);
+      return;
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newPic = reader.result as string;
+      setProfilePic(newPic);
+
+      try {
+        localStorage.setItem('profilePic', newPic);
+      } catch (storageError: any) {
+        console.warn('Unable to persist profile pic in localStorage:', storageError);
+        alert('Profile picture cannot be saved locally due to storage limits. Change will persist until page refresh.');
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   if (!user) return <div style={{color: 'gold', textAlign: 'center', marginTop: '50px'}}>Loading...</div>;
@@ -692,31 +727,32 @@ useEffect(() => {
   }
 
   return (
-    <div style={{ background: '#000', color: '#fff', minHeight: '100vh', display: 'flex', fontFamily: 'sans-serif' }}>
+    <div style={{ background: 'linear-gradient(135deg, #02050f 0%, #071a36 45%, #020b21 100%)', color: '#fff', minHeight: '100vh', display: 'flex', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
       
       {/* SIDEBAR START */}
       <div style={styles.sidebar} className="dashboard-sidebar">
       
   <div style={{textAlign: 'center', marginBottom: '20px'}}>
-     <div style={styles.picContainer}>
+     <div style={{...styles.picContainer, border: '2px solid #FFD700', boxShadow: '0 0 18px rgba(255,215,0,0.35)'}}>
         {profilePic ? <img src={profilePic} style={styles.imgCircle} /> : <div style={styles.imgPlaceholder}>👤</div>}
         <label style={styles.uploadLabel}>
           <input type="file" onChange={handleImageUpload} style={{display: 'none'}} />
-          +
+          ✎
         </label>
      </div>
-     <h2 style={{color: 'gold', fontSize: '16px', marginTop: '10px'}}>{editUsername}</h2>
+     {/* Username label hidden so only profile circle remains */}
   </div>
-  
-  <button onClick={() => handleTabChange('home')} style={activeTab === 'home' ? styles.navBtnActive : styles.navBtn}>🏠 Dashboard</button>
-  <button onClick={() => handleTabChange('profile')} style={activeTab === 'profile' ? styles.navBtnActive : styles.navBtn}>👤 User Profile</button>
-  <button onClick={() => handleTabChange('referral')} style={activeTab === 'referral' ? styles.navBtnActive : styles.navBtn}>� Referral History</button>
-  <button onClick={() => handleTabChange('wallet')} style={activeTab === 'wallet' ? styles.navBtnActive : styles.navBtn}>💰 Wallet</button>
-  <button onClick={() => handleTabChange('news')} style={activeTab === 'news' ? styles.navBtnActive : styles.navBtn}>📰 Daily News</button>
+  <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px'}}>
+    <button onClick={() => handleTabChange('home')} style={activeTab === 'home' ? styles.navBtnActive : styles.navBtn}>🏠 Dashboard</button>
+    <button onClick={() => handleTabChange('profile')} style={activeTab === 'profile' ? styles.navBtnActive : styles.navBtn}>👤 User Profile</button>
+    <button onClick={() => handleTabChange('referral')} style={activeTab === 'referral' ? styles.navBtnActive : styles.navBtn}>🔗 Referral History</button>
+    <button onClick={() => handleTabChange('wallet')} style={activeTab === 'wallet' ? styles.navBtnActive : styles.navBtn}>💰 Wallet</button>
+    <button onClick={() => handleTabChange('news')} style={activeTab === 'news' ? styles.navBtnActive : styles.navBtn}>📰 Daily News</button>
+  </div>
 
   {/* DYNAMIC SOCIAL LINKS & SLOGANS (Connected with Admin) */}
-  <div style={{marginTop: '25px', borderTop: '1px solid #222', paddingTop: '15px'}}>
-    <p style={{fontSize: '10px', color: 'gold', marginBottom: '12px', letterSpacing: '1px'}}>OFFICIAL CHANNELS</p>
+  <div style={styles.navSection}>
+    <p style={styles.sidebarSectionTitle}>OFFICIAL CHANNELS</p>
     
     <div style={{display: 'flex', flexDirection: 'column', gap: '6px'}}>
       {/* 1. YouTube */}
@@ -811,6 +847,22 @@ useEffect(() => {
       </div>
 
         {/* TARGET SECTION */}
+        <div style={styles.trophyBox}>
+          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px'}}>
+            <div>
+              <h2 style={styles.trophyTitle}>🏆 RS. 1,000,000 Trophy Goal</h2>
+              <p style={styles.trophyText}>Professional network milestone: reach 1,000,000 total network strength and complete 11 approved referral payments to unlock the Elite Challenge reward.</p>
+              <div style={styles.trophyMeter}>
+                <div style={{...styles.trophyMeterFill, width: `${Math.min(100, (calculatedNetworkStrength/1000000)*100)}%`}}></div>
+              </div>
+              <p style={{fontSize: '12px', color: '#ccc', marginTop: '8px'}}>{calculatedNetworkStrength.toLocaleString()} / 1,000,000</p>
+            </div>
+            <div style={{textAlign: 'right'}}>
+              <p style={{fontSize: '12px', color: '#b0c4de', marginBottom: '8px'}}>Referral payments: {approvedPaymentsCount} / 11</p>
+              <span style={{display: 'inline-block', background: '#0a1b42', color: '#FFD700', padding: '8px 14px', borderRadius: '12px', fontWeight: 'bold'}}>{approvedPaymentsCount === 11 && calculatedNetworkStrength >= 1000000 ? 'Active' : 'In Progress'}</span>
+            </div>
+          </div>
+        </div>
         {(() => {
           const isNetworkMet = calculatedNetworkStrength >= 1000000;
           const isPaymentsMet = approvedPaymentsCount === 11;
@@ -939,8 +991,12 @@ useEffect(() => {
             )}
             <div style={{marginTop: '40px'}}>
               <h2 style={{textAlign: 'center', color: 'gold'}}>YOUR NETWORK PROGRESS</h2>
-              <p style={{textAlign: 'center', color: '#888', fontSize: '12px'}}>⚠️ صرف 2 گھنٹے میں 11 اراکین شامل ہوں! (Only 11 users unlock in 2 hours to join the Million Chain!)</p>
-              <p style={{textAlign: 'center', color: '#FFA500', fontSize: '11px', fontWeight: 'bold', margin: '10px 0'}}>📋 تمام ادائیگیاں منظور ہونے سے پہلے پیش رفت شمار نہیں ہوگی (Progress is not counted until all 11 payments are approved)</p>
+              <p style={{textAlign: 'center', color: '#32CD32', fontWeight: 'bold', margin: '6px 0'}}>{`✅ Check-in: ${networkReferrals.filter(r => r.paymentApproved).length} / 11 referrals approved`}</p>
+              {networkReferrals.filter(r => r.paymentApproved).length === 10 && networkReferrals.filter(r => r.paymentApproved).length < 11 && (
+                <p style={{textAlign: 'center', color: '#FFD700', fontSize: '12px', margin: '4px 0'}}>🚀 Almost there! 1 referral left to complete the chain.</p>
+              )}
+              <p style={{textAlign: 'center', color: '#888', fontSize: '12px', fontFamily: "'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif"}}>⚠️ صرف 2 گھنٹے میں 11 اراکین شامل ہوں! (Only 11 users unlock in 2 hours to join the Million Chain!)</p>
+              <p style={{textAlign: 'center', color: '#FFA500', fontSize: '11px', fontWeight: 'bold', margin: '10px 0', fontFamily: "'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', serif"}}>📋 تمام ادائیگیاں منظور ہونے سے پہلے پیش رفت شمار نہیں ہوگی (Progress is not counted until all 11 payments are approved)</p>
               {paymentStatus === 'approved' && (
                 <>
                   <p style={{textAlign: 'center', color: '#32CD32', fontSize: '13px', fontWeight: 'bold'}}>✓ Activation Approved - Timer Started!</p>
@@ -1024,7 +1080,7 @@ useEffect(() => {
                     return;
                   }
                   try {
-                    const res = await fetch('http://localhost:5000/api/auth/update-password', {
+                    const res = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/update-password', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ email: user.email, oldPassword, newPassword })
@@ -1283,3 +1339,5 @@ useEffect(() => {
 };
 
 export default Dashboard;
+
+
