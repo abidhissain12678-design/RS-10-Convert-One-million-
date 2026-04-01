@@ -27,7 +27,7 @@ if (!fs.existsSync('uploads')) {
 }
 
 // Ye sab se zaroori line hai connection ke liye
-app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004'], credentials: true }));
+app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'https://rs-10-convert-one-million.vercel.app'], credentials: true }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 

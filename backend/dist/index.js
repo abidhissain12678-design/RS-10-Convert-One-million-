@@ -28,7 +28,7 @@ if (!fs_1.default.existsSync('uploads')) {
     fs_1.default.mkdirSync('uploads', { recursive: true });
 }
 // Ye sab se zaroori line hai connection ke liye
-app.use((0, cors_1.default)({ origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004'], credentials: true }));
+app.use((0, cors_1.default)({ origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'https://rs-10-convert-one-million.vercel.app'], credentials: true }));
 app.use(express_1.default.json());
 app.use('/uploads', express_1.default.static('uploads'));
 // Routes connect karna
