@@ -111,7 +111,12 @@ export const register = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: error.message });
+    if (error.code === 11000) {
+      // Duplicate key error
+      const field = Object.keys(error.keyValue)[0];
+      return res.status(400).json({ message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists. Please choose a different ${field}.` });
+    }
+    res.status(500).json({ message: 'An error occurred during registration. Please try again.' });
   }
 };
 
