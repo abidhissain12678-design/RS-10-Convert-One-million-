@@ -7,7 +7,10 @@ import adminRoutes from './routes/adminRoutes';
 const app = express();
 
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: [
+    "http://localhost:3000",
+    "https://rs-10-convert-one-million.vercel.app"
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'],
   credentials: true
 }));
