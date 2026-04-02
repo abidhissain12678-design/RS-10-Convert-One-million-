@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 
 const styles = {
   sidebar: { width: '200px', background: '#0a0a0a', padding: '30px', borderRight: '1px solid #222', height: '100vh', position: 'fixed' as const, zIndex: 10, overflowY: 'auto' as const, paddingBottom: '50px', scrollbarWidth: 'none' as const },
-  sidebarMobile: { width: '250px', background: '#0a0a0a', padding: '30px', borderRight: '1px solid #222', height: '100vh', position: 'fixed' as const, zIndex: 1000, overflowY: 'auto' as const, paddingBottom: '50px', scrollbarWidth: 'none' as const, left: '0', transform: 'translateX(-100%)', transition: 'transform 0.3s ease' },
+  sidebarMobile: { width: '100vw', maxWidth: '100vw', background: '#0a0a0a', padding: '20px', borderRight: '1px solid #222', height: '100vh', position: 'fixed' as const, top: '0', left: '0', zIndex: 1000, overflowY: 'auto' as const, overflowX: 'hidden' as const, paddingBottom: '50px', scrollbarWidth: 'none' as const, transform: 'translateX(-100%)', transition: 'transform 0.3s ease' },
   sidebarMobileOpen: { transform: 'translateX(0)' },
   picContainer: { position: 'relative' as const, width: '80px', height: '80px', margin: '0 auto' },
   imgCircle: { width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' as const, border: '2px solid gold' },
@@ -14,14 +14,14 @@ const styles = {
   navBtn: { background: 'none', border: 'none', color: '#888', width: '100%', textAlign: 'left' as const, padding: '15px 0', cursor: 'pointer', fontSize: '15px' },
   navBtnActive: { background: 'none', border: 'none', color: 'gold', width: '100%', textAlign: 'left' as const, padding: '15px 0', cursor: 'pointer', fontSize: '15px', fontWeight: 'bold' as const },
   main: { marginLeft: '250px', flex: 1, padding: '40px' },
-  mainMobile: { marginLeft: '0', flex: 1, padding: '20px' },
+  mainMobile: { marginLeft: '0', flex: 1, padding: '16px', width: '100%', maxWidth: '100vw', overflowX: 'hidden' as const },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid #222', paddingBottom: '15px' },
-  headerMobile: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #222', paddingBottom: '15px', flexWrap: 'wrap' as const },
+  headerMobile: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #222', paddingBottom: '15px', flexWrap: 'wrap' as const, gap: '12px', width: '100%' },
   hamburger: { display: 'none', fontSize: '24px', cursor: 'pointer', color: 'gold' },
   hamburgerMobile: { display: 'block', fontSize: '24px', cursor: 'pointer', color: 'gold' },
   timerContainer: { background: '#111', padding: '10px 20px', borderRadius: '12px', border: '1px solid #333', textAlign: 'right' as const },
   alertBox: { background: '#111', padding: '30px', borderRadius: '15px', border: '1px solid gold', textAlign: 'center' as const, marginTop: '20px' },
-  paymentRow: { background: '#222', padding: '10px', borderRadius: '10px', display: 'flex', justifyContent: 'space-around', fontSize: '10px', marginBottom: '15px' },
+  paymentRow: { background: '#222', padding: '10px', borderRadius: '10px', display: 'flex', justifyContent: 'space-around', alignItems: 'center', flexWrap: 'wrap' as const, gap: '10px', fontSize: '10px', marginBottom: '15px' },
   tidInput: { padding: '10px', width: '90%', background: '#000', border: '1px solid #333', color: '#fff', marginBottom: '10px', borderRadius: '5px' },
   fieldLabel: {
     display: 'block',
@@ -30,7 +30,7 @@ const styles = {
     marginBottom: '5px',
     marginTop: '10px'
   },
-  goldBtnLarge: { background: 'gold', color: 'black', border: 'none', padding: '12px 30px', borderRadius: '8px', fontWeight: 'bold' as const, cursor: 'pointer' },
+  goldBtnLarge: { background: 'gold', color: 'black', border: 'none', padding: '12px 24px', borderRadius: '8px', fontWeight: 'bold' as const, cursor: 'pointer', width: '100%', maxWidth: '100%', fontSize: '14px' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '15px', marginTop: '30px' },
   cardLocked: { background: '#050505', padding: '20px', borderRadius: '15px', border: '1px solid #222', textAlign: 'center' as const, opacity: 0.5 },
   cardOpen: { background: '#111', padding: '20px', borderRadius: '15px', border: '1px solid gold', textAlign: 'center' as const, boxShadow: '0 0 10px gold' },
@@ -62,9 +62,9 @@ const styles = {
   trophyMeter: { height: '10px', width: '100%', borderRadius: '8px', background: '#192a52', border: '1px solid #223450', overflow: 'hidden' as const },
   trophyMeterFill: { height: '100%', borderRadius: '8px', background: 'linear-gradient(90deg, #FFD700, #FF9F00)' },
   modalOverlay: { position: 'fixed' as const, top: 0, left: 0, width: '100%', height: '100%', background: 'rgba(0,0,0,0.8)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  modalContent: { background: '#111', padding: '40px', borderRadius: '15px', border: '2px solid gold', maxWidth: '600px', width: '90%', maxHeight: '80vh', overflowY: 'auto' as const, fontFamily: "'Noto Nastaliq Urdu', serif", lineHeight: 1.8 },
-  modalHeading: { color: '#FFD700', fontSize: '28px', textAlign: 'center' as const, marginBottom: '20px', fontWeight: 'bold' as const, fontFamily: "'Noto Nastaliq Urdu', serif" },
-  modalText: { color: 'white', fontSize: '22px', marginBottom: '20px', fontWeight: 'bold' as const, fontFamily: "'Noto Nastaliq Urdu', serif" },
+  modalContent: { background: '#111', padding: '24px', borderRadius: '15px', border: '2px solid gold', maxWidth: '100%', width: '95%', maxHeight: '80vh', overflowY: 'auto' as const, fontFamily: "'Noto Nastaliq Urdu', serif", lineHeight: 1.8, boxSizing: 'border-box' as const },
+  modalHeading: { color: '#FFD700', fontSize: '24px', textAlign: 'center' as const, marginBottom: '18px', fontWeight: 'bold' as const, fontFamily: "'Noto Nastaliq Urdu', serif" },
+  modalText: { color: 'white', fontSize: '18px', marginBottom: '18px', fontWeight: 'bold' as const, fontFamily: "'Noto Nastaliq Urdu', serif" },
   modalButton: { background: 'gold', color: 'black', border: 'none', padding: '12px 30px', borderRadius: '8px', fontSize: '18px', fontWeight: 'bold' as const, cursor: 'pointer', display: 'block', margin: '0 auto', fontFamily: "'Noto Nastaliq Urdu', serif" }
 };
 
@@ -129,6 +129,17 @@ const Dashboard = () => {
 
   // Mobile menu state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
@@ -730,8 +741,23 @@ useEffect(() => {
     <div style={{ background: 'linear-gradient(135deg, #02050f 0%, #071a36 45%, #020b21 100%)', color: '#fff', minHeight: '100vh', display: 'flex', fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" }}>
       
       {/* SIDEBAR START */}
-      <div style={styles.sidebar} className="dashboard-sidebar">
-      
+      <div 
+  style={{
+    ...(window.innerWidth < 768
+      ? {
+          ...styles.sidebarMobile,
+          ...(isMobileMenuOpen ? styles.sidebarMobileOpen : {})
+        }
+      : styles.sidebar)
+  }} 
+  className="dashboard-sidebar"
+>
+   {isMobileMenuOpen && (
+  <div
+    className="mobile-overlay"
+    onClick={() => setIsMobileMenuOpen(false)}
+  ></div>
+)}   
   <div style={{textAlign: 'center', marginBottom: '20px'}}>
      <div style={{...styles.picContainer, border: '2px solid #FFD700', boxShadow: '0 0 18px rgba(255,215,0,0.35)'}}>
         {profilePic ? <img src={profilePic} style={styles.imgCircle} /> : <div style={styles.imgPlaceholder}>👤</div>}
