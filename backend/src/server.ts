@@ -6,7 +6,6 @@ import adminRoutes from './routes/adminRoutes';
 import taskRoutes from './routes/taskRoutes';
 
 const app = express();
-
 app.use(cors({
   origin: [
     "http://localhost:3000",
