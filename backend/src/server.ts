@@ -7,6 +7,7 @@ import taskRoutes from './routes/taskRoutes';
 
 const app = express();
 app.use(cors({
+  
   origin: [
     "http://localhost:3000",
     "https://rs-10-convert-one-million.vercel.app"
@@ -14,7 +15,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'],
   credentials: true
 }));
-
+app.options('*', cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use('/api/auth', authRoutes);
