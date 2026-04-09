@@ -34,17 +34,19 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const PaymentSchema = new mongoose_1.Schema({
-    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
-    username: { type: String, required: true },
-    email: { type: String, required: true },
-    transactionId: { type: String, required: true },
-    screenshotUrl: { type: String },
-    amountType: { type: Number, required: true },
-    withdrawMethod: { type: String },
-    withdrawAccount: { type: String },
-    accountHolderName: { type: String },
-    status: { type: String, required: true, default: 'Pending', enum: ['Pending', 'Approved', 'Rejected'] },
-    type: { type: String, required: true, enum: ['Activation', '1st Chance', '2nd Chance', 'Withdraw', 'Task Withdraw'] },
-}, { timestamps: true });
-exports.default = mongoose_1.default.models.Payment || mongoose_1.default.model('Payment', PaymentSchema);
+const TaskSchema = new mongoose_1.Schema({
+    taskType: { type: String, required: true },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    link: { type: String, required: true },
+    reward: { type: String, required: true },
+    totalQuantity: { type: Number, required: true },
+    completedQuantity: { type: Number, default: 0 },
+    completedBy: { type: [String], default: [] },
+    active: { type: Boolean, default: true },
+    imageUrl: { type: String, default: '' },
+    requiresProof: { type: Boolean, default: true }
+}, {
+    timestamps: true
+});
+exports.default = mongoose_1.default.models.Task || mongoose_1.default.model('Task', TaskSchema);

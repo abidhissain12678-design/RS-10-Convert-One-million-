@@ -86,6 +86,58 @@ export const requestActivation = async (req: Request, res: Response) => {
   }
 };
 
+export const requestTaskWithdrawal = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized. Please login and try again.' });
+
+    const { amount, method, accountNumber, accountHolderName } = req.body;
+    if (!amount || !method || !accountNumber || !accountHolderName) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    if (parseInt(amount) < 100) {
+      return res.status(400).json({ error: 'Minimum withdrawal amount is 100 RS.' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Check if user has sufficient balance (assuming balance includes task earnings)
+    if (user.balance < parseInt(amount)) {
+      return res.status(400).json({ error: 'Insufficient balance.' });
+    }
+
+    const payment = new Payment({
+      userId,
+      username: user.name,
+      email: user.email,
+      transactionId: `TW-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      amountType: Number(amount),
+      type: 'Task Withdraw',
+      status: 'Pending',
+      withdrawMethod: method,
+      withdrawAccount: accountNumber,
+      accountHolderName: accountHolderName
+    });
+
+    await payment.save();
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.ADMIN_EMAIL,
+      subject: 'New Task Earnings Withdrawal Request',
+      text: `Task earnings withdraw request from ${user.name} (${user.email}) for Rs. ${amount} via ${method}. Account: ${accountNumber}, Holder: ${accountHolderName}`,
+    };
+    try { await transporter.sendMail(mailOptions); } catch(e) { console.error('Task withdrawal mail send failed', e); }
+
+    res.json({ message: 'Task withdrawal request sent, waiting for admin approval.', status: 'Pending' });
+  } catch (error: any) {
+    console.error('Error in requestTaskWithdrawal:', error);
+    res.status(500).json({ error: error.message || 'Failed to process task withdrawal request' });
+  }
+};
+
 export const requestWithdrawal = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.id;
@@ -93,11 +145,20 @@ export const requestWithdrawal = async (req: Request, res: Response) => {
 
     const { amount, method, account } = req.body;
     if (!amount || !method || !account) {
-      return res.status(400).json({ error: 'amount, method, and account are required.' });
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+
+    if (parseInt(amount) < 100) {
+      return res.status(400).json({ error: 'Minimum withdrawal amount is 100 RS.' });
     }
 
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Check if user has sufficient balance
+    if (user.balance < parseInt(amount)) {
+      return res.status(400).json({ error: 'Insufficient balance.' });
+    }
 
     const payment = new Payment({
       userId,

@@ -5,6 +5,8 @@ import Settings from '../models/Settings';
 import News from '../models/News';
 import Notification from '../models/Notification';
 import LockedAccount from '../models/LockedAccount';
+import Task from '../models/Task';
+import UserTask from '../models/UserTask';
 import fs from 'fs';
 import path from 'path';
 
@@ -106,6 +108,34 @@ export const sendNotification = async (req: Request, res: Response) => {
     res.json({ message: 'Notification sent successfully' });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+export const createTask = async (req: Request, res: Response) => {
+  try {
+    const { taskType, title, description, link, reward, totalQuantity, active, imageUrl, requiresProof } = req.body;
+    if (!taskType || !title || !description || !link || !reward || !totalQuantity) {
+      return res.status(400).json({ error: 'Missing required task fields' });
+    }
+
+    const task = new Task({
+      taskType,
+      title,
+      description,
+      link,
+      reward,
+      totalQuantity,
+      completedQuantity: 0,
+      active: active ?? true,
+      imageUrl: imageUrl || '',
+      requiresProof: requiresProof ?? true
+    });
+
+    await task.save();
+    res.json({ message: 'Task created successfully', task });
+  } catch (error: any) {
+    console.error('Error creating task:', error);
+    res.status(500).json({ error: error.message || 'Failed to create task' });
   }
 };
 
@@ -588,6 +618,65 @@ export const createTestLockedAccount = async (req: Request, res: Response) => {
       message: 'Test locked account record created successfully',
       record: testRecord
     });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// ==================== TASK SUBMISSION MANAGEMENT ====================
+
+// Approve a task submission
+export const approveTaskSubmission = async (req: Request, res: Response) => {
+  try {
+    const { submissionId } = req.body;
+
+    const submission = await UserTask.findByIdAndUpdate(
+      submissionId,
+      {
+        status: 'approved',
+        reviewedAt: new Date(),
+        reviewedBy: 'admin'
+      },
+      { new: true }
+    ).populate('user').populate('task');
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Task submission not found' });
+    }
+
+    // Update user's balance with task reward
+    if (submission.task && submission.task.reward) {
+      await User.findByIdAndUpdate(submission.user._id, {
+        $inc: { balance: submission.task.reward }
+      });
+    }
+
+    res.json({ message: 'Task submission approved successfully', submission });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Reject a task submission
+export const rejectTaskSubmission = async (req: Request, res: Response) => {
+  try {
+    const { submissionId } = req.body;
+
+    const submission = await UserTask.findByIdAndUpdate(
+      submissionId,
+      {
+        status: 'rejected',
+        reviewedAt: new Date(),
+        reviewedBy: 'admin'
+      },
+      { new: true }
+    ).populate('user').populate('task');
+
+    if (!submission) {
+      return res.status(404).json({ error: 'Task submission not found' });
+    }
+
+    res.json({ message: 'Task submission rejected successfully', submission });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

@@ -113,12 +113,13 @@ const Register = () => {
       style={{
         color: '#FFFFFF',
         textDecoration: 'none',
-        padding: '8px 14px',
-        borderRadius: '8px',
+        padding: '4px 8px',
+        borderRadius: '6px',
         border: '1px solid rgba(255,255,255,0.26)',
         background: 'rgba(5, 16, 36, 0.72)',
-        fontSize: '14px',
-        margin: '0 5px'
+        fontSize: '11px',
+        margin: '2px',
+        whiteSpace: 'nowrap'
       }}
     >
       {label}
@@ -151,7 +152,9 @@ const Register = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '14px'
+        padding: '14px',
+        flexWrap: 'wrap',
+        gap: '5px'
       }}>
         {navButton('/', 'Home')}
         {navButton('/register', 'Sign Up')}
@@ -168,7 +171,9 @@ const Register = () => {
         borderRadius: '15px',
         backgroundColor: '#111',
         boxShadow: '0 0 20px rgba(255, 215, 0, 0.3)',
-        overflow: 'visible'
+        overflow: 'visible',
+        width: '90%',
+        boxSizing: 'border-box'
       }}>
         <h2 style={{
           color: '#FFD700',
@@ -509,28 +514,6 @@ const Register = () => {
           </div>
         </div>
       )}
-
-      <footer style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        zIndex: 95,
-        background: 'rgba(3, 10, 22, 0.92)',
-        borderTop: '1px solid rgba(255,255,255,0.18)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '10px 8px',
-        backdropFilter: 'blur(8px)'
-      }}>
-        {navButton('/', 'Home')}
-        {navButton('/register', 'Sign Up')}
-        {navButton('/login', 'Login')}
-        {navButton('#contact', 'Contact')}
-        {navButton('#sport-team', 'Sport Team')}
-      </footer>
     </div>
   );
 };

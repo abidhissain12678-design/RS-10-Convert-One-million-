@@ -24,51 +24,82 @@ const AdminPanel = () => {
 
   const [paymentRequests, setPaymentRequests] = useState<any[]>([]);
   const [allPayments, setAllPayments] = useState<any[]>([]);
+  const [taskSubmissions, setTaskSubmissions] = useState<any[]>([]);
+
+  // Loading and error states
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [errorUsers, setErrorUsers] = useState<string | null>(null);
+  const [isLoadingPayments, setIsLoadingPayments] = useState(true);
+  const [errorPayments, setErrorPayments] = useState<string | null>(null);
+  const [isLoadingAllPayments, setIsLoadingAllPayments] = useState(true);
+  const [errorAllPayments, setErrorAllPayments] = useState<string | null>(null);
+  const [isLoadingLockedAccounts, setIsLoadingLockedAccounts] = useState(true);
+  const [errorLockedAccounts, setErrorLockedAccounts] = useState<string | null>(null);
+  const [isLoadingTaskSubmissions, setIsLoadingTaskSubmissions] = useState(true);
+  const [errorTaskSubmissions, setErrorTaskSubmissions] = useState<string | null>(null);
 
   // Fetch users
   useEffect(() => {
-    const fetchUsers = () => {
+    const fetchUsers = async () => {
+      setIsLoadingUsers(true);
+      setErrorUsers(null);
       const token = localStorage.getItem('token');
-      const headers: any = {};
+      const headers: any = { 'Cache-Control': 'no-cache' };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      fetch('https://rs-10-convert-one-million.onrender.com/api/admin/users', { headers })
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setUsers(data);
-          } else {
-            console.error('Expected array of users, got:', data);
-            setUsers([]);
-          }
-        })
-        .catch(err => console.log('Error fetching users:', err));
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/users', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setUsers(data);
+        } else {
+          console.error('Expected array of users, got:', data);
+          setUsers([]);
+        }
+      } catch (err) {
+        console.log('Error fetching users:', err);
+        setErrorUsers('Failed to load users. Please try again.');
+      } finally {
+        setIsLoadingUsers(false);
+      }
     };
     fetchUsers();
   }, []);
 
   // Fetch payment requests
   useEffect(() => {
-    const fetchPayments = () => {
+    const fetchPayments = async () => {
+      setIsLoadingPayments(true);
+      setErrorPayments(null);
       const token = localStorage.getItem('token');
-      const headers: any = {};
+      const headers: any = { 'Cache-Control': 'no-cache' };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      fetch('https://rs-10-convert-one-million.onrender.com/api/admin/pending-payments', { headers })
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setPaymentRequests(data);
-          } else if (data && Array.isArray((data as any).pendingPayments)) {
-            setPaymentRequests((data as any).pendingPayments);
-          } else {
-            console.error('Expected array for pending payments, got:', data);
-            setPaymentRequests([]);
-          }
-        })
-        .catch(err => console.log('Error fetching payments:', err));
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/pending-payments', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setPaymentRequests(data);
+        } else if (data && Array.isArray((data as any).pendingPayments)) {
+          setPaymentRequests((data as any).pendingPayments);
+        } else {
+          console.error('Expected array for pending payments, got:', data);
+          setPaymentRequests([]);
+        }
+      } catch (err) {
+        console.log('Error fetching payments:', err);
+        setErrorPayments('Failed to load payment requests. Please try again.');
+      } finally {
+        setIsLoadingPayments(false);
+      }
     };
     fetchPayments();
     const interval = setInterval(fetchPayments, 10000); // Refresh every 10 seconds
@@ -77,23 +108,32 @@ const AdminPanel = () => {
 
   // Fetch all payments (pending, approved, rejected)
   useEffect(() => {
-    const fetchAllPayments = () => {
+    const fetchAllPayments = async () => {
+      setIsLoadingAllPayments(true);
+      setErrorAllPayments(null);
       const token = localStorage.getItem('token');
-      const headers: any = {};
+      const headers: any = { 'Cache-Control': 'no-cache' };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      fetch('https://rs-10-convert-one-million.onrender.com/api/admin/all-payments', { headers })
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setAllPayments(data);
-          } else {
-            console.error('Expected array for all payments, got:', data);
-            setAllPayments([]);
-          }
-        })
-        .catch(err => console.log('Error fetching all payments:', err));
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/all-payments', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setAllPayments(data);
+        } else {
+          console.error('Expected array for all payments, got:', data);
+          setAllPayments([]);
+        }
+      } catch (err) {
+        console.log('Error fetching all payments:', err);
+        setErrorAllPayments('Failed to load transaction history. Please try again.');
+      } finally {
+        setIsLoadingAllPayments(false);
+      }
     };
     fetchAllPayments();
     const interval = setInterval(fetchAllPayments, 15000); // Refresh every 15 seconds
@@ -102,28 +142,233 @@ const AdminPanel = () => {
 
   // Fetch locked accounts
   useEffect(() => {
-    const fetchLockedAccounts = () => {
+    const fetchLockedAccounts = async () => {
+      setIsLoadingLockedAccounts(true);
+      setErrorLockedAccounts(null);
       const token = localStorage.getItem('token');
-      const headers: any = {};
+      const headers: any = { 'Cache-Control': 'no-cache' };
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      fetch('https://rs-10-convert-one-million.onrender.com/api/admin/locked-accounts', { headers })
-        .then(res => res.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            setLockedAccounts(data);
-          } else {
-            console.error('Expected array for locked accounts, got:', data);
-            setLockedAccounts([]);
-          }
-        })
-        .catch(err => console.log('Error fetching locked accounts:', err));
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/locked-accounts', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setLockedAccounts(data);
+        } else {
+          console.error('Expected array for locked accounts, got:', data);
+          setLockedAccounts([]);
+        }
+      } catch (err) {
+        console.log('Error fetching locked accounts:', err);
+        setErrorLockedAccounts('Failed to load locked accounts. Please try again.');
+      } finally {
+        setIsLoadingLockedAccounts(false);
+      }
     };
     fetchLockedAccounts();
     const interval = setInterval(fetchLockedAccounts, 20000); // Refresh every 20 seconds
     return () => clearInterval(interval);
   }, []);
+
+  // Fetch task submissions
+  useEffect(() => {
+    const fetchTaskSubmissions = async () => {
+      setIsLoadingTaskSubmissions(true);
+      setErrorTaskSubmissions(null);
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Cache-Control': 'no-cache' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/task-submissions', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setTaskSubmissions(data);
+        } else if (data && Array.isArray((data as any).taskSubmissions)) {
+          setTaskSubmissions((data as any).taskSubmissions);
+        } else {
+          console.error('Expected array for task submissions, got:', data);
+          setTaskSubmissions([]);
+        }
+      } catch (err) {
+        console.log('Error fetching task submissions:', err);
+        setErrorTaskSubmissions('Failed to load task submissions. Please try again.');
+      } finally {
+        setIsLoadingTaskSubmissions(false);
+      }
+    };
+    fetchTaskSubmissions();
+    const interval = setInterval(fetchTaskSubmissions, 15000); // Refresh every 15 seconds
+    return () => clearInterval(interval);
+  }, []);
+
+  // Retry functions
+  const retryFetchUsers = () => {
+    const fetchUsers = async () => {
+      setIsLoadingUsers(true);
+      setErrorUsers(null);
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Cache-Control': 'no-cache' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/users', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setUsers(data);
+        } else {
+          console.error('Expected array of users, got:', data);
+          setUsers([]);
+        }
+      } catch (err) {
+        console.log('Error fetching users:', err);
+        setErrorUsers('Failed to load users. Please try again.');
+      } finally {
+        setIsLoadingUsers(false);
+      }
+    };
+    fetchUsers();
+  };
+
+  const retryFetchPayments = () => {
+    const fetchPayments = async () => {
+      setIsLoadingPayments(true);
+      setErrorPayments(null);
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Cache-Control': 'no-cache' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/pending-payments', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setPaymentRequests(data);
+        } else if (data && Array.isArray((data as any).pendingPayments)) {
+          setPaymentRequests((data as any).pendingPayments);
+        } else {
+          console.error('Expected array for pending payments, got:', data);
+          setPaymentRequests([]);
+        }
+      } catch (err) {
+        console.log('Error fetching payments:', err);
+        setErrorPayments('Failed to load payment requests. Please try again.');
+      } finally {
+        setIsLoadingPayments(false);
+      }
+    };
+    fetchPayments();
+  };
+
+  const retryFetchAllPayments = () => {
+    const fetchAllPayments = async () => {
+      setIsLoadingAllPayments(true);
+      setErrorAllPayments(null);
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Cache-Control': 'no-cache' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/all-payments', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setAllPayments(data);
+        } else {
+          console.error('Expected array for all payments, got:', data);
+          setAllPayments([]);
+        }
+      } catch (err) {
+        console.log('Error fetching all payments:', err);
+        setErrorAllPayments('Failed to load transaction history. Please try again.');
+      } finally {
+        setIsLoadingAllPayments(false);
+      }
+    };
+    fetchAllPayments();
+  };
+
+  const retryFetchLockedAccounts = () => {
+    const fetchLockedAccounts = async () => {
+      setIsLoadingLockedAccounts(true);
+      setErrorLockedAccounts(null);
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Cache-Control': 'no-cache' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/locked-accounts', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setLockedAccounts(data);
+        } else {
+          console.error('Expected array for locked accounts, got:', data);
+          setLockedAccounts([]);
+        }
+      } catch (err) {
+        console.log('Error fetching locked accounts:', err);
+        setErrorLockedAccounts('Failed to load locked accounts. Please try again.');
+      } finally {
+        setIsLoadingLockedAccounts(false);
+      }
+    };
+    fetchLockedAccounts();
+  };
+
+  const retryFetchTaskSubmissions = () => {
+    const fetchTaskSubmissions = async () => {
+      setIsLoadingTaskSubmissions(true);
+      setErrorTaskSubmissions(null);
+      const token = localStorage.getItem('token');
+      const headers: any = { 'Cache-Control': 'no-cache' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      try {
+        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/task-submissions', { headers });
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setTaskSubmissions(data);
+        } else if (data && Array.isArray((data as any).taskSubmissions)) {
+          setTaskSubmissions((data as any).taskSubmissions);
+        } else {
+          console.error('Expected array for task submissions, got:', data);
+          setTaskSubmissions([]);
+        }
+      } catch (err) {
+        console.log('Error fetching task submissions:', err);
+        setErrorTaskSubmissions('Failed to load task submissions. Please try again.');
+      } finally {
+        setIsLoadingTaskSubmissions(false);
+      }
+    };
+    fetchTaskSubmissions();
+  };
 
   // --- SETTINGS STATES ---
   const [settings, setSettings] = useState({
@@ -460,9 +705,11 @@ const AdminPanel = () => {
         <button onClick={() => handleTabChange('txn_history')} style={activeTab === 'txn_history' ? styles.navBtnActive : styles.navBtn}>🧾 Transaction History</button>
         <button onClick={() => handleTabChange('register')} style={activeTab === 'register' ? styles.navBtnActive : styles.navBtn}>📝 Registered Users</button>
         <button onClick={() => handleTabChange('locked_accounts')} style={activeTab === 'locked_accounts' ? styles.navBtnActive : styles.navBtn}>🔒 Locked Accounts</button>
+        <button onClick={() => handleTabChange('task_submissions')} style={activeTab === 'task_submissions' ? styles.navBtnActive : styles.navBtn}>📋 Task Submissions</button>
         <button onClick={() => handleTabChange('social_settings')} style={activeTab === 'social_settings' ? styles.navBtnActive : styles.navBtn}>🌐 Social Settings</button>
         <button onClick={() => handleTabChange('manage_news')} style={activeTab === 'manage_news' ? styles.navBtnActive : styles.navBtn}>📰 Manage News</button>
         <button onClick={() => handleTabChange('maintenance')} style={activeTab === 'maintenance' ? styles.navBtnActive : styles.navBtn}>🛠️ Maintenance</button>
+        <button onClick={() => { window.location.href = '/admin/customize-tasks'; }} style={styles.navBtn}>🧩 Customize Tasks</button>
         <button onClick={() => handleTabChange('change_password')} style={activeTab === 'change_password' ? styles.navBtnActive : styles.navBtn}>🔑 Change Password</button>
         <button onClick={() => { localStorage.removeItem('token'); setIsAdmin(false); window.location.href='/'; }} style={styles.logoutBtn}>🚪 Logout Admin</button>
       </div>
@@ -471,10 +718,22 @@ const AdminPanel = () => {
         {/* 1. PAYMENT REQUESTS */}
         {activeTab === 'requests' && (
           <div style={styles.card}>
-            <h2 style={{color: 'gold', marginBottom: '20px'}}>💰 All Payment Requests</h2>
-            <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
-              {Array.isArray(allPayments) && allPayments.length > 0 ? (
-                allPayments.map(req => (
+            <h2 style={{color: 'gold', marginBottom: '20px'}}>💰 Pending Payment Requests</h2>
+            {isLoadingPayments ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FFD700'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>⏳</div>
+                <div>Loading payment requests...</div>
+              </div>
+            ) : errorPayments ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FF6347'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>❌</div>
+                <div>{errorPayments}</div>
+                <button onClick={retryFetchPayments} style={{...styles.goldBtn, marginTop: '15px'}}>Retry</button>
+              </div>
+            ) : (
+              <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
+                {Array.isArray(paymentRequests) && paymentRequests.length > 0 ? (
+                  paymentRequests.map(req => (
                   <div key={req._id} style={{
                     background: '#0a0a0a',
                     border: `1px solid ${req.status === 'Pending' ? '#FFD700' : req.status === 'Approved' ? '#32CD32' : '#FF6347'}`,
@@ -489,7 +748,7 @@ const AdminPanel = () => {
                       <div><div style={{fontSize: '11px', color: '#888'}}>🧾 TID</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.transactionId || 'N/A'}</div></div>
                     </div>
                     <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
-                      <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>{req.screenshotUrl ? <a href={`https://rs-10-convert-one-million.onrender.com${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline'}}>View File</a> : <span style={{color: '#888'}}>N/A</span>}</div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>{req.screenshotUrl ? <a href={req.screenshotUrl.startsWith('http') ? req.screenshotUrl : `https://rs-10-convert-one-million.onrender.com${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline'}}>View File</a> : <span style={{color: '#888'}}>N/A</span>}</div>
                       <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
                       <div><div style={{fontSize: '11px', color: '#888'}}>📅 CREATED</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A'}</div></div>
                     </div>
@@ -511,6 +770,7 @@ const AdminPanel = () => {
                 </div>
               )}
             </div>
+            )}
           </div>
         )}
 
@@ -563,9 +823,21 @@ const AdminPanel = () => {
         {activeTab === 'register' && (
           <div style={styles.card}>
             <h2 style={{color: 'gold', marginBottom: '20px'}}>👥 Manage All Users ({users.length})</h2>
-            <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px', maxHeight: '80vh', overflowY: 'auto'}}>
-              {users && users.length > 0 ? (
-                users.map(u => (
+            {isLoadingUsers ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FFD700'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>⏳</div>
+                <div>Loading users...</div>
+              </div>
+            ) : errorUsers ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FF6347'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>❌</div>
+                <div>{errorUsers}</div>
+                <button onClick={retryFetchUsers} style={{...styles.goldBtn, marginTop: '15px'}}>Retry</button>
+              </div>
+            ) : (
+              <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px', maxHeight: '80vh', overflowY: 'auto'}}>
+                {users && users.length > 0 ? (
+                  users.map(u => (
                   <div key={u._id} style={{
                     background: '#0a0a0a',
                     border: `1px solid ${u.banned ? '#FF6347' : '#333'}`,
@@ -634,6 +906,7 @@ const AdminPanel = () => {
                 </div>
               )}
             </div>
+            )}
           </div>
         )}
 
@@ -650,9 +923,20 @@ const AdminPanel = () => {
               <span style={{fontSize: '12px', color: '#666', alignSelf: 'center', fontWeight: 'bold'}}>📊 Total: {lockedAccounts.length} locked accounts</span>
             </div>
 
-            {/* Locked Accounts Cards */}
-            <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
-              {lockedAccounts && lockedAccounts.length > 0 ? (
+            {isLoadingLockedAccounts ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FFD700'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>⏳</div>
+                <div>Loading locked accounts...</div>
+              </div>
+            ) : errorLockedAccounts ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FF6347'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>❌</div>
+                <div>{errorLockedAccounts}</div>
+                <button onClick={retryFetchLockedAccounts} style={{...styles.goldBtn, marginTop: '15px'}}>Retry</button>
+              </div>
+            ) : (
+              <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
+                {lockedAccounts && lockedAccounts.length > 0 ? (
                 lockedAccounts.map(account => (
                   <div key={account._id} style={{
                     background: '#0a0a0a',
@@ -782,10 +1066,169 @@ const AdminPanel = () => {
                 </div>
               )}
             </div>
+            )}
           </div>
         )}
 
         {/* Manage Banned section removed as per request */}
+
+        {/* 4. TASK SUBMISSIONS */}
+        {activeTab === 'task_submissions' && (
+          <div style={styles.card}>
+            <h2 style={{color: 'gold', marginBottom: '20px'}}>📋 Task Submissions ({taskSubmissions.length})</h2>
+            <p style={{fontSize: '13px', color: '#aaa', marginBottom: '20px'}}>Review user task submissions with multiple screenshots for verification</p>
+            
+            {isLoadingTaskSubmissions ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FFD700'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>⏳</div>
+                <div>Loading task submissions...</div>
+              </div>
+            ) : errorTaskSubmissions ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FF6347'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>❌</div>
+                <div>{errorTaskSubmissions}</div>
+                <button onClick={retryFetchTaskSubmissions} style={{...styles.goldBtn, marginTop: '15px'}}>Retry</button>
+              </div>
+            ) : (
+              <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
+                {taskSubmissions && taskSubmissions.length > 0 ? (
+                taskSubmissions.map(submission => (
+                  <div key={submission._id} style={{
+                    background: '#0a0a0a',
+                    border: '1px solid #333',
+                    borderRadius: '10px',
+                    padding: '18px',
+                    boxShadow: '0 0 10px rgba(255,215,0,0.1)'
+                  }}>
+                    {/* Header Row */}
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #333'}}>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>👤 USER</div>
+                        <div style={{fontSize: '16px', color: 'gold', fontWeight: 'bold'}}>{submission.userId?.username || submission.user?.username || 'Unknown'}</div>
+                        <div style={{fontSize: '12px', color: '#ccc'}}>{submission.userId?.email || submission.user?.email || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>🎯 TASK</div>
+                        <div style={{fontSize: '14px', color: '#FFD700', fontWeight: 'bold'}}>{submission.taskId?.title || submission.task?.title || 'Unknown Task'}</div>
+                        <div style={{fontSize: '12px', color: '#ccc'}}>{submission.taskId?.description || submission.task?.description || ''}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>📅 SUBMITTED</div>
+                        <div style={{fontSize: '13px', color: '#ccc'}}>{submission.createdAt ? new Date(submission.createdAt).toLocaleDateString() : 'N/A'}</div>
+                        <div style={{fontSize: '12px', color: '#666'}}>{submission.createdAt ? new Date(submission.createdAt).toLocaleTimeString() : ''}</div>
+                      </div>
+                    </div>
+
+                    {/* Screenshots Grid */}
+                    <div style={{marginBottom: '15px'}}>
+                      <div style={{fontSize: '13px', color: '#FFD700', marginBottom: '10px', fontWeight: 'bold'}}>
+                        📸 Screenshots ({submission.proofUrls?.length || 0})
+                      </div>
+                      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px'}}>
+                        {submission.proofUrls && submission.proofUrls.length > 0 ? (
+                          submission.proofUrls.map((url: string, index: number) => (
+                            <div key={index} style={{textAlign: 'center'}}>
+                              <img 
+                                src={url.startsWith('http') ? url : `https://rs-10-convert-one-million.onrender.com${url}`} 
+                                alt={`Screenshot ${index + 1}`}
+                                style={{
+                                  width: '100%',
+                                  maxWidth: '180px',
+                                  height: '120px',
+                                  objectFit: 'cover',
+                                  borderRadius: '8px',
+                                  border: '1px solid #333',
+                                  cursor: 'pointer'
+                                }}
+                                onClick={() => window.open(url.startsWith('http') ? url : `https://rs-10-convert-one-million.onrender.com${url}`, '_blank')}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDE4MCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMTExIi8+Cjx0ZXh0IHg9IjkwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjODg4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD4KPC9zdmc+';
+                                }}
+                              />
+                              <div style={{fontSize: '11px', color: '#888', marginTop: '5px'}}>Screenshot {index + 1}</div>
+                            </div>
+                          ))
+                        ) : (
+                          <div style={{textAlign: 'center', padding: '40px', color: '#666', gridColumn: '1 / -1'}}>
+                            <div style={{fontSize: '30px', marginBottom: '10px'}}>📷</div>
+                            <div>No screenshots available</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', paddingTop: '15px', borderTop: '1px solid #333'}}>
+                      <button 
+                        onClick={async () => {
+                          if (!confirm('Approve this task submission?')) return;
+                          try {
+                            const token = localStorage.getItem('token');
+                            const headers: any = { 'Content-Type': 'application/json' };
+                            if (token) headers['Authorization'] = `Bearer ${token}`;
+                            const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/approve-task-submission', {
+                              method: 'POST',
+                              headers,
+                              body: JSON.stringify({ submissionId: submission._id })
+                            });
+                            if (response.ok) {
+                              alert('✅ Task submission approved!');
+                              // Refresh the list
+                              window.location.reload();
+                            } else {
+                              const data = await response.json();
+                              alert('❌ Error: ' + (data.error || 'Failed to approve submission'));
+                            }
+                          } catch (err) {
+                            alert('❌ Error approving submission: ' + err);
+                          }
+                        }}
+                        style={{...styles.approveBtn, flex: 1}}
+                      >
+                        ✅ Approve Submission
+                      </button>
+                      <button 
+                        onClick={async () => {
+                          if (!confirm('Reject this task submission?')) return;
+                          try {
+                            const token = localStorage.getItem('token');
+                            const headers: any = { 'Content-Type': 'application/json' };
+                            if (token) headers['Authorization'] = `Bearer ${token}`;
+                            const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/reject-task-submission', {
+                              method: 'POST',
+                              headers,
+                              body: JSON.stringify({ submissionId: submission._id })
+                            });
+                            if (response.ok) {
+                              alert('✅ Task submission rejected!');
+                              // Refresh the list
+                              window.location.reload();
+                            } else {
+                              const data = await response.json();
+                              alert('❌ Error: ' + (data.error || 'Failed to reject submission'));
+                            }
+                          } catch (err) {
+                            alert('❌ Error rejecting submission: ' + err);
+                          }
+                        }}
+                        style={{...styles.rejectBtn, flex: 1}}
+                      >
+                        ❌ Reject Submission
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                  <div style={{fontSize: '40px', marginBottom: '10px'}}>📋</div>
+                  <div style={{fontSize: '16px'}}>No task submissions found</div>
+                  <div style={{fontSize: '12px', color: '#555', marginTop: '10px'}}>Users will appear here when they submit tasks with screenshots</div>
+                </div>
+              )}
+            </div>
+            )}
+          </div>
+        )}
 
         {/* 5. SOCIAL SETTINGS (FILE 2) */}
         {activeTab === 'social_settings' && (
@@ -927,6 +1370,13 @@ const AdminPanel = () => {
         </button>
 
         <button onClick={() => {
+          handleTabChange('task_submissions');
+          alert('✅ Switched to Task Submissions tab');
+        }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#20B2AA'}}>
+          📋 Task Submissions
+        </button>
+
+        <button onClick={() => {
           handleTabChange('manage_news');
           alert('✅ Switched to Manage News tab');
         }} style={{...styles.approveBtn, padding: '12px', fontSize: '12px', height: 'auto', background: '#9370DB'}}>
@@ -984,61 +1434,59 @@ const AdminPanel = () => {
 {/* TRANSACTION HISTORY TAB */}
 {activeTab === 'txn_history' && (
   <div style={styles.card}>
-    <h2 style={{color: 'gold', marginBottom: '20px'}}>🧾 Payment History</h2>
-    <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '12px', maxHeight: '70vh', overflowY: 'auto'}}>
-      <div style={{
-        background: '#0a0a0a',
-        border: '1px solid #333',
-        borderRadius: '10px',
-        padding: '15px',
-        display: 'grid',
-        gridTemplateColumns: '1fr auto auto',
-        gap: '15px',
-        alignItems: 'center'
-      }}>
-        <div>
-          <div style={{fontSize: '13px', color: '#ccc'}}>💸 Paid to M-105 via EasyPaisa</div>
-          <div style={{fontSize: '11px', color: '#666', marginTop: '3px'}}>Payment processed on: Mar 24, 2026</div>
-        </div>
-        <div style={{textAlign: 'right'}}>
-          <div style={{fontSize: '16px', color: '#32CD32', fontWeight: 'bold'}}>+ RS 1,000,000</div>
-          <div style={{fontSize: '11px', color: '#666'}}>Completed</div>
-        </div>
-        <div style={{fontSize: '11px', color: '#888'}}>🕐</div>
+    <h2 style={{color: 'gold', marginBottom: '20px'}}>🧾 Transaction History</h2>
+    {isLoadingAllPayments ? (
+      <div style={{textAlign: 'center', padding: '40px', color: '#FFD700'}}>
+        <div style={{fontSize: '20px', marginBottom: '10px'}}>⏳</div>
+        <div>Loading transaction history...</div>
       </div>
-      <div style={{
-        background: '#0a0a0a',
-        border: '1px solid #333',
-        borderRadius: '10px',
-        padding: '15px',
-        display: 'grid',
-        gridTemplateColumns: '1fr auto auto',
-        gap: '15px',
-        alignItems: 'center'
-      }}>
-        <div>
-          <div style={{fontSize: '13px', color: '#ccc'}}>📥 Received from User-40 via JazzCash</div>
-          <div style={{fontSize: '11px', color: '#666', marginTop: '3px'}}>Payment processed on: Mar 24, 2026</div>
-        </div>
-        <div style={{textAlign: 'right'}}>
-          <div style={{fontSize: '16px', color: '#FFD700', fontWeight: 'bold'}}>+ RS 1,000</div>
-          <div style={{fontSize: '11px', color: '#666'}}>Completed</div>
-        </div>
-        <div style={{fontSize: '11px', color: '#888'}}>🕐</div>
+    ) : errorAllPayments ? (
+      <div style={{textAlign: 'center', padding: '40px', color: '#FF6347'}}>
+        <div style={{fontSize: '20px', marginBottom: '10px'}}>❌</div>
+        <div>{errorAllPayments}</div>
+        <button onClick={retryFetchAllPayments} style={{...styles.goldBtn, marginTop: '15px'}}>Retry</button>
       </div>
-      <div style={{
-        background: '#1a1a1a',
-        border: '1px solid #333',
-        borderRadius: '10px',
-        padding: '15px',
-        textAlign: 'center',
-        color: '#666',
-        fontSize: '12px'
-      }}>
-        <div style={{marginBottom: '5px'}}>📊</div>
-        Load more transactions in the database
+    ) : (
+      <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '12px', maxHeight: '70vh', overflowY: 'auto'}}>
+        {Array.isArray(allPayments) && allPayments.length > 0 ? (
+          allPayments.map(payment => (
+            <div key={payment._id} style={{
+              background: '#0a0a0a',
+              border: '1px solid #333',
+              borderRadius: '10px',
+              padding: '15px',
+              display: 'grid',
+              gridTemplateColumns: '1fr auto auto',
+              gap: '15px',
+              alignItems: 'center'
+            }}>
+              <div>
+                <div style={{fontSize: '13px', color: '#ccc'}}>{payment.username} - {payment.type}</div>
+                <div style={{fontSize: '11px', color: '#666', marginTop: '3px'}}>Status: {payment.status} | {payment.createdAt ? new Date(payment.createdAt).toLocaleDateString() : 'N/A'}</div>
+              </div>
+              <div style={{textAlign: 'right'}}>
+                <div style={{fontSize: '16px', color: payment.status === 'Approved' ? '#32CD32' : payment.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>RS {payment.amountType}</div>
+                <div style={{fontSize: '11px', color: '#666'}}>{payment.status}</div>
+              </div>
+              <div style={{fontSize: '11px', color: '#888'}}>🕐</div>
+            </div>
+          ))
+        ) : (
+          <div style={{
+            background: '#1a1a1a',
+            border: '1px solid #333',
+            borderRadius: '10px',
+            padding: '15px',
+            textAlign: 'center',
+            color: '#666',
+            fontSize: '12px'
+          }}>
+            <div style={{marginBottom: '5px'}}>📊</div>
+            No transactions found
+          </div>
+        )}
       </div>
-    </div>
+    )}
   </div>
 )}
         

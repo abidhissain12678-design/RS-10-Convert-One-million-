@@ -111,7 +111,12 @@ const register = async (req, res) => {
     }
     catch (error) {
         console.error('Registration error:', error);
-        res.status(500).json({ error: error.message });
+        if (error.code === 11000) {
+            // Duplicate key error
+            const field = Object.keys(error.keyValue)[0];
+            return res.status(400).json({ message: `${field.charAt(0).toUpperCase() + field.slice(1)} already exists. Please choose a different ${field}.` });
+        }
+        res.status(500).json({ message: 'An error occurred during registration. Please try again.' });
     }
 };
 exports.register = register;
@@ -128,6 +133,14 @@ const login = async (req, res) => {
         const user = await User_1.default.findOne({ email });
         if (!user || !await bcryptjs_1.default.compare(password, user.password)) {
             return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        // Check if user is banned
+        if (user.banned) {
+            return res.status(403).json({ error: '🚫 Account Banned - Your account has been permanently banned. Please contact support.' });
+        }
+        // Check if user is locked
+        if (user.activationStatus === 'locked') {
+            return res.status(403).json({ error: '🔒 Account Locked - Your account is locked due to failing the challenge. Please contact support or wait for reactivation.' });
         }
         const token = jsonwebtoken_1.default.sign({ id: user._id, isAdmin: user.isAdmin }, process.env.JWT_SECRET || 'chain10challenge_secret_key_2024', { expiresIn: '30d' });
         console.log('[login] Token created for user:', user._id);

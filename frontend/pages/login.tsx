@@ -12,11 +12,13 @@ const Login = () => {
       style={{
         color: '#FFF',
         textDecoration: 'none',
-        padding: '8px 12px',
+        padding: '6px 8px',
         border: '1px solid rgba(255,255,255,0.32)',
-        borderRadius: '8px',
-        margin: '0 5px',
+        borderRadius: '6px',
+        margin: '2px',
         background: 'rgba(7, 20, 35, 0.78)',
+        fontSize: '12px',
+        whiteSpace: 'nowrap'
       }}
     >
       {label}
@@ -76,7 +78,9 @@ const Login = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '12px 10px'
+        padding: '12px 10px',
+        flexWrap: 'wrap',
+        gap: '5px'
       }}>
         {navButton('/', 'Home')}
         {navButton('/register', 'Sign Up')}
@@ -130,28 +134,6 @@ const Login = () => {
           Don't have an account? <span onClick={() => router.push('/register')} style={{color: 'gold', cursor: 'pointer'}}>Join Chain</span>
         </p>
       </div>
-
-      <footer style={{
-        position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        background: 'rgba(3, 10, 22, 0.90)',
-        borderTop: '1px solid rgba(255,255,255,0.12)',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '10px',
-        backdropFilter: 'blur(6px)',
-        zIndex: 98
-      }}>
-        {navButton('/', 'Home')}
-        {navButton('/register', 'Sign Up')}
-        {navButton('/login', 'Login')}
-        {navButton('#contact', 'Contact')}
-        {navButton('#sport-team', 'Sport Team')}
-      </footer>
     </div>
   );
 };
@@ -161,18 +143,20 @@ const styles = {
     background: '#000', 
     minHeight: '100vh', 
     display: 'flex', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    padding: '20px' 
+    flexDirection: 'column' as 'column',
+    padding: '0',
+    paddingBottom: '20px'
   },
   loginCard: { 
     background: '#111', 
-    padding: '40px', 
+    padding: '30px 20px', 
     borderRadius: '20px', 
     border: '1px solid gold', 
     maxWidth: '400px', 
-    width: '100%',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
+    width: '90%',
+    margin: '20px auto',
+    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+    flex: 1
   },
   form: { display: 'flex', flexDirection: 'column' as 'column', gap: '20px' },
   inputGroup: { display: 'flex', flexDirection: 'column' as 'column', gap: '8px' },

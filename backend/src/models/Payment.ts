@@ -9,7 +9,10 @@ export interface IPayment extends Document {
   screenshotUrl?: string;
   amountType: number; // 10, 50, or 100
   status: 'Pending' | 'Approved' | 'Rejected';
-  type: 'Activation' | '1st Chance' | '2nd Chance';
+  type: 'Activation' | '1st Chance' | '2nd Chance' | 'Withdraw' | 'Task Withdraw';
+  withdrawMethod?: string;
+  withdrawAccount?: string;
+  accountHolderName?: string;
   createdAt: Date;
   approvedAt?: Date;
 }
@@ -23,8 +26,9 @@ const PaymentSchema: Schema = new Schema({
   amountType: { type: Number, required: true },
   withdrawMethod: { type: String },
   withdrawAccount: { type: String },
+  accountHolderName: { type: String },
   status: { type: String, required: true, default: 'Pending', enum: ['Pending', 'Approved', 'Rejected'] },
-  type: { type: String, required: true, enum: ['Activation', '1st Chance', '2nd Chance', 'Withdraw'] },
+  type: { type: String, required: true, enum: ['Activation', '1st Chance', '2nd Chance', 'Withdraw', 'Task Withdraw'] },
 }, { timestamps: true });
 
 export default mongoose.models.Payment || mongoose.model<IPayment>('Payment', PaymentSchema);
