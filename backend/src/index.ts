@@ -6,6 +6,7 @@ import fs from 'fs';
 import authRoutes from './routes/authRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import adminRoutes from './routes/adminRoutes';
+import taskRoutes from './routes/taskRoutes';
 import { expireOverdueUsersInternal } from './controllers/adminController';
 
 dotenv.config();
@@ -27,7 +28,9 @@ if (!fs.existsSync('uploads')) {
 }
 
 // Ye sab se zaroori line hai connection ke liye
-app.use(cors({ origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'https://rs-10-convert-one-million.vercel.app'], credentials: true }));
+const allowedOrigins = ['http://localhost:3000'];
+app.use(cors({ origin: allowedOrigins, credentials: true }));
+app.options('*', cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
@@ -35,6 +38,7 @@ app.use('/uploads', express.static('uploads'));
 app.use('/api/auth', authRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/tasks', taskRoutes);
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/chain10challenge')
   .then(() => {

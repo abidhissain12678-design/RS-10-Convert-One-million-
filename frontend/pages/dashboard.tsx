@@ -144,6 +144,7 @@ const Dashboard = () => {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     localStorage.setItem('dashboardActiveTab', tab);
+    setIsMobileMenuOpen(false); // Close mobile menu after selecting tab
     if (tab === 'referral') {
       fetchCompletedUsers();
     }
@@ -751,11 +752,13 @@ useEffect(() => {
       : styles.sidebar)
   }} 
   className="dashboard-sidebar"
+  data-mobile-open={isMobileMenuOpen ? "true" : "false"}
 >
-   {isMobileMenuOpen && (
+   {isMobileMenuOpen && window.innerWidth < 768 && (
   <div
     className="mobile-overlay"
     onClick={() => setIsMobileMenuOpen(false)}
+    style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0, 0, 0, 0.7)', zIndex: 999}}
   ></div>
 )}   
   <div style={{textAlign: 'center', marginBottom: '20px'}}>
@@ -774,6 +777,7 @@ useEffect(() => {
     <button onClick={() => handleTabChange('referral')} style={activeTab === 'referral' ? styles.navBtnActive : styles.navBtn}>🔗 Referral History</button>
     <button onClick={() => handleTabChange('wallet')} style={activeTab === 'wallet' ? styles.navBtnActive : styles.navBtn}>💰 Wallet</button>
     <button onClick={() => handleTabChange('news')} style={activeTab === 'news' ? styles.navBtnActive : styles.navBtn}>📰 Daily News</button>
+    <button onClick={() => { window.location.href = '/dashboard/microtasks'; }} style={styles.navBtn}>🧩 Micro Tasks</button>
   </div>
 
   {/* DYNAMIC SOCIAL LINKS & SLOGANS (Connected with Admin) */}
@@ -851,24 +855,24 @@ useEffect(() => {
 </div>
 
     {/* 2. MAIN CONTENT START (Line 157) */}
-    <div style={styles.main} className="dashboard-main">
-      <div style={styles.header} className="dashboard-header">
+    <div style={window.innerWidth < 768 ? styles.mainMobile : styles.main} className="dashboard-main">
+      <div style={window.innerWidth < 768 ? styles.headerMobile : styles.header} className="dashboard-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <div style={styles.hamburger} className="dashboard-hamburger" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>☰</div>
+          <div style={window.innerWidth < 768 ? styles.hamburgerMobile : styles.hamburger} className="dashboard-hamburger" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>☰</div>
           <div>
-            <h1 style={{fontSize: '30px', margin: 0}}>WELCOME <span style={{color: 'gold'}}>MILLIONAIRE</span></h1>
-            <div style={{fontSize: '14px', color: '#aaa'}}>Network Strength: {calculatedNetworkStrength.toLocaleString()} / 1,000,000</div>
+            <h1 style={{fontSize: window.innerWidth < 768 ? '20px' : '30px', margin: 0}}>WELCOME <span style={{color: 'gold'}}>MILLIONAIRE</span></h1>
+            <div style={{fontSize: window.innerWidth < 768 ? '10px' : '14px', color: '#aaa'}}>Network Strength: {calculatedNetworkStrength.toLocaleString()} / 1,000,000</div>
           </div>
         </div>
-        <div style={styles.timerContainer}>
-          <p style={{fontSize: '10px', margin: 0}}>
+        <div style={{...styles.timerContainer, fontSize: window.innerWidth < 768 ? '12px' : 'auto'}}>
+          <p style={{fontSize: window.innerWidth < 768 ? '8px' : '10px', margin: 0}}>
             {(activationStatus as ActivationStatusType) === 'approved' ? 'TIMER RUNNING' : 
              (activationStatus as ActivationStatusType) === 'expired' ? 'TIMER EXPIRED' : 
              (activationStatus as ActivationStatusType) === 'pending_chance' ? 'CHANCE PENDING' : 
              (activationStatus as ActivationStatusType) === 'locked' ? 'ACCOUNT LOCKED' :
              (activationStatus as ActivationStatusType) === 'completed' ? 'CHALLENGE COMPLETED' : 'NOT ACTIVATED'}
           </p>
-          <h2 style={{margin: 0, color: activationStatus === 'approved' ? 'gold' : '#444'}}>{formatTime(timeLeft)}</h2>
+          <h2 style={{margin: 0, color: activationStatus === 'approved' ? 'gold' : '#444', fontSize: window.innerWidth < 768 ? '18px' : 'auto'}}>{formatTime(timeLeft)}</h2>
         </div>
       </div>
 

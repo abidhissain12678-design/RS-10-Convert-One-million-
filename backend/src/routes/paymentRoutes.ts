@@ -1,5 +1,5 @@
 import express from 'express';
-import { requestActivation, requestWithdrawal, getPendingPayments, approvePayment, getUserPayments } from '../controllers/paymentController';
+import { requestActivation, requestWithdrawal, requestTaskWithdrawal, getPendingPayments, approvePayment, rejectPayment, getUserPayments } from '../controllers/paymentController';
 import { authMiddleware } from '../middleware/authmiddleware';
 import multer from 'multer';
 
@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post('/request-activation', authMiddleware, upload.any(), requestActivation);
 router.post('/request-withdrawal', authMiddleware, requestWithdrawal);
+router.post('/request-task-withdrawal', authMiddleware, requestTaskWithdrawal);
 router.post('/test-upload', upload.single('screenshot'), (req, res) => {
   console.log('Test upload - Body:', req.body);
   console.log('Test upload - File:', req.file);
@@ -15,6 +16,7 @@ router.post('/test-upload', upload.single('screenshot'), (req, res) => {
 });
 router.get('/pending-payments', getPendingPayments);
 router.post('/approve-payment', approvePayment);
+router.post('/reject-payment', rejectPayment);
 router.get('/user-payments', authMiddleware, getUserPayments);
 
 export default router;

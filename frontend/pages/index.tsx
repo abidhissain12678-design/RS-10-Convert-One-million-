@@ -1,37 +1,27 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 const Index: React.FC = () => {
-  const [activeForm, setActiveForm] = useState<'none' | 'register' | 'login'>('none');
-
-  const navButton = (href: string, label: string, isActive?: boolean) => (
-    <button
-      onClick={() => {
-        if (label === 'Sign Up') setActiveForm('register');
-        else if (label === 'Login') setActiveForm('login');
-        else if (href === '#home') setActiveForm('none');
-        else if (href.startsWith('#')) {
-          setActiveForm('none');
-          document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' });
-        }
-      }}
+  const navButton = (href: string, label: string) => (
+    <a
+      href={href}
       style={{
-        color: isActive ? '#FFD700' : '#fff',
+        color: '#fff',
         textDecoration: 'none',
         padding: '6px 10px',
-        border: `1px solid ${isActive ? '#FFD700' : 'rgba(255,255,255,0.3)'}`,
+        border: '1px solid rgba(255,255,255,0.3)',
         borderRadius: '6px',
         display: 'inline-block',
         margin: '0 4px',
         backdropFilter: 'blur(4px)',
         transition: 'all 0.25s ease',
-        background: isActive ? 'rgba(255,215,0,0.1)' : 'rgba(0,0,0,0.45)',
+        background: 'rgba(0,0,0,0.45)',
         fontSize: '12px',
         fontWeight: '500',
         cursor: 'pointer'
       }}
     >
       {label}
-    </button>
+    </a>
   );
 
   return (
@@ -59,22 +49,22 @@ const Index: React.FC = () => {
         background: 'rgba(3, 10, 22, 0.95)',
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(255,255,255,0.12)',
-        boxShadow: '0 2px 20px rgba(0,0,0,0.3)'
+        boxShadow: '0 2px 20px rgba(0,0,0,0.3)',
+        flexWrap: 'wrap',
+        gap: '8px'
       }}>
         <div style={{
-          fontSize: '1.3rem',
+          fontSize: '1.1rem',
           fontWeight: 800,
           color: '#FFD700',
-          letterSpacing: '1px'
+          letterSpacing: '1px',
+          whiteSpace: 'nowrap'
         }}>
           MILLION HUB
         </div>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          {navButton('#home', 'Home', activeForm === 'none')}
-          {navButton('/register', 'Sign Up', activeForm === 'register')}
-          {navButton('/login', 'Login', activeForm === 'login')}
-          {navButton('#how-it-works', 'How It Works')}
-          {navButton('#contact', 'Contact')}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+          {navButton('/register', 'Sign Up')}
+          {navButton('/login', 'Login')}
         </div>
       </header>
 
@@ -82,45 +72,44 @@ const Index: React.FC = () => {
         display: 'flex',
         minHeight: 'calc(100vh - 80px)',
         width: '100%',
-        flexDirection: activeForm === 'none' ? 'column' : 'row',
+        flexDirection: 'column',
         flexWrap: 'wrap'
       }} className="split-container">
 
         {/* Landing Page Section */}
         <div style={{
-          flex: activeForm === 'none' ? 1 : 0.6,
+          flex: 1,
           transition: 'all 0.5s ease',
           overflowY: 'auto',
           background: 'rgba(15, 20, 25, 0.95)',
           backdropFilter: 'blur(10px)',
-          width: activeForm === 'none' ? '100%' : '60%',
-          minWidth: activeForm === 'none' ? '100%' : '0',
-          order: activeForm === 'none' ? 1 : 2
+          width: '100%',
+          minWidth: '100%'
         }} className="landing-section">
           <main style={{
-            opacity: activeForm === 'none' ? 1 : 0.7,
-            transition: 'opacity 0.3s ease',
             width: '100%'
           }}>
         {/* Hero Section */}
         <section id="home" style={{
           textAlign: 'center',
-          padding: '60px 20px 60px',
+          padding: '40px 15px 40px',
           maxWidth: '1200px',
           margin: '0 auto',
-          position: 'relative'
+          position: 'relative',
+          width: '100%',
+          boxSizing: 'border-box'
         }} className="hero-section">
           <div style={{
             background: 'rgba(0,0,0,0.4)',
-            padding: '40px',
-            borderRadius: '20px',
+            padding: '30px 20px',
+            borderRadius: '15px',
             backdropFilter: 'blur(10px)',
             border: '1px solid rgba(255,255,255,0.1)',
             boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
           }}>
             <h1 style={{
-              fontSize: '3.5rem',
-              marginBottom: '20px',
+              fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+              marginBottom: '15px',
               color: '#FFD700',
               textShadow: '0 0 30px rgba(255, 215, 0, 0.5)',
               fontWeight: '800',
@@ -129,7 +118,7 @@ const Index: React.FC = () => {
               MILLION HUB
             </h1>
             <h2 style={{
-              fontSize: '2.2rem',
+              fontSize: 'clamp(1.3rem, 4vw, 2.2rem)',
               marginBottom: '15px',
               color: '#FFD700',
               fontWeight: 'bold',
@@ -138,24 +127,24 @@ const Index: React.FC = () => {
               💰 RS 10 to Convert RS 1,000,000 💰
             </h2>
             <p style={{
-              fontSize: '1.3rem',
+              fontSize: 'clamp(0.95rem, 2vw, 1.3rem)',
               color: '#E8E8E8',
               maxWidth: '800px',
-              margin: '0 auto 30px',
+              margin: '0 auto 25px',
               lineHeight: 1.6,
               fontWeight: '300'
             }} className="hero-description">
-              Transform your financial future through exponential networking. Start with just 10 rupees and build a network that reaches 1 million members through strategic referrals.
+              Transform your financial future through exponential networking. Start with just 10 rupees and build a network that reaches 1 million members.
             </p>
-            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button
-                onClick={() => setActiveForm('register')}
+            <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', flexWrap: 'wrap', padding: '0 10px' }}>
+              <a
+                href="/register"
                 style={{
                   background: 'linear-gradient(135deg, #FFD700, #FFA500)',
                   color: '#000',
-                  padding: '18px 40px',
+                  padding: '16px 32px',
                   textDecoration: 'none',
-                  fontSize: '1.2rem',
+                  fontSize: '1rem',
                   fontWeight: '700',
                   borderRadius: '50px',
                   display: 'inline-block',
@@ -166,15 +155,15 @@ const Index: React.FC = () => {
                 }}
               >
                 🚀 Start Your Journey
-              </button>
-              <button
-                onClick={() => setActiveForm('login')}
+              </a>
+              <a
+                href="/login"
                 style={{
                   background: 'rgba(255,255,255,0.1)',
                   color: '#FFD700',
-                  padding: '18px 40px',
+                  padding: '16px 32px',
                   textDecoration: 'none',
-                  fontSize: '1.2rem',
+                  fontSize: '1rem',
                   fontWeight: '600',
                   borderRadius: '50px',
                   display: 'inline-block',
@@ -184,34 +173,38 @@ const Index: React.FC = () => {
                 }}
               >
                 🔑 Login to Account
-              </button>
+              </a>
             </div>
           </div>
         </section>
 
+        <EarningTasks />
+
         {/* Network Visualization */}
         <section id="how-it-works" style={{
-          padding: '60px 20px',
+          padding: '50px 15px',
           background: 'rgba(0, 0, 0, 0.6)',
-          backdropFilter: 'blur(5px)'
+          backdropFilter: 'blur(5px)',
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
-          <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
             <h2 style={{
               textAlign: 'center',
-              fontSize: '2.8rem',
+              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
               color: '#FFD700',
-              marginBottom: '20px',
+              marginBottom: '15px',
               fontWeight: '700'
             }}>
               Your Network Growth Path
             </h2>
             <p style={{
               textAlign: 'center',
-              fontSize: '1.2rem',
+              fontSize: 'clamp(1rem, 2vw, 1.2rem)',
               color: '#CCC',
-              marginBottom: '50px',
+              marginBottom: '40px',
               maxWidth: '700px',
-              margin: '0 auto 50px'
+              margin: '0 auto 40px'
             }}>
               Watch your network expand exponentially. Each level multiplies by 11, creating unlimited earning potential.
             </p>
@@ -221,25 +214,27 @@ const Index: React.FC = () => {
         </section>
 
         {/* Why Choose Us */}
-        <section style={{
-          padding: '80px 20px',
+        <section className="why-choose-section" style={{
+          padding: '60px 15px',
           background: 'rgba(15, 28, 44, 0.8)',
-          backdropFilter: 'blur(10px)'
+          backdropFilter: 'blur(10px)',
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
-          <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
             <h2 style={{
               textAlign: 'center',
-              fontSize: '2.8rem',
+              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
               color: '#FFD700',
-              marginBottom: '60px',
+              marginBottom: '50px',
               fontWeight: '700'
             }}>
               Why Choose Million Hub?
             </h2>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-              gap: '40px'
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '30px'
             }}>
               <FeatureCard
                 icon="🌐"
@@ -277,24 +272,26 @@ const Index: React.FC = () => {
 
         {/* Stats Section */}
         <section style={{
-          padding: '60px 20px',
+          padding: '50px 15px',
           background: 'rgba(0, 0, 0, 0.7)',
-          textAlign: 'center'
+          textAlign: 'center',
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
-          <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
             <h2 style={{
-              fontSize: '2.5rem',
+              fontSize: 'clamp(1.6rem, 4vw, 2.5rem)',
               color: '#FFD700',
-              marginBottom: '40px',
+              marginBottom: '35px',
               fontWeight: '700'
             }}>
               The Mathematics of Success
             </h2>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: '30px',
-              marginBottom: '50px'
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: '20px',
+              marginBottom: '40px'
             }}>
               <StatCard number="11" label="Level 1 Members" />
               <StatCard number="121" label="Level 2 Members" />
@@ -305,17 +302,17 @@ const Index: React.FC = () => {
             </div>
             <div style={{
               background: 'rgba(255, 215, 0, 0.1)',
-              padding: '30px',
-              borderRadius: '15px',
+              padding: '25px 20px',
+              borderRadius: '12px',
               border: '1px solid rgba(255, 215, 0, 0.3)'
             }}>
-              <h3 style={{ color: '#FFD700', fontSize: '1.8rem', marginBottom: '15px' }}>
+              <h3 style={{ color: '#FFD700', fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', marginBottom: '10px' }}>
                 Total Network Potential
               </h3>
-              <p style={{ color: '#FFF', fontSize: '2.5rem', fontWeight: 'bold', margin: '0' }}>
+              <p style={{ color: '#FFF', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 'bold', margin: '0' }}>
                 1,771,561 Members
               </p>
-              <p style={{ color: '#CCC', marginTop: '10px' }}>
+              <p style={{ color: '#CCC', marginTop: '8px', fontSize: '0.9rem' }}>
                 From your single referral action
               </p>
             </div>
@@ -324,33 +321,33 @@ const Index: React.FC = () => {
 
         {/* CTA Section */}
         <section style={{
-          padding: '80px 20px',
+          padding: '60px 20px',
           textAlign: 'center',
           background: 'linear-gradient(135deg, rgba(15, 28, 44, 0.9), rgba(26, 35, 50, 0.9))'
         }}>
-          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto', width: '100%', boxSizing: 'border-box' }}>
             <h2 style={{
-              fontSize: '2.8rem',
+              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
               color: '#FFD700',
-              marginBottom: '20px',
+              marginBottom: '15px',
               fontWeight: '700'
             }}>
               Ready to Transform Your Future?
             </h2>
             <p style={{
-              fontSize: '1.3rem',
+              fontSize: 'clamp(1rem, 2vw, 1.3rem)',
               color: '#E8E8E8',
-              marginBottom: '40px',
+              marginBottom: '30px',
               lineHeight: 1.6
             }}>
-              Join thousands who have already started their journey to financial freedom. Your success story begins with one simple step.
+              Join thousands who have started their journey to financial freedom. Your success story begins with one simple step.
             </p>
             <a href="/register" style={{
               background: 'linear-gradient(135deg, #FFD700, #FFA500)',
               color: '#000',
-              padding: '20px 50px',
+              padding: 'clamp(14px 28px, 5vw, 20px 50px)',
               textDecoration: 'none',
-              fontSize: '1.4rem',
+              fontSize: 'clamp(1rem, 2vw, 1.4rem)',
               fontWeight: '700',
               borderRadius: '50px',
               display: 'inline-block',
@@ -365,17 +362,20 @@ const Index: React.FC = () => {
 
         {/* Contact Section */}
         <section id="contact" style={{
-          padding: '60px 20px',
+          padding: '50px 15px',
           textAlign: 'center',
-          background: 'rgba(0, 0, 0, 0.8)'
+          background: 'rgba(0, 0, 0, 0.8)',
+          width: '100%',
+          boxSizing: 'border-box'
         }}>
-          <h2 style={{ color: '#FFD700', fontSize: '2.2rem', marginBottom: '20px' }}>Contact Us</h2>
+          <h2 style={{ color: '#FFD700', fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', marginBottom: '20px' }}>Contact Us</h2>
           <div style={{
             display: 'flex',
             justifyContent: 'center',
-            gap: '40px',
+            gap: '20px',
             flexWrap: 'wrap',
-            color: '#CCC'
+            color: '#CCC',
+            fontSize: 'clamp(0.9rem, 2vw, 1rem)'
           }}>
             <div>📧 support@millionhub.com</div>
             <div>📱 +92 3299545214</div>
@@ -384,43 +384,6 @@ const Index: React.FC = () => {
         </section>
       </main>
         </div>
-
-        {/* Right Side - Forms */}
-        {(activeForm === 'register' || activeForm === 'login') && (
-          <div style={{
-            flex: 0.4,
-            minWidth: '320px',
-            width: '40%',
-            background: 'linear-gradient(135deg, #1a1f26 0%, #0f1419 100%)',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
-            padding: '20px',
-            borderLeft: '1px solid rgba(255,255,255,0.1)',
-            boxShadow: '-5px 0 20px rgba(0,0,0,0.3)',
-            order: 1
-          }}>
-            <div style={{
-              width: '100%',
-              maxWidth: '400px',
-              marginBottom: '15px',
-              background: 'rgba(255, 215, 0, 0.15)',
-              border: '1px solid rgba(255, 215, 0, 0.35)',
-              borderRadius: '12px',
-              padding: '10px',
-              textAlign: 'center',
-              fontWeight: 700,
-              color: '#FFF',
-              fontSize: '1.2rem',
-              boxShadow: '0 0 15px rgba(255, 215, 0, 0.4)'
-            }}>
-              MILLION HUB
-            </div>
-            {activeForm === 'register' && <RegisterForm />}
-            {activeForm === 'login' && <LoginForm />}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -495,6 +458,7 @@ const RegisterForm: React.FC = () => {
           referredBy: formData.referralCode || undefined
         }),
       });
+
 
       const data = await response.json();
 
@@ -910,6 +874,129 @@ const LoginForm: React.FC = () => {
     </div>
   );
 };
+
+const EarningTasks: React.FC = () => {
+  const cards = [
+    { icon: '📺', title: 'Watch Videos', description: 'YouTube, TikTok, Instagram' },
+    { icon: '👍', title: 'Like Posts', description: 'Social Media Posts' },
+    { icon: '📺', title: 'Subscribe', description: 'YouTube Channels' },
+    { icon: '👥', title: 'Follow Accounts', description: 'Instagram, Twitter' },
+    { icon: '🔗', title: 'Share Content', description: 'Posts & Videos' },
+    { icon: '✍️', title: 'Write Comments', description: 'Engage with Content' },
+    { icon: '🎁', title: 'Daily Rewards', description: 'Complete quick tasks daily' },
+    { icon: '📱', title: 'App Installs', description: 'Install and try apps' },
+    { icon: '🌐', title: 'Website Visits', description: 'Visit partner websites' }
+  ];
+
+  return (
+    <section style={{
+      padding: '60px 15px',
+      background: 'transparent',
+      width: '100%',
+      boxSizing: 'border-box'
+    }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+        <h2 style={{
+          textAlign: 'center',
+          fontSize: 'clamp(2rem, 4vw, 2.8rem)',
+          color: '#FFD700',
+          marginBottom: '15px',
+          fontWeight: '800'
+        }}>
+          Earn Money Online
+        </h2>
+        <p style={{
+          textAlign: 'center',
+          fontSize: 'clamp(1rem, 2vw, 1.15rem)',
+          color: '#DDD',
+          maxWidth: '850px',
+          margin: '0 auto 35px',
+          lineHeight: 1.6
+        }}>
+          Complete simple tasks and earn money instantly. Watch videos, like posts, app install, Survey, Website Visit, subscribe to channels, follow accounts, Write comment, and share content to start earning today!
+        </p>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+          gap: '20px'
+        }}>
+          {cards.map((card) => (
+            <div key={card.title} style={{
+              background: '#1a1a1a',
+              borderRadius: '18px',
+              padding: '25px',
+              boxShadow: '0 20px 45px rgba(0,0,0,0.35), 0 0 16px rgba(255, 215, 0, 0.12)',
+              border: '1px solid rgba(255, 215, 0, 0.18)',
+              minHeight: '190px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center'
+            }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '18px',
+                background: 'rgba(255, 215, 0, 0.12)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '1.8rem',
+                marginBottom: '18px',
+                color: '#FFD700'
+              }}>
+                {card.icon}
+              </div>
+              <h3 style={{
+                fontSize: '1.2rem',
+                color: '#FFF',
+                marginBottom: '10px'
+              }}>
+                {card.title}
+              </h3>
+              <p style={{
+                fontSize: '0.95rem',
+                color: '#CCC',
+                lineHeight: 1.7,
+                margin: 0
+              }}>
+                {card.description}
+              </p>
+            </div>
+          ))}
+        </div>
+        <div style={{
+          marginTop: '30px',
+          background: '#1a1a1a',
+          borderRadius: '22px',
+          padding: '30px',
+          boxShadow: '0 24px 70px rgba(0,0,0,0.35), 0 0 20px rgba(255, 215, 0, 0.12)',
+          border: '1px solid rgba(255, 215, 0, 0.2)',
+          textAlign: 'center'
+        }}>
+          <h3 style={{
+            color: '#FFD700',
+            fontSize: '1.4rem',
+            fontWeight: '700',
+            marginBottom: '12px'
+          }}>
+            Minimum Payout: RS 100
+          </h3>
+          <p style={{
+            color: '#CCC',
+            fontSize: '1rem',
+            lineHeight: 1.7,
+            margin: 0
+          }}>
+            Payment Methods: JazzCash / EasyPaisa / Bank Account / PayPal / Payoneer.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const NetworkVisualization: React.FC = () => {
   const [showConfetti, setShowConfetti] = React.useState(false);
 
@@ -919,7 +1006,7 @@ const NetworkVisualization: React.FC = () => {
   }, []);
 
   return (
-    <div style={{
+    <div className="network-visualization" style={{
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -970,7 +1057,7 @@ const NetworkVisualization: React.FC = () => {
             gap: '30px',
             alignItems: 'flex-end',
             marginBottom: '20px'
-          }}>
+          }} className="winner-characters">
             {/* Celebratory User */}
             <div style={{
               display: 'flex',
@@ -997,7 +1084,7 @@ const NetworkVisualization: React.FC = () => {
                 boxShadow: '0 15px 40px rgba(255, 215, 0, 0.5), inset -2px -2px 5px rgba(0,0,0,0.2)',
                 border: '5px solid #FFF',
                 animation: 'pulse 2s infinite'
-              }}>
+              }} className="champion-circle">
                 🏆
               </div>
               <div style={{
@@ -1033,7 +1120,7 @@ const NetworkVisualization: React.FC = () => {
                 border: '3px solid #FFF',
                 position: 'relative',
                 overflow: 'hidden'
-              }}>
+              }} className="trophy">
                 {/* Money inside trophy */}
                 <div style={{
                   position: 'absolute',
@@ -1050,7 +1137,7 @@ const NetworkVisualization: React.FC = () => {
                   fontWeight: '700',
                   textAlign: 'center',
                   zIndex: 2
-                }}>
+                }} className="prize-text">
                   💰 PRIZE
                 </div>
                 <div style={{
@@ -1059,7 +1146,7 @@ const NetworkVisualization: React.FC = () => {
                   color: '#000',
                   textShadow: '0 2px 4px rgba(255,255,255,0.5)',
                   zIndex: 2
-                }}>
+                }} className="amount">
                   $1M
                 </div>
                 <div style={{
@@ -1067,7 +1154,7 @@ const NetworkVisualization: React.FC = () => {
                   color: '#000',
                   fontWeight: '600',
                   zIndex: 2
-                }}>
+                }} className="won-text">
                   💎 WON
                 </div>
               </div>
@@ -1137,7 +1224,7 @@ const NetworkVisualization: React.FC = () => {
                 boxShadow: '0 15px 40px rgba(255, 215, 0, 0.5), inset -2px -2px 5px rgba(0,0,0,0.2)',
                 border: '5px solid #FFF',
                 animation: 'pulse 2s infinite 0.5s'
-              }}>
+              }} className="success-circle">
                 🤝
               </div>
               <div style={{
@@ -1154,7 +1241,7 @@ const NetworkVisualization: React.FC = () => {
           {/* Main Title */}
           <div style={{
             textAlign: 'center'
-          }}>
+          }} className="winner-title">
             <h3 style={{
               color: '#FFD700',
               fontSize: '28px',
@@ -1212,7 +1299,7 @@ const NetworkVisualization: React.FC = () => {
         border: '2px solid rgba(91, 192, 235, 0.4)',
         width: '100%',
         maxWidth: '1000px'
-      }}>
+      }} className="level-section">
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -1239,6 +1326,7 @@ const NetworkVisualization: React.FC = () => {
                 transition: 'all 0.3s ease',
                 cursor: 'pointer'
               }}
+              className="level1-circles"
               onMouseEnter={(e) => {
                 (e.currentTarget as HTMLElement).style.transform = 'scale(1.1)';
                 (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 25px rgba(91, 192, 235, 0.6)';
@@ -1263,14 +1351,14 @@ const NetworkVisualization: React.FC = () => {
             fontWeight: '800',
             margin: '0 0 5px 0',
             textShadow: '0 0 10px rgba(91, 192, 235, 0.4)'
-          }}>
+          }} className="level-title">
             📊 LEVEL 1: 11 MEMBERS
           </h4>
           <p style={{
             color: '#B0E0E6',
             fontSize: '13px',
             margin: '5px 0 0 0'
-          }}>
+          }} className="level-subtitle">
             Each member brings one additional person into the network
           </p>
         </div>
@@ -1289,7 +1377,7 @@ const NetworkVisualization: React.FC = () => {
         width: '100%',
         maxWidth: '1000px',
         overflow: 'hidden'
-      }}>
+      }} className="level-section">
         <div style={{
           display: 'flex',
           flexWrap: 'wrap',
@@ -1320,6 +1408,7 @@ const NetworkVisualization: React.FC = () => {
                   transition: 'all 0.2s ease',
                   flexShrink: 0
                 }}
+                className="level2-circles"
               >
                 {emoji}
               </div>
@@ -1337,14 +1426,21 @@ const NetworkVisualization: React.FC = () => {
             fontWeight: '800',
             margin: '0 0 5px 0',
             textShadow: '0 0 10px rgba(142, 68, 173, 0.4)'
-          }}>
-            🎯 LEVEL 2: 121 MEMBERS (11 × 11)
+          }} className="level-title">
+            🎯 LEVEL 2: 11 MEMBER
           </h4>
           <p style={{
             color: '#D7BDE2',
             fontSize: '13px',
+            margin: '2px 0 5px 0'
+          }} className="level-calculation">
+            (11 × 11)=121
+          </p>
+          <p style={{
+            color: '#D7BDE2',
+            fontSize: '13px',
             margin: '5px 0 0 0'
-          }}>
+          }} className="level-subtitle">
             Exponential growth multiplied: each of the 11 members brings 11 more
           </p>
         </div>
@@ -1449,14 +1545,21 @@ const NetworkVisualization: React.FC = () => {
             fontWeight: '800',
             margin: '0 0 5px 0',
             textShadow: '0 0 10px rgba(231, 76, 60, 0.4)'
-          }}>
-            🌐 LEVEL 3: 1,331 MEMBERS (121 × 11)
+          }} className="level-title">
+            🌐 LEVEL 3: 121 MEMBER
           </h4>
           <p style={{
             color: '#F5B7B1',
             fontSize: '13px',
+            margin: '2px 0 5px 0'
+          }} className="level-calculation">
+            (121 × 11)=1331
+          </p>
+          <p style={{
+            color: '#F5B7B1',
+            fontSize: '13px',
             margin: '5px 0 0 0'
-          }}>
+          }} className="level-subtitle">
             The network begins to explode with exponential growth
           </p>
         </div>

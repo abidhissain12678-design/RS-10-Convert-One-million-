@@ -11,6 +11,7 @@ const fs_1 = __importDefault(require("fs"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const paymentRoutes_1 = __importDefault(require("./routes/paymentRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
+const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
 const adminController_1 = require("./controllers/adminController");
 dotenv_1.default.config();
 // Set consistent JWT_SECRET if not in environment
@@ -28,13 +29,16 @@ if (!fs_1.default.existsSync('uploads')) {
     fs_1.default.mkdirSync('uploads', { recursive: true });
 }
 // Ye sab se zaroori line hai connection ke liye
-app.use((0, cors_1.default)({ origin: ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002', 'http://localhost:3003', 'http://localhost:3004', 'https://rs-10-convert-one-million.vercel.app'], credentials: true }));
+const allowedOrigins = ['http://localhost:3000'];
+app.use((0, cors_1.default)({ origin: allowedOrigins, credentials: true }));
+app.options('*', (0, cors_1.default)({ origin: allowedOrigins, credentials: true }));
 app.use(express_1.default.json());
 app.use('/uploads', express_1.default.static('uploads'));
 // Routes connect karna
 app.use('/api/auth', authRoutes_1.default);
 app.use('/api/payment', paymentRoutes_1.default);
 app.use('/api/admin', adminRoutes_1.default);
+app.use('/api/tasks', taskRoutes_1.default);
 mongoose_1.default.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/chain10challenge')
     .then(() => {
     console.log('✅ MongoDB connected');

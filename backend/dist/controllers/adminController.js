@@ -3,12 +3,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.unbanUser = exports.banUser = exports.updateUser = exports.getAllUsers = exports.expireOverdueUsers = exports.expireOverdueUsersInternal = exports.lockUser = exports.unlockUser = exports.getLockedUsers = exports.approveActivation = exports.approveChance = exports.buyChance = exports.sendNotification = exports.getNotificationsHistory = exports.getNews = exports.postNews = exports.updateSettings = exports.getSettings = void 0;
+exports.rejectTaskSubmission = exports.approveTaskSubmission = exports.createTestLockedAccount = exports.backfillLockedAccounts = exports.updateLockedAccountNotes = exports.unlockLockedAccount = exports.giveSecondChanceToLockedAccount = exports.createLockedAccountRecord = exports.getAllLockedAccounts = exports.unbanUser = exports.banUser = exports.updateUser = exports.getAllUsers = exports.expireOverdueUsers = exports.expireOverdueUsersInternal = exports.lockUser = exports.unlockUser = exports.getLockedUsers = exports.approveActivation = exports.approveChance = exports.buyChance = exports.createTask = exports.sendNotification = exports.getNotificationsHistory = exports.getNews = exports.postNews = exports.updateSettings = exports.getSettings = void 0;
 const User_1 = __importDefault(require("../models/User"));
 const Payment_1 = __importDefault(require("../models/Payment"));
 const Settings_1 = __importDefault(require("../models/Settings"));
 const News_1 = __importDefault(require("../models/News"));
 const Notification_1 = __importDefault(require("../models/Notification"));
+const LockedAccount_1 = __importDefault(require("../models/LockedAccount"));
+const Task_1 = __importDefault(require("../models/Task"));
+const UserTask_1 = __importDefault(require("../models/UserTask"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const settingsFile = path_1.default.join(process.cwd(), 'settings.json');
@@ -116,6 +119,33 @@ const sendNotification = async (req, res) => {
     }
 };
 exports.sendNotification = sendNotification;
+const createTask = async (req, res) => {
+    try {
+        const { taskType, title, description, link, reward, totalQuantity, active, imageUrl, requiresProof } = req.body;
+        if (!taskType || !title || !description || !link || !reward || !totalQuantity) {
+            return res.status(400).json({ error: 'Missing required task fields' });
+        }
+        const task = new Task_1.default({
+            taskType,
+            title,
+            description,
+            link,
+            reward,
+            totalQuantity,
+            completedQuantity: 0,
+            active: active ?? true,
+            imageUrl: imageUrl || '',
+            requiresProof: requiresProof ?? true
+        });
+        await task.save();
+        res.json({ message: 'Task created successfully', task });
+    }
+    catch (error) {
+        console.error('Error creating task:', error);
+        res.status(500).json({ error: error.message || 'Failed to create task' });
+    }
+};
+exports.createTask = createTask;
 const buyChance = async (req, res) => {
     try {
         const { userId, tid, amount } = req.body;
@@ -278,6 +308,31 @@ const expireOverdueUsersInternal = async () => {
             user.activationStatus = 'locked';
             user.chanceLevel = 3;
             user.networkReferrals = user.networkReferrals.map((r) => ({ ...r, status: 'locked' }));
+            // Create a LockedAccount record
+            try {
+                const existingRecord = await LockedAccount_1.default.findOne({ userId: user._id, unlocked: false });
+                if (!existingRecord) {
+                    const lockedRecord = new LockedAccount_1.default({
+                        userId: user._id,
+                        username: user.username,
+                        email: user.email,
+                        phone: user.phone,
+                        city: user.city,
+                        referralCount: activeCount,
+                        requiredReferrals: 11,
+                        totalNetworkSize: user.totalNetworkSize,
+                        referredBy: user.referredBy,
+                        reasonLocked: 'Failed to reach 11 referrals within 2 hours',
+                        timerEndTime: user.timerEndTime,
+                        lockedAt: new Date()
+                    });
+                    await lockedRecord.save();
+                    console.log(`LockedAccount record created for user: ${user.username}`);
+                }
+            }
+            catch (error) {
+                console.error(`Error creating LockedAccount record for ${user.username}:`, error);
+            }
         }
         await user.save();
         processed += 1;
@@ -348,3 +403,238 @@ const unbanUser = async (req, res) => {
     }
 };
 exports.unbanUser = unbanUser;
+// ==================== LOCKED ACCOUNTS TABLE MANAGEMENT ====================
+// Get all locked accounts from LockedAccount table
+const getAllLockedAccounts = async (req, res) => {
+    try {
+        const lockedAccounts = await LockedAccount_1.default.find({ unlocked: false })
+            .sort({ lockedAt: -1 });
+        res.json(lockedAccounts);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.getAllLockedAccounts = getAllLockedAccounts;
+// Create a new locked account record when user fails 2-hour challenge
+const createLockedAccountRecord = async (req, res) => {
+    try {
+        const { userId, username, email, phone, city, referralCount, totalNetworkSize, referredBy, timerEndTime } = req.body;
+        // Check if record already exists
+        const existingRecord = await LockedAccount_1.default.findOne({ userId, unlocked: false });
+        if (existingRecord) {
+            return res.status(400).json({ error: 'Record already exists for this user' });
+        }
+        const lockedAccount = new LockedAccount_1.default({
+            userId,
+            username,
+            email,
+            phone,
+            city,
+            referralCount,
+            requiredReferrals: 11,
+            totalNetworkSize,
+            referredBy,
+            reasonLocked: 'Failed to reach 11 referrals within 2 hours',
+            timerEndTime,
+            lockedAt: new Date()
+        });
+        await lockedAccount.save();
+        res.json({ message: 'Locked account record created', lockedAccount });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.createLockedAccountRecord = createLockedAccountRecord;
+// Give second chance to locked account
+const giveSecondChanceToLockedAccount = async (req, res) => {
+    try {
+        const { lockedAccountId } = req.body;
+        const lockedAccount = await LockedAccount_1.default.findByIdAndUpdate(lockedAccountId, {
+            secondChanceGiven: true,
+            secondChanceDate: new Date()
+        }, { new: true });
+        if (!lockedAccount) {
+            return res.status(404).json({ error: 'Locked account record not found' });
+        }
+        // Also update user status
+        await User_1.default.findByIdAndUpdate(lockedAccount.userId, {
+            activationStatus: 'pending_chance',
+            chanceLevel: 1
+        });
+        res.json({ message: 'Second chance given successfully', lockedAccount });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.giveSecondChanceToLockedAccount = giveSecondChanceToLockedAccount;
+// Unlock a locked account (remove from locked status)
+const unlockLockedAccount = async (req, res) => {
+    try {
+        const { lockedAccountId } = req.body;
+        const lockedAccount = await LockedAccount_1.default.findByIdAndUpdate(lockedAccountId, {
+            unlocked: true,
+            unlockedAt: new Date()
+        }, { new: true });
+        if (!lockedAccount) {
+            return res.status(404).json({ error: 'Locked account record not found' });
+        }
+        res.json({ message: 'Account unlocked successfully', lockedAccount });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.unlockLockedAccount = unlockLockedAccount;
+// Update notes for locked account
+const updateLockedAccountNotes = async (req, res) => {
+    try {
+        const { lockedAccountId, notes } = req.body;
+        const lockedAccount = await LockedAccount_1.default.findByIdAndUpdate(lockedAccountId, { notes }, { new: true });
+        if (!lockedAccount) {
+            return res.status(404).json({ error: 'Locked account record not found' });
+        }
+        res.json({ message: 'Notes updated successfully', lockedAccount });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.updateLockedAccountNotes = updateLockedAccountNotes;
+// ==================== HELPER FUNCTIONS ====================
+// Create LockedAccount records for existing locked users (backfill/migration)
+const backfillLockedAccounts = async (req, res) => {
+    try {
+        const lockedUsers = await User_1.default.find({ activationStatus: 'locked' });
+        let created = 0;
+        let skipped = 0;
+        for (const user of lockedUsers) {
+            const existingRecord = await LockedAccount_1.default.findOne({ userId: user._id, unlocked: false });
+            if (!existingRecord) {
+                const activeCount = user.networkReferrals.filter((r) => r.status === 'unlocked' || r.status === 'locked').length;
+                const lockedRecord = new LockedAccount_1.default({
+                    userId: user._id,
+                    username: user.username,
+                    email: user.email,
+                    phone: user.phone,
+                    city: user.city,
+                    referralCount: activeCount,
+                    requiredReferrals: 11,
+                    totalNetworkSize: user.totalNetworkSize,
+                    referredBy: user.referredBy,
+                    reasonLocked: 'Failed to reach 11 referrals within 2 hours',
+                    timerEndTime: user.timerEndTime,
+                    lockedAt: user.updatedAt
+                });
+                await lockedRecord.save();
+                created += 1;
+            }
+            else {
+                skipped += 1;
+            }
+        }
+        res.json({
+            message: 'Backfill complete',
+            created,
+            skipped,
+            total: lockedUsers.length
+        });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.backfillLockedAccounts = backfillLockedAccounts;
+// Create a test/sample locked account (for demo/testing purposes)
+const createTestLockedAccount = async (req, res) => {
+    try {
+        // Find a locked user from User collection
+        const lockedUser = await User_1.default.findOne({ activationStatus: 'locked' });
+        if (!lockedUser) {
+            return res.status(400).json({
+                error: 'No locked users found. Please lock a user first.'
+            });
+        }
+        // Check if record already exists
+        const existingRecord = await LockedAccount_1.default.findOne({
+            userId: lockedUser._id,
+            unlocked: false
+        });
+        if (existingRecord) {
+            return res.status(400).json({
+                error: 'LockedAccount record already exists for this user'
+            });
+        }
+        const activeCount = lockedUser.networkReferrals.filter((r) => r.status === 'unlocked').length;
+        const testRecord = new LockedAccount_1.default({
+            userId: lockedUser._id,
+            username: lockedUser.username,
+            email: lockedUser.email,
+            phone: lockedUser.phone,
+            city: lockedUser.city,
+            referralCount: activeCount,
+            requiredReferrals: 11,
+            totalNetworkSize: lockedUser.totalNetworkSize,
+            referredBy: lockedUser.referredBy || 'Direct',
+            reasonLocked: 'Failed to reach 11 referrals within 2 hours',
+            timerEndTime: lockedUser.timerEndTime,
+            lockedAt: new Date()
+        });
+        await testRecord.save();
+        res.json({
+            message: 'Test locked account record created successfully',
+            record: testRecord
+        });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.createTestLockedAccount = createTestLockedAccount;
+// ==================== TASK SUBMISSION MANAGEMENT ====================
+// Approve a task submission
+const approveTaskSubmission = async (req, res) => {
+    try {
+        const { submissionId } = req.body;
+        const submission = await UserTask_1.default.findByIdAndUpdate(submissionId, {
+            status: 'approved',
+            reviewedAt: new Date(),
+            reviewedBy: 'admin'
+        }, { new: true }).populate('user').populate('task');
+        if (!submission) {
+            return res.status(404).json({ error: 'Task submission not found' });
+        }
+        // Update user's balance with task reward
+        if (submission.task && submission.task.reward) {
+            await User_1.default.findByIdAndUpdate(submission.user._id, {
+                $inc: { balance: submission.task.reward }
+            });
+        }
+        res.json({ message: 'Task submission approved successfully', submission });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.approveTaskSubmission = approveTaskSubmission;
+// Reject a task submission
+const rejectTaskSubmission = async (req, res) => {
+    try {
+        const { submissionId } = req.body;
+        const submission = await UserTask_1.default.findByIdAndUpdate(submissionId, {
+            status: 'rejected',
+            reviewedAt: new Date(),
+            reviewedBy: 'admin'
+        }, { new: true }).populate('user').populate('task');
+        if (!submission) {
+            return res.status(404).json({ error: 'Task submission not found' });
+        }
+        res.json({ message: 'Task submission rejected successfully', submission });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.rejectTaskSubmission = rejectTaskSubmission;

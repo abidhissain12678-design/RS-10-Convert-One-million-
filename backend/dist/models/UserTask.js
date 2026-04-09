@@ -34,17 +34,16 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const PaymentSchema = new mongoose_1.Schema({
+const UserTaskSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
-    username: { type: String, required: true },
-    email: { type: String, required: true },
-    transactionId: { type: String, required: true },
-    screenshotUrl: { type: String },
-    amountType: { type: Number, required: true },
-    withdrawMethod: { type: String },
-    withdrawAccount: { type: String },
-    accountHolderName: { type: String },
-    status: { type: String, required: true, default: 'Pending', enum: ['Pending', 'Approved', 'Rejected'] },
-    type: { type: String, required: true, enum: ['Activation', '1st Chance', '2nd Chance', 'Withdraw', 'Task Withdraw'] },
-}, { timestamps: true });
-exports.default = mongoose_1.default.models.Payment || mongoose_1.default.model('Payment', PaymentSchema);
+    taskId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Task', required: true },
+    proofSubmitted: { type: Boolean, default: false },
+    proofUrls: [{ type: String }],
+    completed: { type: Boolean, default: false },
+    status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
+    reviewedBy: { type: String, default: '' },
+    reviewedAt: { type: Date }
+}, {
+    timestamps: true
+});
+exports.default = mongoose_1.default.models.UserTask || mongoose_1.default.model('UserTask', UserTaskSchema);

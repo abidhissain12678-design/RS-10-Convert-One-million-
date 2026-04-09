@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const multer_1 = __importDefault(require("multer"));
 const paymentController_1 = require("../controllers/paymentController");
 const adminController_1 = require("../controllers/adminController");
+const taskController_1 = require("../controllers/taskController");
 const authmiddleware_1 = require("../middleware/authmiddleware");
 const User_1 = __importDefault(require("../models/User"));
 const upload = (0, multer_1.default)({ dest: 'uploads/' });
@@ -15,9 +16,10 @@ const router = express_1.default.Router();
 router.get('/pending-payments', authmiddleware_1.authMiddleware, paymentController_1.getPendingPayments);
 router.get('/all-payments', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, paymentController_1.getAllPayments);
 router.post('/approve-payment', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, paymentController_1.approvePayment);
-router.post('/reject-payment', authmiddleware_1.authMiddleware, paymentController_1.rejectPayment);
+router.post('/reject-payment', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, paymentController_1.rejectPayment);
 router.post('/approve-chance', authmiddleware_1.authMiddleware, adminController_1.approveChance);
 router.post('/approve-activation', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.approveActivation);
+router.post('/create-task', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.createTask);
 router.get('/users', authmiddleware_1.authMiddleware, async (req, res) => {
     try {
         const users = await User_1.default.find();
@@ -64,4 +66,16 @@ router.get('/all-users', authmiddleware_1.authMiddleware, authmiddleware_1.admin
 router.put('/update-user', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.updateUser);
 router.put('/ban-user', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.banUser);
 router.put('/unban-user', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.unbanUser);
+// ==================== LOCKED ACCOUNTS TABLE ROUTES ====================
+router.get('/locked-accounts', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.getAllLockedAccounts);
+router.post('/create-locked-account', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.createLockedAccountRecord);
+router.post('/give-second-chance-locked', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.giveSecondChanceToLockedAccount);
+router.post('/unlock-locked-account', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.unlockLockedAccount);
+router.post('/update-locked-account-notes', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.updateLockedAccountNotes);
+router.post('/backfill-locked-accounts', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.backfillLockedAccounts);
+router.post('/create-test-locked-account', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.createTestLockedAccount);
+// ==================== TASK SUBMISSION ROUTES ====================
+router.get('/task-submissions', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, taskController_1.getUserTaskSubmissions);
+router.post('/approve-task-submission', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.approveTaskSubmission);
+router.post('/reject-task-submission', authmiddleware_1.authMiddleware, authmiddleware_1.adminMiddleware, adminController_1.rejectTaskSubmission);
 exports.default = router;

@@ -1,7 +1,8 @@
 import express from 'express';
 import multer from 'multer';
 import { getPendingPayments, approvePayment, rejectPayment, getAllPayments, requestActivation } from '../controllers/paymentController';
-import { getSettings, updateSettings, postNews, getNews, getNotificationsHistory, sendNotification, buyChance, approveChance, approveActivation, getLockedUsers, unlockUser, lockUser, expireOverdueUsers, getAllUsers, updateUser, banUser, unbanUser, getAllLockedAccounts, createLockedAccountRecord, giveSecondChanceToLockedAccount, unlockLockedAccount, updateLockedAccountNotes, backfillLockedAccounts, createTestLockedAccount } from '../controllers/adminController';
+import { getSettings, updateSettings, postNews, getNews, getNotificationsHistory, sendNotification, buyChance, approveChance, approveActivation, getLockedUsers, unlockUser, lockUser, expireOverdueUsers, getAllUsers, updateUser, banUser, unbanUser, getAllLockedAccounts, createLockedAccountRecord, giveSecondChanceToLockedAccount, unlockLockedAccount, updateLockedAccountNotes, backfillLockedAccounts, createTestLockedAccount, createTask, approveTaskSubmission, rejectTaskSubmission } from '../controllers/adminController';
+import { getUserTaskSubmissions } from '../controllers/taskController';
 import { authMiddleware, adminMiddleware }  from '../middleware/authmiddleware';
 import User from '../models/User';
 
@@ -16,6 +17,7 @@ router.post('/approve-payment', authMiddleware, adminMiddleware, approvePayment)
 router.post('/reject-payment', authMiddleware, adminMiddleware, rejectPayment);
 router.post('/approve-chance', authMiddleware, approveChance);
 router.post('/approve-activation', authMiddleware, adminMiddleware, approveActivation);
+router.post('/create-task', authMiddleware, adminMiddleware, createTask);
 router.get('/users', authMiddleware, async (req, res) => {
   try {
     const users = await User.find();
@@ -73,5 +75,10 @@ router.post('/unlock-locked-account', authMiddleware, adminMiddleware, unlockLoc
 router.post('/update-locked-account-notes', authMiddleware, adminMiddleware, updateLockedAccountNotes);
 router.post('/backfill-locked-accounts', authMiddleware, adminMiddleware, backfillLockedAccounts);
 router.post('/create-test-locked-account', authMiddleware, adminMiddleware, createTestLockedAccount);
+
+// ==================== TASK SUBMISSION ROUTES ====================
+router.get('/task-submissions', authMiddleware, adminMiddleware, getUserTaskSubmissions);
+router.post('/approve-task-submission', authMiddleware, adminMiddleware, approveTaskSubmission);
+router.post('/reject-task-submission', authMiddleware, adminMiddleware, rejectTaskSubmission);
 
 export default router;

@@ -34,17 +34,23 @@ var __importStar = (this && this.__importStar) || (function () {
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const PaymentSchema = new mongoose_1.Schema({
+const LockedAccountSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true },
     username: { type: String, required: true },
     email: { type: String, required: true },
-    transactionId: { type: String, required: true },
-    screenshotUrl: { type: String },
-    amountType: { type: Number, required: true },
-    withdrawMethod: { type: String },
-    withdrawAccount: { type: String },
-    accountHolderName: { type: String },
-    status: { type: String, required: true, default: 'Pending', enum: ['Pending', 'Approved', 'Rejected'] },
-    type: { type: String, required: true, enum: ['Activation', '1st Chance', '2nd Chance', 'Withdraw', 'Task Withdraw'] },
+    phone: { type: String, required: true },
+    city: { type: String, required: true },
+    referralCount: { type: Number, required: true },
+    requiredReferrals: { type: Number, default: 11 },
+    totalNetworkSize: { type: Number, required: true },
+    referredBy: { type: String },
+    reasonLocked: { type: String, default: 'Failed to reach 11 referrals within 2 hours' },
+    timerEndTime: { type: Date },
+    lockedAt: { type: Date, default: Date.now },
+    secondChanceGiven: { type: Boolean, default: false },
+    secondChanceDate: { type: Date },
+    notes: { type: String },
+    unlocked: { type: Boolean, default: false },
+    unlockedAt: { type: Date },
 }, { timestamps: true });
-exports.default = mongoose_1.default.models.Payment || mongoose_1.default.model('Payment', PaymentSchema);
+exports.default = mongoose_1.default.models.LockedAccount || mongoose_1.default.model('LockedAccount', LockedAccountSchema);
