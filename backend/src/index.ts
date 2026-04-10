@@ -28,7 +28,7 @@ if (!fs.existsSync('uploads')) {
 }
 
 // Ye sab se zaroori line hai connection ke liye
-const allowedOrigins = ['http://localhost:3000'];
+const allowedOrigins = ['http://localhost:3000', 'https://rs-10-convert-one-million.vercel.app'];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.options('*', cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
