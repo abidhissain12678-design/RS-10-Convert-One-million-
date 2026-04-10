@@ -30,10 +30,13 @@ const authMiddleware = (req, res, next) => {
 };
 exports.authMiddleware = authMiddleware;
 const adminMiddleware = (req, res, next) => {
+    console.log('[adminMiddleware] Checking admin access for user:', req.user?.id, 'isAdmin:', req.user?.isAdmin);
     if (req.user && req.user.isAdmin) {
+        console.log('[adminMiddleware] Admin access granted for user:', req.user.id);
         next();
     }
     else {
+        console.log('[adminMiddleware] Admin access DENIED for user:', req.user?.id);
         res.status(403).json({ error: 'Admin access required.' });
     }
 };

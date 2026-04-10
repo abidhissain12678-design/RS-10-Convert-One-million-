@@ -180,34 +180,43 @@ const CustomizeTasks: React.FC = () => {
       
       const method = editingTask ? 'PUT' : 'POST';
       
+      const payload = {
+        taskType,
+        title,
+        description,
+        link,
+        reward,
+        totalQuantity,
+        active,
+        requiresProof,
+        imageUrl: imagePreview || imageUrl
+      };
+      
+      console.log('Submitting task:', { url, method, payload });
+      
       const response = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({
-          taskType,
-          title,
-          description,
-          link,
-          reward,
-          totalQuantity,
-          active,
-          requiresProof,
-          imageUrl: imagePreview || imageUrl
-        })
+        body: JSON.stringify(payload)
       });
+      
+      console.log('Response status:', response.status);
       const result = await response.json();
+      console.log('Response data:', result);
+      
       if (!response.ok) {
-        setMessage(result.error || 'Failed to save task.');
+        setMessage(result.error || result.message || 'Failed to save task.');
       } else {
         setMessage(editingTask ? 'Task updated successfully.' : 'Task saved successfully.');
         resetForm();
         loadTasks();
       }
-    } catch (error) {
-      setMessage('An error occurred while saving the task.');
+    } catch (error: any) {
+      console.error('Task submission error:', error);
+      setMessage(error.message || 'An error occurred while saving the task.');
     } finally {
       setLoading(false);
     }
