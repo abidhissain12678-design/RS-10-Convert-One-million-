@@ -139,28 +139,41 @@ const getAllTasks = async (req, res) => {
 exports.getAllTasks = getAllTasks;
 const updateTask = async (req, res) => {
     try {
-        const { taskId } = req.params;
+        const taskId = req.params.taskId;
         const updates = req.body;
-        const task = await Task_1.default.findByIdAndUpdate(taskId, updates, { new: true });
+        if (!taskId) {
+            return res.status(400).json({ error: 'Task ID is required' });
+        }
+        console.log('updateTask called with taskId:', taskId, 'updates:', updates);
+        const task = await Task_1.default.findByIdAndUpdate(taskId, updates, { new: true, runValidators: true });
         if (!task) {
             return res.status(404).json({ error: 'Task not found' });
         }
         res.status(200).json({ message: 'Task updated successfully', task });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error('updateTask error:', error);
+        res.status(500).json({ error: error.message || 'Failed to update task' });
     }
 };
 exports.updateTask = updateTask;
 const deleteTask = async (req, res) => {
     try {
-        const { taskId } = req.params;
-        await Task_1.default.findByIdAndDelete(taskId);
+        const taskId = req.params.taskId;
+        if (!taskId) {
+            return res.status(400).json({ error: 'Task ID is required' });
+        }
+        console.log('deleteTask called with taskId:', taskId);
+        const deletedTask = await Task_1.default.findByIdAndDelete(taskId);
+        if (!deletedTask) {
+            return res.status(404).json({ error: 'Task not found' });
+        }
         await UserTask_1.default.deleteMany({ taskId });
         res.status(200).json({ message: 'Task deleted successfully' });
     }
     catch (error) {
-        res.status(500).json({ message: 'Server error' });
+        console.error('deleteTask error:', error);
+        res.status(500).json({ error: error.message || 'Failed to delete task' });
     }
 };
 exports.deleteTask = deleteTask;
