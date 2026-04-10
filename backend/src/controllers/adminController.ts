@@ -114,8 +114,11 @@ export const sendNotification = async (req: Request, res: Response) => {
 export const createTask = async (req: Request, res: Response) => {
   try {
     const { taskType, title, description, link, reward, totalQuantity, active, imageUrl, requiresProof } = req.body;
-    if (!taskType || !title || !description || !link || !reward || !totalQuantity) {
-      return res.status(400).json({ error: 'Missing required task fields' });
+    
+    console.log('createTask called with data:', { taskType, title, description, link, reward, totalQuantity });
+    
+    if (!taskType || !title || !description || !link || !reward || totalQuantity === undefined || totalQuantity === null) {
+      return res.status(400).json({ error: 'Missing required task fields: taskType, title, description, link, reward, totalQuantity' });
     }
 
     const task = new Task({
@@ -132,6 +135,7 @@ export const createTask = async (req: Request, res: Response) => {
     });
 
     await task.save();
+    console.log('Task created successfully:', task._id);
     res.json({ message: 'Task created successfully', task });
   } catch (error: any) {
     console.error('Error creating task:', error);

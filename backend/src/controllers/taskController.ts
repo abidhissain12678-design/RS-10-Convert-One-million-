@@ -156,30 +156,48 @@ export const getAllTasks = async (req: Request, res: Response) => {
 
 export const updateTask = async (req: Request, res: Response) => {
   try {
-    const { taskId } = req.params;
+    const taskId = req.params.taskId;
     const updates = req.body;
     
-    const task = await Task.findByIdAndUpdate(taskId, updates, { new: true });
+    if (!taskId) {
+      return res.status(400).json({ error: 'Task ID is required' });
+    }
+    
+    console.log('updateTask called with taskId:', taskId, 'updates:', updates);
+    
+    const task = await Task.findByIdAndUpdate(taskId, updates, { new: true, runValidators: true });
     if (!task) {
       return res.status(404).json({ error: 'Task not found' });
     }
     
     res.status(200).json({ message: 'Task updated successfully', task });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+  } catch (error: any) {
+    console.error('updateTask error:', error);
+    res.status(500).json({ error: error.message || 'Failed to update task' });
   }
 };
 
 export const deleteTask = async (req: Request, res: Response) => {
   try {
-    const { taskId } = req.params;
+    const taskId = req.params.taskId;
     
-    await Task.findByIdAndDelete(taskId);
+    if (!taskId) {
+      return res.status(400).json({ error: 'Task ID is required' });
+    }
+    
+    console.log('deleteTask called with taskId:', taskId);
+    
+    const deletedTask = await Task.findByIdAndDelete(taskId);
+    if (!deletedTask) {
+      return res.status(404).json({ error: 'Task not found' });
+    }
+    
     await UserTask.deleteMany({ taskId });
     
     res.status(200).json({ message: 'Task deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+  } catch (error: any) {
+    console.error('deleteTask error:', error);
+    res.status(500).json({ error: error.message || 'Failed to delete task' });
   }
 };
 
