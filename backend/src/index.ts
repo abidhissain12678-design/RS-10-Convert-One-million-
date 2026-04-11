@@ -28,9 +28,41 @@ if (!fs.existsSync('uploads')) {
 }
 
 // Ye sab se zaroori line hai connection ke liye
-const allowedOrigins = ['http://localhost:3000', 'https://rs-10-convert-one-million.vercel.app'];
-app.use(cors({ origin: allowedOrigins, credentials: true }));
-app.options('*', cors({ origin: allowedOrigins, credentials: true }));
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://127.0.0.1:3000',
+  'https://rs-10-convert-one-million.vercel.app',
+  'https://rs-10-convert-one-million.onrender.com'
+];
+
+// CORS configuration with flexible origin checking
+const corsOptions = {
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    // Check if origin is in whitelist
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    // Allow localhost origins in development
+    if (process.env.NODE_ENV !== 'production' && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+      return callback(null, true);
+    }
+    
+    callback(new Error('CORS not allowed'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 

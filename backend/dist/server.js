@@ -13,27 +13,35 @@ const app = (0, express_1.default)(); // 👈 YE LINE MUST HONA CHAHIYE (top par
 // ✅ Step 1: allowed origins define karo
 const allowedOrigins = [
     "http://localhost:3000",
-    "https://rs-10-convert-one-million.vercel.app"
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "https://rs-10-convert-one-million.vercel.app",
+    "https://rs-10-convert-one-million.onrender.com"
 ];
-// ✅ Step 2: CORS middleware
-app.use((0, cors_1.default)({
+// ✅ Step 2: CORS middleware with flexible origin checking
+const corsOptions = {
     origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
+        // Allow requests with no origin (mobile apps, curl requests)
+        if (!origin) {
+            return callback(null, true);
         }
-        else {
-            callback(new Error("CORS not allowed"));
+        // Check if origin is in whitelist
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
         }
+        // Allow localhost origins in development
+        if (process.env.NODE_ENV !== 'production' && (origin.includes('localhost') || origin.includes('127.0.0.1'))) {
+            return callback(null, true);
+        }
+        callback(new Error("CORS not allowed"));
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD'],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+app.use((0, cors_1.default)(corsOptions));
 // ✅ Step 3: OPTIONS fix (IMPORTANT)
-app.options('*', (0, cors_1.default)({
-    origin: allowedOrigins,
-    credentials: true
-}));
+app.options('*', (0, cors_1.default)(corsOptions));
 // ✅ Step 4: body parser
 app.use(express_1.default.json({ limit: '50mb' }));
 app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));

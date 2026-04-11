@@ -138,8 +138,14 @@ const createTask = async (req, res) => {
             imageUrl: imageUrl || '',
             requiresProof: requiresProof ?? true
         });
+        console.log('📤 BEFORE saving Task:', {
+            title
+        });
         await task.save();
-        console.log('Task created successfully:', task._id);
+        console.log('✅ Task created successfully:', {
+            id: task._id,
+            title: task.title
+        });
         res.json({ message: 'Task created successfully', task });
     }
     catch (error) {

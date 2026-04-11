@@ -12,13 +12,19 @@ const cloudinary_1 = require("../utils/cloudinary");
 const upload = (0, multer_1.default)({ storage: cloudinary_1.storage });
 const getActiveTasks = async (req, res) => {
     try {
+        console.log('🔍 getActiveTasks - Querying database');
         const tasks = await Task_1.default.find({
             active: true,
             $expr: { $lt: ['$completedQuantity', '$totalQuantity'] }
         }).select('+completedBy');
+        console.log('📋 getActiveTasks - Query result:', {
+            count: tasks.length,
+            tasks: tasks.map(t => ({ id: t._id, title: t.title, completed: t.completedQuantity, total: t.totalQuantity }))
+        });
         res.status(200).json(tasks);
     }
     catch (error) {
+        console.error('getActiveTasks error:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
@@ -57,11 +63,24 @@ exports.submitProof = [
             userTask.proofUrls = proofUrls;
             userTask.status = 'Pending';
             userTask.completed = false;
-            await userTask.save();
+            console.log('📤 BEFORE saving UserTask:', {
+                userId,
+                taskId,
+                proofCount: proofUrls.length
+            });
+            const savedUserTask = await userTask.save();
+            console.log('✅ UserTask SAVED successfully:', {
+                id: savedUserTask._id,
+                status: savedUserTask.status
+            });
             // Add user to completedBy array to prevent further submissions
             task.completedBy.push(userId);
-            await task.save();
-            console.log('UserTask saved:', userTask._id, 'User added to completedBy');
+            const savedTask = await task.save();
+            console.log('✅ Task UPDATED successfully:', {
+                id: savedTask._id,
+                completedQuantity: savedTask.completedQuantity,
+                completedBy: savedTask.completedBy.length
+            });
             res.status(200).json({ message: 'Proof submitted successfully' });
         }
         catch (error) {
@@ -179,11 +198,15 @@ const deleteTask = async (req, res) => {
 exports.deleteTask = deleteTask;
 const getUserTaskSubmissions = async (req, res) => {
     try {
+        console.log('🔍 getUserTaskSubmissions - Querying database');
         const userTasks = await UserTask_1.default.find({ proofSubmitted: true })
             .populate('userId', 'name username email')
             .populate('taskId', 'title taskType reward')
             .sort({ updatedAt: -1 });
-        console.log('getUserTaskSubmissions found:', userTasks.length, 'submissions');
+        console.log('📋 getUserTaskSubmissions - Query result:', {
+            count: userTasks.length,
+            submissions: userTasks.map(ut => ({ id: ut._id, userId: ut.userId, taskId: ut.taskId }))
+        });
         res.status(200).json(userTasks);
     }
     catch (error) {

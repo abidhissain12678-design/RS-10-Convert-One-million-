@@ -134,6 +134,10 @@ export const createTask = async (req: Request, res: Response) => {
       requiresProof: requiresProof ?? true
     });
 
+    console.log('📤 BEFORE saving Task:', {
+      title
+    });
+
     await task.save();
     console.log('✅ Task created successfully:', {
       id: task._id,
