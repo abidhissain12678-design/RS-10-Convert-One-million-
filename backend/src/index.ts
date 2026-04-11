@@ -46,11 +46,18 @@ const mongoUri = process.env.MONGO_URI ||
     ? (() => { throw new Error('MONGO_URI environment variable is required for production'); })()
     : 'mongodb://127.0.0.1:27017/chain10challenge');
 
-console.log('🔄 Connecting to MongoDB:', mongoUri.substring(0, 50) + '...');
+// Log connection details (hide password)
+const displayUri = mongoUri.includes('mongodb+srv') 
+  ? mongoUri.replace(/:[^@]*@/, ':****@') 
+  : mongoUri;
+console.log('🔄 Connecting to MongoDB:', displayUri);
+console.log('📍 Environment:', process.env.NODE_ENV || 'development');
+console.log('⏰ Connection time:', new Date().toISOString());
 
 mongoose.connect(mongoUri)
   .then(() => {
-    console.log('✅ MongoDB connected');
+    console.log('✅ MongoDB connected successfully');
+    console.log('📊 Connected to database:', mongoose.connection.db?.databaseName || 'unknown');
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
 
     // Periodic background enforcement: lock overdue accounts every minute.
