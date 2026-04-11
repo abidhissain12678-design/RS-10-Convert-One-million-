@@ -134,8 +134,19 @@ export const createTask = async (req: Request, res: Response) => {
       requiresProof: requiresProof ?? true
     });
 
+    console.log('📤 BEFORE saving Task:', {
+      title,
+      mongooseConnectionState: Task.db?.getName(),
+      mongooseHost: Task.db?.getClient()?.topology?.description?.servers?.[0]?.address
+    });
+
     await task.save();
-    console.log('Task created successfully:', task._id);
+    console.log('✅ Task created successfully:', {
+      id: task._id,
+      title: task.title,
+      database: Task.db?.getName(),
+      mongooseConnectionState: Task.db?.getName()
+    });
     res.json({ message: 'Task created successfully', task });
   } catch (error: any) {
     console.error('Error creating task:', error);

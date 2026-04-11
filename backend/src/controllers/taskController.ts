@@ -9,12 +9,25 @@ const upload = multer({ storage });
 
 export const getActiveTasks = async (req: Request, res: Response) => {
   try {
+    console.log('🔍 getActiveTasks - Querying database:', {
+      mongooseConnectionState: Task.db?.getName(),
+      mongooseHost: Task.db?.getClient()?.topology?.description?.servers?.[0]?.address
+    });
+
     const tasks = await Task.find({
       active: true,
       $expr: { $lt: ['$completedQuantity', '$totalQuantity'] }
     }).select('+completedBy');
+
+    console.log('📋 getActiveTasks - Query result:', {
+      count: tasks.length,
+      database: Task.db?.getName(),
+      tasks: tasks.map(t => ({ id: t._id, title: t.title, completed: t.completedQuantity, total: t.totalQuantity }))
+    });
+
     res.status(200).json(tasks);
   } catch (error) {
+    console.error('getActiveTasks error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -62,13 +75,31 @@ export const submitProof = [
       userTask.proofUrls = proofUrls;
       userTask.status = 'Pending';
       userTask.completed = false;
-      await userTask.save();
+      
+      console.log('📤 BEFORE saving UserTask:', {
+        userId,
+        taskId,
+        proofCount: proofUrls.length,
+        mongooseConnectionState: UserTask.db?.getName(),
+        mongooseHost: UserTask.db?.getClient()?.topology?.description?.servers?.[0]?.address
+      });
+
+      const savedUserTask = await userTask.save();
+      console.log('✅ UserTask SAVED successfully:', {
+        id: savedUserTask._id,
+        status: savedUserTask.status,
+        database: UserTask.db?.getName()
+      });
 
       // Add user to completedBy array to prevent further submissions
       task.completedBy.push(userId);
-      await task.save();
-
-      console.log('UserTask saved:', userTask._id, 'User added to completedBy');
+      const savedTask = await task.save();
+      console.log('✅ Task UPDATED successfully:', {
+        id: savedTask._id,
+        completedQuantity: savedTask.completedQuantity,
+        completedBy: savedTask.completedBy.length,
+        database: Task.db?.getName()
+      });
 
       res.status(200).json({ message: 'Proof submitted successfully' });
     } catch (error) {
@@ -203,12 +234,21 @@ export const deleteTask = async (req: Request, res: Response) => {
 
 export const getUserTaskSubmissions = async (req: Request, res: Response) => {
   try {
+    console.log('🔍 getUserTaskSubmissions - Querying database:', {
+      mongooseConnectionState: UserTask.db?.getName(),
+      mongooseHost: UserTask.db?.getClient()?.topology?.description?.servers?.[0]?.address
+    });
+
     const userTasks = await UserTask.find({ proofSubmitted: true })
       .populate('userId', 'name username email')
       .populate('taskId', 'title taskType reward')
       .sort({ updatedAt: -1 });
     
-    console.log('getUserTaskSubmissions found:', userTasks.length, 'submissions');
+    console.log('📋 getUserTaskSubmissions - Query result:', {
+      count: userTasks.length,
+      database: UserTask.db?.getName(),
+      submissions: userTasks.map(ut => ({ id: ut._id, userId: ut.userId, taskId: ut.taskId }))
+    });
     
     res.status(200).json(userTasks);
   } catch (error) {
