@@ -9,6 +9,8 @@ const upload = multer({ storage });
 
 export const getActiveTasks = async (req: Request, res: Response) => {
   try {
+    console.log('🔍 getActiveTasks - Querying database');
+
     const tasks = await Task.find({
       active: true,
       $expr: { $lt: ['$completedQuantity', '$totalQuantity'] }
@@ -70,6 +72,12 @@ export const submitProof = [
       userTask.status = 'Pending';
       userTask.completed = false;
       
+      console.log('📤 BEFORE saving UserTask:', {
+        userId,
+        taskId,
+        proofCount: proofUrls.length
+      });
+
       const savedUserTask = await userTask.save();
       console.log('✅ UserTask SAVED successfully:', {
         id: savedUserTask._id,
@@ -218,6 +226,8 @@ export const deleteTask = async (req: Request, res: Response) => {
 
 export const getUserTaskSubmissions = async (req: Request, res: Response) => {
   try {
+    console.log('🔍 getUserTaskSubmissions - Querying database');
+
     const userTasks = await UserTask.find({ proofSubmitted: true })
       .populate('userId', 'name username email')
       .populate('taskId', 'title taskType reward')

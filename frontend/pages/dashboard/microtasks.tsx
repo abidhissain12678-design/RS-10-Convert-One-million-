@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { getApiBaseUrl } from '../../utils/api';
 
 interface Task {
   _id: string;
@@ -60,9 +61,7 @@ const MicroTasks: React.FC = () => {
     if (!token) return;
 
     try {
-      const baseUrl = typeof window !== 'undefined' && process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
+      const baseUrl = getApiBaseUrl();
       const response = await fetch(`${baseUrl}/api/tasks/user/earnings`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -84,9 +83,7 @@ const MicroTasks: React.FC = () => {
     if (!token) return;
 
     try {
-      const baseUrl = typeof window !== 'undefined' && process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
+      const baseUrl = getApiBaseUrl();
       const response = await fetch(`${baseUrl}/api/tasks/user/submissions`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -124,9 +121,7 @@ const MicroTasks: React.FC = () => {
           }
         }
 
-        const baseUrl = typeof window !== 'undefined' && process.env.NODE_ENV === 'production'
-          ? 'https://rs-10-convert-one-million.onrender.com'
-          : 'http://localhost:5000';
+        const baseUrl = getApiBaseUrl();
         const response = await fetch(`${baseUrl}/api/tasks/active`, {
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -382,9 +377,7 @@ const MicroTasks: React.FC = () => {
     });
 
     try {
-      const baseUrl = typeof window !== 'undefined' && process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
+      const baseUrl = getApiBaseUrl();
       const response = await fetch(`${baseUrl}/api/tasks/submit-proof`, {
         method: 'POST',
         headers: {
@@ -419,9 +412,7 @@ const MicroTasks: React.FC = () => {
     const token = localStorage.getItem('token');
 
     try {
-      const baseUrl = typeof window !== 'undefined' && process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
+      const baseUrl = getApiBaseUrl();
       const response = await fetch(`${baseUrl}/api/tasks/claim-reward`, {
         method: 'POST',
         headers: {
@@ -486,9 +477,7 @@ const MicroTasks: React.FC = () => {
     const token = localStorage.getItem('token');
 
     try {
-      const baseUrl = typeof window !== 'undefined' && process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
+      const baseUrl = getApiBaseUrl();
       
       const response = await fetch(`${baseUrl}/api/payment/request-task-withdrawal`, {
         method: 'POST',

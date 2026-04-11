@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../../utils/api';
 
 interface Task {
   _id: string;
@@ -50,9 +51,7 @@ const CustomizeTasks: React.FC = () => {
     }
 
     try {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
+      const baseUrl = getApiBaseUrl();
       
       const response = await fetch(`${baseUrl}/api/tasks/all`, {
         headers: {
@@ -100,9 +99,7 @@ const CustomizeTasks: React.FC = () => {
     if (!token) return;
 
     try {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
+      const baseUrl = getApiBaseUrl();
       
       const response = await fetch(`${baseUrl}/api/tasks/${taskId}`, {
         method: 'DELETE',
@@ -170,9 +167,7 @@ const CustomizeTasks: React.FC = () => {
 
     setLoading(true);
     try {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
+      const baseUrl = getApiBaseUrl();
       
       const url = editingTask 
         ? `${baseUrl}/api/tasks/${editingTask._id}`
