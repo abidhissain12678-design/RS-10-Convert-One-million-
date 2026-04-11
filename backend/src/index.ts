@@ -40,7 +40,15 @@ app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tasks', taskRoutes);
 
-mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/chain10challenge')
+// Get MongoDB URI - use local for development, require MONGO_URI for production
+const mongoUri = process.env.MONGO_URI || 
+  (process.env.NODE_ENV === 'production' 
+    ? (() => { throw new Error('MONGO_URI environment variable is required for production'); })()
+    : 'mongodb://127.0.0.1:27017/chain10challenge');
+
+console.log('🔄 Connecting to MongoDB:', mongoUri.substring(0, 50) + '...');
+
+mongoose.connect(mongoUri)
   .then(() => {
     console.log('✅ MongoDB connected');
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
