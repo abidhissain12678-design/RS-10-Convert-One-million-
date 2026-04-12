@@ -56,6 +56,7 @@ const MicroTasks: React.FC = () => {
   const [videoPlaying, setVideoPlaying] = useState(false);
   const [videoId, setVideoId] = useState<string | null>(null);
   const youtubeApiLoadedRef = useRef(false);
+  const videoStartTimeRef = useRef<number>(0);
 
   const fetchTaskEarnings = async () => {
     const token = localStorage.getItem('token');
@@ -274,10 +275,32 @@ const MicroTasks: React.FC = () => {
         },
         events: {
           'onReady': (event: any) => {
-            console.log('YouTube player ready');
+            console.log('🎬 YouTube player ready - Full video watching required');
             setVideoError(null);
+            videoStartTimeRef.current = 0;
+            
+            // Prevent seeking by resetting position if user tries to skip
+            const preventSeeking = setInterval(() => {
+              if (playerRef.current && event.target === playerRef.current) {
+                const currentTime = event.target.getCurrentTime();
+                const duration = event.target.getDuration();
+                
+                // Allow seeking forward only a few seconds, not backward or too far ahead
+                // If user tries to skip more than 10 seconds ahead, reset to start
+                if (currentTime > 10 && !videoPlaying) {
+                  console.warn('⚠️ Skipping detected - resetting video to beginning');
+                  event.target.seekTo(0, true);
+                  setVideoPlaying(false);
+                }
+              }
+            }, 500);
+            
+            // Store interval ID for cleanup
+            (playerRef as any).seekPreventionInterval = preventSeeking;
+            
             try {
               event.target.playVideo();
+              setVideoPlaying(true);
             } catch (playError) {
               console.warn('Auto-play blocked, waiting for user interaction', playError);
             }
@@ -316,9 +339,25 @@ const MicroTasks: React.FC = () => {
   const onPlayerStateChange = (event: YTOnStateChangeEvent) => {
     try {
       if (event.data === window.YT.PlayerState.ENDED) {
+        console.log('✅ Video completed - Full video watched');
         setVideoEnded(true);
         setVideoPlaying(false);
       } else if (event.data === window.YT.PlayerState.PLAYING) {
+        const player = playerRef.current || (event as any).target;
+        if (player) {
+          const currentTime = player.getCurrentTime();
+          const duration = player.getDuration();
+          console.log(`▶️ Video playing - ${currentTime.toFixed(1)}s / ${duration.toFixed(1)}s`);
+          
+          // If video is playing but not from the beginning, it means user tried to skip
+          if (currentTime > 5 && videoStartTimeRef.current === 0) {
+            console.warn('⚠️ Attempted to skip video - resetting to beginning');
+            player.seekTo(0, true);
+            return;
+          }
+          
+          videoStartTimeRef.current = currentTime;
+        }
         setVideoEnded(false);
         setVideoPlaying(true);
       } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.BUFFERING) {
@@ -333,6 +372,10 @@ const MicroTasks: React.FC = () => {
   useEffect(() => {
     if (!showModal && playerRef.current) {
       try {
+        // Clear seeking prevention interval
+        if ((playerRef as any).seekPreventionInterval) {
+          clearInterval((playerRef as any).seekPreventionInterval);
+        }
         playerRef.current.destroy();
       } catch (error) {
         console.warn('Error destroying YouTube player on modal close:', error);
