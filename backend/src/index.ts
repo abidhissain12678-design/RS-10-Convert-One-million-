@@ -3,11 +3,15 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import dns from 'dns';
 import authRoutes from './routes/authRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import adminRoutes from './routes/adminRoutes';
 import taskRoutes from './routes/taskRoutes';
 import { expireOverdueUsersInternal } from './controllers/adminController';
+
+// ✅ Configure DNS for MongoDB Atlas connection
+dns.setServers(['1.1.1.1', '8.8.8.8']);
 
 dotenv.config();
 

@@ -8,11 +8,14 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const fs_1 = __importDefault(require("fs"));
+const dns_1 = __importDefault(require("dns"));
 const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const paymentRoutes_1 = __importDefault(require("./routes/paymentRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
 const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
 const adminController_1 = require("./controllers/adminController");
+// ✅ Configure DNS for MongoDB Atlas connection
+dns_1.default.setServers(['1.1.1.1', '8.8.8.8']);
 dotenv_1.default.config();
 // Set consistent JWT_SECRET if not in environment
 if (!process.env.JWT_SECRET) {
