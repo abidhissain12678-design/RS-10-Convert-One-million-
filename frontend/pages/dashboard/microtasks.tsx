@@ -5,6 +5,7 @@ interface Task {
   _id: string;
   taskType: string;
   title: string;
+  description: string;
   reward: string;
   link: string;
   totalQuantity: number;
@@ -675,9 +676,15 @@ const MicroTasks: React.FC = () => {
               <div>
                 {!videoEnded ? (
                   <>
-                    <h2 style={{ color: 'gold', marginBottom: '20px' }}>
-                      🎥 Watch This Video
+                    <h2 style={{ color: 'gold', marginBottom: '10px' }}>
+                      🎥 {currentTask?.title || 'Watch This Video'}
                     </h2>
+                    <p style={{ color: '#FFD700', marginBottom: '15px', fontSize: '16px', fontWeight: 'bold' }}>
+                      Reward: RS {currentTask?.reward}
+                    </p>
+                    <p style={{ color: '#ccc', marginBottom: '20px', fontSize: '13px', padding: '8px', background: '#1a1a1a', borderRadius: '8px' }}>
+                      {currentTask?.description || 'Watch this video completely and follow the channel'}
+                    </p>
                     <div
                       key={`youtube-player-wrapper-${videoId || 'empty'}`}
                       style={{
@@ -825,9 +832,12 @@ const MicroTasks: React.FC = () => {
                   </>
                 ) : (
                   <div>
-                    <h2 style={{ color: 'gold', marginBottom: '20px' }}>
+                    <h2 style={{ color: 'gold', marginBottom: '10px' }}>
                       ✅ Video Completed!
                     </h2>
+                    <p style={{ color: '#FFD700', marginBottom: '15px', fontSize: '16px', fontWeight: 'bold' }}>
+                      Reward: RS {currentTask?.reward}
+                    </p>
                     <p style={{ color: '#fff', marginBottom: '20px' }}>
                       Great! Now follow the YouTube channel:
                     </p>
@@ -965,9 +975,15 @@ const MicroTasks: React.FC = () => {
             ) : (
               /* NON-YOUTUBE TASKS */
               <>
-                <h2 style={{ color: 'gold', marginBottom: '20px' }}>
-                  Task Ready
+                <h2 style={{ color: 'gold', marginBottom: '10px' }}>
+                  📋 {currentTask?.title || 'Task'}
                 </h2>
+                <p style={{ color: '#FFD700', marginBottom: '15px', fontSize: '18px', fontWeight: 'bold' }}>
+                  Reward: RS {currentTask?.reward}
+                </p>
+                <p style={{ color: '#ccc', marginBottom: '20px', fontSize: '14px', padding: '10px', background: '#1a1a1a', borderRadius: '8px', minHeight: '40px' }}>
+                  {currentTask?.description || 'Complete this task and submit proof'}
+                </p>
                 <p style={{ color: '#fff', marginBottom: '20px' }}>
                   Your task link has been opened in a new tab. Submit proof or claim reward below after completion.
                 </p>

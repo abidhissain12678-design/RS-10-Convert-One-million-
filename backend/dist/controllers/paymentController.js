@@ -227,10 +227,24 @@ const approvePayment = async (req, res) => {
             // The referrer's boxes are unlocked when the referred user registers, not when they get approved
         }
         else if (payment.type === 'Withdraw') {
-            // Withdrawal approved; keep user activation as is
-            console.log('Withdraw approved for user', user.email);
-            // optionally track success/settlement metadata in Payment model (not required)
-            // do not alter activation/chance fields for withdraw
+            // Mega withdrawal approved - deduct from network earnings
+            console.log('Mega Withdraw approved for user', user.email, 'Amount:', payment.amountType);
+            // Deduct from balance
+            user.balance = Math.max(0, (user.balance || 0) - payment.amountType);
+        }
+        else if (payment.type === 'Task Withdraw') {
+            // Task earnings withdrawal approved - deduct from taskEarnings and balance
+            const withdrawAmount = payment.amountType;
+            console.log('Task Withdraw approved for user', user.email, 'Amount:', withdrawAmount);
+            // Verify user has sufficient balance
+            if (user.taskEarnings >= withdrawAmount) {
+                user.taskEarnings -= withdrawAmount;
+                user.balance = Math.max(0, (user.balance || 0) - withdrawAmount);
+                console.log(`✅ Deducted ${withdrawAmount} from user. Remaining: ${user.taskEarnings}`);
+            }
+            else {
+                console.warn(`⚠️ User insufficient balance. Requested: ${withdrawAmount}, Available: ${user.taskEarnings}`);
+            }
         }
         await user.save();
         // Update referrer's networkReferrals paymentApproved if applicable
