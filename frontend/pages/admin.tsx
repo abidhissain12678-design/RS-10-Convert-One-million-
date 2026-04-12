@@ -706,17 +706,19 @@ const AdminPanel = () => {
       {/* SIDEBAR */}
       <div style={styles.sidebar}>
         <h2 style={{color: 'gold', textAlign: 'center'}}>ADMIN</h2>
-        <button onClick={() => handleTabChange('requests')} style={activeTab === 'requests' ? styles.navBtnActive : styles.navBtn}>💰 Payment Requests</button>
-        <button onClick={() => handleTabChange('withdraw_approvals')} style={activeTab === 'withdraw_approvals' ? styles.navBtnActive : styles.navBtn}>💎 Mega Withdrawals</button>
-        <button onClick={() => handleTabChange('txn_history')} style={activeTab === 'txn_history' ? styles.navBtnActive : styles.navBtn}>🧾 Transaction History</button>
-        <button onClick={() => handleTabChange('register')} style={activeTab === 'register' ? styles.navBtnActive : styles.navBtn}>📝 Registered Users</button>
-        <button onClick={() => handleTabChange('locked_accounts')} style={activeTab === 'locked_accounts' ? styles.navBtnActive : styles.navBtn}>🔒 Locked Accounts</button>
-        <button onClick={() => handleTabChange('task_submissions')} style={activeTab === 'task_submissions' ? styles.navBtnActive : styles.navBtn}>📋 Task Submissions</button>
-        <button onClick={() => handleTabChange('social_settings')} style={activeTab === 'social_settings' ? styles.navBtnActive : styles.navBtn}>🌐 Social Settings</button>
-        <button onClick={() => handleTabChange('manage_news')} style={activeTab === 'manage_news' ? styles.navBtnActive : styles.navBtn}>📰 Manage News</button>
-        <button onClick={() => handleTabChange('maintenance')} style={activeTab === 'maintenance' ? styles.navBtnActive : styles.navBtn}>🛠️ Maintenance</button>
-        <button onClick={() => { window.location.href = '/admin/customize-tasks'; }} style={styles.navBtn}>🧩 Customize Tasks</button>
-        <button onClick={() => handleTabChange('change_password')} style={activeTab === 'change_password' ? styles.navBtnActive : styles.navBtn}>🔑 Change Password</button>
+        <div style={{ flex: 1, overflowY: 'auto', marginBottom: '10px' }}>
+          <button onClick={() => handleTabChange('requests')} style={activeTab === 'requests' ? styles.navBtnActive : styles.navBtn}>💰 Payment Requests</button>
+          <button onClick={() => handleTabChange('withdraw_approvals')} style={activeTab === 'withdraw_approvals' ? styles.navBtnActive : styles.navBtn}>💎 Mega Withdrawals</button>
+          <button onClick={() => handleTabChange('txn_history')} style={activeTab === 'txn_history' ? styles.navBtnActive : styles.navBtn}>🧾 Transaction History</button>
+          <button onClick={() => handleTabChange('register')} style={activeTab === 'register' ? styles.navBtnActive : styles.navBtn}>📝 Registered Users</button>
+          <button onClick={() => handleTabChange('locked_accounts')} style={activeTab === 'locked_accounts' ? styles.navBtnActive : styles.navBtn}>🔒 Locked Accounts</button>
+          <button onClick={() => handleTabChange('task_submissions')} style={activeTab === 'task_submissions' ? styles.navBtnActive : styles.navBtn}>📋 Task Submissions</button>
+          <button onClick={() => handleTabChange('social_settings')} style={activeTab === 'social_settings' ? styles.navBtnActive : styles.navBtn}>🌐 Social Settings</button>
+          <button onClick={() => handleTabChange('manage_news')} style={activeTab === 'manage_news' ? styles.navBtnActive : styles.navBtn}>📰 Manage News</button>
+          <button onClick={() => handleTabChange('maintenance')} style={activeTab === 'maintenance' ? styles.navBtnActive : styles.navBtn}>🛠️ Maintenance</button>
+          <button onClick={() => { window.location.href = '/admin/customize-tasks'; }} style={styles.navBtn}>🧩 Customize Tasks</button>
+          <button onClick={() => handleTabChange('change_password')} style={activeTab === 'change_password' ? styles.navBtnActive : styles.navBtn}>🔑 Change Password</button>
+        </div>
         <button onClick={() => { localStorage.removeItem('token'); setIsAdmin(false); window.location.href='/'; }} style={styles.logoutBtn}>🚪 Logout Admin</button>
       </div>
 
@@ -1504,8 +1506,8 @@ const AdminPanel = () => {
 const styles: any = {
   loginOverlay: { background: '#000', height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center' },
   loginBox: { background: '#0a0a0a', padding: '40px', border: '1px solid gold', borderRadius: '15px', textAlign: 'center' },
-  sidebar: { width: '250px', background: '#0a0a0a', borderRight: '1px solid #222', height: '100vh', position: 'fixed', padding: '20px' },
-  main: { marginLeft: '290px', padding: '40px', flex: 1 },
+  sidebar: { width: '250px', background: '#0a0a0a', borderRight: '1px solid #222', height: '100vh', position: 'fixed', padding: '20px', display: 'flex', flexDirection: 'column' },
+  main: { marginLeft: '290px', padding: '40px', flex: 1, maxHeight: '100vh', overflowY: 'auto' },
   loginInput: { padding: '12px', width: '100%', background: '#111', border: '1px solid #333', color: '#fff', borderRadius: '8px', marginBottom: '15px', display: 'block' },
   navBtn: { background: 'none', border: 'none', color: '#666', width: '100%', textAlign: 'left', padding: '15px', cursor: 'pointer' },
   navBtnActive: { background: 'rgba(255,215,0,0.1)', color: 'gold', width: '100%', textAlign: 'left', padding: '15px', cursor: 'pointer', fontWeight: 'bold', borderLeft: '4px solid gold' },
@@ -1525,7 +1527,7 @@ const styles: any = {
     marginBottom: '5px',
     marginTop: '10px'
   },
-  logoutBtn: { background: '#ff4444', color: 'white', border: 'none', width: '100%', padding: '10px', borderRadius: '5px', cursor: 'pointer', marginTop: '20px' },
+  logoutBtn: { background: '#ff4444', color: 'white', border: 'none', width: '100%', padding: '10px', borderRadius: '5px', cursor: 'pointer', marginTop: 'auto' },
   inputField: { padding: '8px', background: '#111', border: '1px solid #333', color: '#fff', borderRadius: '4px', width: '100%' },
 };
 
