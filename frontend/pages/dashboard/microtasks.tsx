@@ -263,15 +263,16 @@ const MicroTasks: React.FC = () => {
         videoId: videoId,
         playerVars: {
           'autoplay': 1,
-          'controls': 1,
-          'disablekb': 0,
+          'controls': 0,  // Hide controls to prevent seeking/skipping
+          'disablekb': 1,  // Disable keyboard controls
           'enablejsapi': 1,
           'origin': window.location.origin,
           'rel': 0,
           'modestbranding': 1,
-          'fs': 0,
+          'fs': 0,  // Disable fullscreen
           'iv_load_policy': 3,
-          'cc_load_policy': 0
+          'cc_load_policy': 0,
+          'playsinline': 1  // Inline playback on mobile
         },
         events: {
           'onReady': (event: any) => {
@@ -728,6 +729,14 @@ const MicroTasks: React.FC = () => {
                     <p style={{ color: '#ccc', marginBottom: '20px', fontSize: '13px', padding: '8px', background: '#1a1a1a', borderRadius: '8px' }}>
                       {currentTask?.description || 'Watch this video completely and follow the channel'}
                     </p>
+                    <div style={{ marginBottom: '20px', padding: '12px', background: '#ff6347', borderRadius: '8px', textAlign: 'center' }}>
+                      <p style={{ color: '#fff', fontSize: '14px', fontWeight: 'bold', margin: '0' }}>
+                        ⚠️ MUST WATCH ENTIRE VIDEO
+                      </p>
+                      <p style={{ color: '#fff', fontSize: '12px', margin: '5px 0 0 0' }}>
+                        No skip controls - Video must play completely to submit proof
+                      </p>
+                    </div>
                     <div
                       key={`youtube-player-wrapper-${videoId || 'empty'}`}
                       style={{
