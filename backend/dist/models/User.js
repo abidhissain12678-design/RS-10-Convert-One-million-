@@ -55,5 +55,7 @@ const UserSchema = new mongoose_1.Schema({
     otpExpiry: { type: Date },
     activationRequest: { type: Boolean, default: false },
     chanceLevel: { type: Number, default: 0 },
+    taskEarnings: { type: Number, default: 0 },
+    balance: { type: Number, default: 0 },
 }, { timestamps: true });
 exports.default = mongoose_1.default.models.User || mongoose_1.default.model('User', UserSchema);

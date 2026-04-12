@@ -22,6 +22,8 @@ export interface IUser extends Document {
   otpExpiry?: Date;
   activationRequest: boolean;
   chanceLevel: number;
+  taskEarnings: number;
+  balance: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +49,8 @@ const UserSchema: Schema = new Schema({
   otpExpiry: { type: Date },
   activationRequest: { type: Boolean, default: false },
   chanceLevel: { type: Number, default: 0 },
+  taskEarnings: { type: Number, default: 0 },
+  balance: { type: Number, default: 0 },
 }, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model<IUser>('User', UserSchema);

@@ -329,11 +329,21 @@ export const getUserTaskEarnings = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.id;
 
-    const completedTasks = await UserTask.find({ userId, completed: true }).populate('taskId', 'reward');
-    const totalEarnings = completedTasks.reduce((sum, task) => sum + parseFloat(task.taskId.reward), 0);
+    // Get user's taskEarnings directly from User document
+    const user = await User.findById(userId).select('taskEarnings balance');
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-    res.status(200).json({ taskEarnings: totalEarnings });
+    console.log(`📊 Task Earnings for user ${userId}:`, { taskEarnings: user.taskEarnings, balance: user.balance });
+
+    res.status(200).json({ 
+      taskEarnings: user.taskEarnings || 0,
+      balance: user.balance || 0
+    });
   } catch (error) {
+    console.error('getUserTaskEarnings error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };

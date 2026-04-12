@@ -608,17 +608,21 @@ const approveTaskSubmission = async (req, res) => {
         const { submissionId } = req.body;
         const submission = await UserTask_1.default.findByIdAndUpdate(submissionId, {
             status: 'Approved',
+            completed: true,
             reviewedAt: new Date(),
             reviewedBy: 'admin'
         }, { new: true }).populate('userId').populate('taskId');
         if (!submission) {
             return res.status(404).json({ error: 'Task submission not found' });
         }
-        // Update user's balance with task reward
-        if (submission.taskId && submission.taskId.reward) {
-            await User_1.default.findByIdAndUpdate(submission.userId, {
-                $inc: { balance: submission.taskId.reward }
-            });
+        // Update user's taskEarnings with task reward
+        const reward = parseFloat(submission.taskId?.reward) || 0;
+        if (reward > 0) {
+            console.log(`💰 Adding reward ${reward} to user ${submission.userId}`);
+            const updatedUser = await User_1.default.findByIdAndUpdate(submission.userId, {
+                $inc: { taskEarnings: reward, balance: reward }
+            }, { new: true });
+            console.log(`✅ User balance updated:`, updatedUser?.taskEarnings);
         }
         res.json({ message: 'Task submission approved successfully', submission });
     }

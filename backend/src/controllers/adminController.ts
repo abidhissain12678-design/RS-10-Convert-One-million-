@@ -645,6 +645,7 @@ export const approveTaskSubmission = async (req: Request, res: Response) => {
       submissionId,
       {
         status: 'Approved',
+        completed: true,
         reviewedAt: new Date(),
         reviewedBy: 'admin'
       },
@@ -655,11 +656,18 @@ export const approveTaskSubmission = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Task submission not found' });
     }
 
-    // Update user's balance with task reward
-    if (submission.taskId && (submission.taskId as any).reward) {
-      await User.findByIdAndUpdate(submission.userId, {
-        $inc: { balance: (submission.taskId as any).reward }
-      });
+    // Update user's taskEarnings with task reward
+    const reward = parseFloat((submission.taskId as any)?.reward) || 0;
+    if (reward > 0) {
+      console.log(`💰 Adding reward ${reward} to user ${submission.userId}`);
+      const updatedUser = await User.findByIdAndUpdate(
+        submission.userId,
+        {
+          $inc: { taskEarnings: reward, balance: reward }
+        },
+        { new: true }
+      );
+      console.log(`✅ User balance updated:`, updatedUser?.taskEarnings);
     }
 
     res.json({ message: 'Task submission approved successfully', submission });
