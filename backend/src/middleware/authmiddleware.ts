@@ -14,10 +14,6 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
     const decoded = jwt.verify(token, secret);
     console.log('[authMiddleware] Token verified successfully, userId:', (decoded as any).id);
     (req as any).user = decoded;
-    // Check if admin access is required (for admin routes)
-    if (req.path.startsWith('/api/admin') && !(decoded as any).isAdmin) {
-      return res.status(403).json({ error: 'Admin access required.' });
-    }
     next();
   } catch (error: any) {
     console.error('[authMiddleware] JWT verification failed:', error.message);

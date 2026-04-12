@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../utils/api';
 
 const AdminPanel = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -49,7 +50,8 @@ const AdminPanel = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/users', { headers });
+        const baseUrl = getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/admin/users`, { headers });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -81,7 +83,8 @@ const AdminPanel = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/pending-payments', { headers });
+        const baseUrl = getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/admin/pending-payments`, { headers });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -117,7 +120,8 @@ const AdminPanel = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/all-payments', { headers });
+        const baseUrl = getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/admin/all-payments`, { headers });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -151,7 +155,8 @@ const AdminPanel = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/locked-accounts', { headers });
+        const baseUrl = getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/admin/locked-accounts`, { headers });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -185,7 +190,8 @@ const AdminPanel = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/task-submissions', { headers });
+        const baseUrl = getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/admin/task-submissions`, { headers });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }

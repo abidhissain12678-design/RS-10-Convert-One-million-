@@ -17,10 +17,6 @@ const authMiddleware = (req, res, next) => {
         const decoded = jsonwebtoken_1.default.verify(token, secret);
         console.log('[authMiddleware] Token verified successfully, userId:', decoded.id);
         req.user = decoded;
-        // Check if admin access is required (for admin routes)
-        if (req.path.startsWith('/api/admin') && !decoded.isAdmin) {
-            return res.status(403).json({ error: 'Admin access required.' });
-        }
         next();
     }
     catch (error) {

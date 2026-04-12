@@ -18,7 +18,7 @@ router.post('/reject-payment', authMiddleware, adminMiddleware, rejectPayment);
 router.post('/approve-chance', authMiddleware, approveChance);
 router.post('/approve-activation', authMiddleware, adminMiddleware, approveActivation);
 router.post('/create-task', authMiddleware, adminMiddleware, createTask);
-router.get('/users', authMiddleware, async (req, res) => {
+router.get('/users', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const users = await User.find();
     console.log('Fetched users:', users.length);
