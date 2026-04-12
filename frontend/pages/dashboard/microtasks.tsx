@@ -280,24 +280,8 @@ const MicroTasks: React.FC = () => {
             setVideoError(null);
             videoStartTimeRef.current = 0;
             
-            // Prevent seeking by resetting position if user tries to skip
-            const preventSeeking = setInterval(() => {
-              if (playerRef.current && event.target === playerRef.current) {
-                const currentTime = event.target.getCurrentTime();
-                const duration = event.target.getDuration();
-                
-                // Allow seeking forward only a few seconds, not backward or too far ahead
-                // If user tries to skip more than 10 seconds ahead, reset to start
-                if (currentTime > 10 && !videoPlaying) {
-                  console.warn('⚠️ Skipping detected - resetting video to beginning');
-                  event.target.seekTo(0, true);
-                  setVideoPlaying(false);
-                }
-              }
-            }, 500);
-            
-            // Store interval ID for cleanup
-            (playerRef as any).seekPreventionInterval = preventSeeking;
+            // All seeking is prevented by hidden controls (controls: 0, disablekb: 1)
+            // Only tracking video completion via onStateChange event (ENDED)
             
             try {
               event.target.playVideo();
@@ -340,7 +324,7 @@ const MicroTasks: React.FC = () => {
   const onPlayerStateChange = (event: YTOnStateChangeEvent) => {
     try {
       if (event.data === window.YT.PlayerState.ENDED) {
-        console.log('✅ Video completed - Full video watched');
+        console.log('✅ Video completed - Full video watched successfully');
         setVideoEnded(true);
         setVideoPlaying(false);
       } else if (event.data === window.YT.PlayerState.PLAYING) {
@@ -349,19 +333,11 @@ const MicroTasks: React.FC = () => {
           const currentTime = player.getCurrentTime();
           const duration = player.getDuration();
           console.log(`▶️ Video playing - ${currentTime.toFixed(1)}s / ${duration.toFixed(1)}s`);
-          
-          // If video is playing but not from the beginning, it means user tried to skip
-          if (currentTime > 5 && videoStartTimeRef.current === 0) {
-            console.warn('⚠️ Attempted to skip video - resetting to beginning');
-            player.seekTo(0, true);
-            return;
-          }
-          
-          videoStartTimeRef.current = currentTime;
         }
         setVideoEnded(false);
         setVideoPlaying(true);
       } else if (event.data === window.YT.PlayerState.PAUSED || event.data === window.YT.PlayerState.BUFFERING) {
+        console.log('⏸️ Video paused or buffering');
         setVideoPlaying(false);
       }
     } catch (error) {
@@ -373,10 +349,6 @@ const MicroTasks: React.FC = () => {
   useEffect(() => {
     if (!showModal && playerRef.current) {
       try {
-        // Clear seeking prevention interval
-        if ((playerRef as any).seekPreventionInterval) {
-          clearInterval((playerRef as any).seekPreventionInterval);
-        }
         playerRef.current.destroy();
       } catch (error) {
         console.warn('Error destroying YouTube player on modal close:', error);
@@ -975,20 +947,20 @@ const MicroTasks: React.FC = () => {
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                       <button
                         onClick={handleSubmitProof}
-                        disabled={proofFiles.length < 2 || submitting}
+                        disabled={proofFiles.length < 2 || submitting || !videoEnded}
                         style={{
-                          background: proofFiles.length >= 2 ? 'gold' : '#666',
-                          color: proofFiles.length >= 2 ? 'black' : '#999',
+                          background: (proofFiles.length >= 2 && videoEnded) ? 'gold' : '#666',
+                          color: (proofFiles.length >= 2 && videoEnded) ? 'black' : '#999',
                           border: 'none',
                           padding: '10px 20px',
                           borderRadius: '8px',
                           fontWeight: 'bold',
-                          cursor: proofFiles.length >= 2 && !submitting ? 'pointer' : 'not-allowed',
+                          cursor: (proofFiles.length >= 2 && videoEnded && !submitting) ? 'pointer' : 'not-allowed',
                           flex: 1,
                           maxWidth: '200px'
                         }}
                       >
-                        {submitting ? 'Submitting...' : '✅ Submit Proof'}
+                        {submitting ? 'Submitting...' : !videoEnded ? '⏳ Watch video first' : '✅ Submit Proof'}
                       </button>
                       <button
                         onClick={() => {
