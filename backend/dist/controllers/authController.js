@@ -155,8 +155,8 @@ const adminLogin = async (req, res) => {
     try {
         const { key } = req.body;
         if (key === 'Abid786') {
-            const token = jsonwebtoken_1.default.sign({ isAdmin: true }, process.env.JWT_SECRET || 'chain10challenge_secret_key_2024', { expiresIn: '30d' });
-            console.log('[verifyOTP] Admin token created');
+            const token = jsonwebtoken_1.default.sign({ id: 'admin', isAdmin: true }, process.env.JWT_SECRET || 'chain10challenge_secret_key_2024', { expiresIn: '30d' });
+            console.log('[verifyOTP] Admin token created for user: admin');
             res.json({ token });
         }
         else {

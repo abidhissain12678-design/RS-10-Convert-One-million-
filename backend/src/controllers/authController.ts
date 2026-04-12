@@ -159,8 +159,8 @@ export const adminLogin = async (req: Request, res: Response) => {
   try {
     const { key } = req.body;
     if (key === 'Abid786') {
-      const token = jwt.sign({ isAdmin: true }, process.env.JWT_SECRET || 'chain10challenge_secret_key_2024', { expiresIn: '30d' });
-      console.log('[verifyOTP] Admin token created');
+      const token = jwt.sign({ id: 'admin', isAdmin: true }, process.env.JWT_SECRET || 'chain10challenge_secret_key_2024', { expiresIn: '30d' });
+      console.log('[verifyOTP] Admin token created for user: admin');
       res.json({ token });
     } else {
       res.status(401).json({ error: 'Invalid admin key' });
