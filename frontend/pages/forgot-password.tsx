@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { getApiBaseUrl } from '../utils/api';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -16,12 +17,16 @@ const ForgotPassword = () => {
     setMessage('');
 
     try {
+      const baseUrl = getApiBaseUrl();
+
       if (step === 1) {
         if (!email) {
           setMessage('Please enter your email address');
+          setIsLoading(false);
           return;
         }
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/forgot-password', {
+        console.log('📧 Sending forgot password request for:', email);
+        const response = await fetch(`${baseUrl}/api/auth/forgot-password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -30,17 +35,20 @@ const ForgotPassword = () => {
         });
         const data = await response.json();
         if (response.ok) {
-          setMessage('OTP sent to your email.');
+          setMessage('✅ OTP sent to your email. Check spam folder if not found.');
           setStep(2);
         } else {
-          setMessage(data.message || data.error || 'An error occurred. Please try again.');
+          setMessage(data.message || data.error || 'Failed to send OTP. Please try again.');
+          console.error('❌ Forgot password error:', data);
         }
       } else if (step === 2) {
         if (!otp) {
           setMessage('Please enter the OTP');
+          setIsLoading(false);
           return;
         }
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/verify-otp', {
+        console.log('🔐 Verifying OTP for:', email);
+        const response = await fetch(`${baseUrl}/api/auth/verify-otp`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -49,17 +57,25 @@ const ForgotPassword = () => {
         });
         const data = await response.json();
         if (response.ok) {
-          setMessage('OTP verified. Enter your new password.');
+          setMessage('✅ OTP verified! Now set your new password.');
           setStep(3);
         } else {
-          setMessage(data.message || data.error || 'Invalid OTP.');
+          setMessage(data.message || data.error || 'Invalid or expired OTP. Please try again.');
+          console.error('❌ OTP verification error:', data);
         }
       } else if (step === 3) {
         if (!newPassword) {
           setMessage('Please enter a new password');
+          setIsLoading(false);
           return;
         }
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/reset-password', {
+        if (newPassword.length < 6) {
+          setMessage('Password must be at least 6 characters');
+          setIsLoading(false);
+          return;
+        }
+        console.log('🔄 Resetting password for:', email);
+        const response = await fetch(`${baseUrl}/api/auth/reset-password`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -68,14 +84,15 @@ const ForgotPassword = () => {
         });
         const data = await response.json();
         if (response.ok) {
-          setMessage('Password reset successfully. You can now login.');
+          setMessage('✅ Password reset successfully! Redirecting to login...');
           setTimeout(() => router.push('/login'), 2000);
         } else {
-          setMessage(data.message || data.error || 'An error occurred.');
+          setMessage(data.message || data.error || 'Failed to reset password. Please try again.');
+          console.error('❌ Password reset error:', data);
         }
       }
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Network error:', error);
       setMessage('Network error. Please check your connection and try again.');
     } finally {
       setIsLoading(false);
@@ -86,11 +103,11 @@ const ForgotPassword = () => {
     <div style={styles.container}>
       <div style={styles.card}>
         <h1 style={{ color: 'gold', textAlign: 'center', marginBottom: '10px' }}>
-          {step === 1 ? 'FORGOT PASSWORD' : step === 2 ? 'ENTER OTP' : 'RESET PASSWORD'}
+          {step === 1 ? '🔒 FORGOT PASSWORD' : step === 2 ? '🔐 VERIFY OTP' : '🔄 RESET PASSWORD'}
         </h1>
         <p style={{ color: '#888', textAlign: 'center', fontSize: '14px', marginBottom: '30px' }}>
           {step === 1 ? 'Enter your email address and we\'ll send you an OTP' :
-           step === 2 ? 'Enter the OTP sent to your email' :
+           step === 2 ? 'Enter the 6-digit OTP sent to your email' :
            'Enter your new password'}
         </p>
 
@@ -105,20 +122,23 @@ const ForgotPassword = () => {
                 style={styles.input} 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)} 
+                disabled={isLoading}
               />
             </div>
           )}
 
           {step === 2 && (
             <div style={styles.inputGroup}>
-              <label style={styles.label}>OTP</label>
+              <label style={styles.label}>OTP (6 Digits)</label>
               <input 
                 type="text" 
                 placeholder="Enter 6-digit OTP" 
                 required 
+                maxLength={6}
                 style={styles.input} 
                 value={otp}
-                onChange={(e) => setOtp(e.target.value)} 
+                onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} 
+                disabled={isLoading}
               />
             </div>
           )}
@@ -128,36 +148,40 @@ const ForgotPassword = () => {
               <label style={styles.label}>New Password</label>
               <input 
                 type="password" 
-                placeholder="Enter new password" 
+                placeholder="Enter new password (min 6 characters)" 
                 required 
+                minLength={6}
                 style={styles.input} 
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)} 
+                disabled={isLoading}
               />
             </div>
           )}
 
           {message && (
             <div style={{
-              backgroundColor: message.includes('successfully') || message.includes('verified') || message.includes('sent') ? '#4CAF50' : '#ff4444',
+              backgroundColor: message.includes('✅') ? '#4CAF50' : '#ff4444',
               color: '#fff',
-              padding: '10px',
-              borderRadius: '5px',
+              padding: '12px',
+              borderRadius: '8px',
               marginBottom: '20px',
-              textAlign: 'center'
+              textAlign: 'center',
+              fontSize: '14px',
+              fontWeight: 'bold'
             }}>
               {message}
             </div>
           )}
 
-          <button type="submit" style={styles.submitBtn} disabled={isLoading}>
-            {isLoading ? 'PROCESSING...' : step === 1 ? 'SEND OTP' : step === 2 ? 'VERIFY OTP' : 'RESET PASSWORD'}
+          <button type="submit" style={{...styles.submitBtn, opacity: isLoading ? 0.6 : 1, cursor: isLoading ? 'not-allowed' : 'pointer'}} disabled={isLoading}>
+            {isLoading ? '⏳ PROCESSING...' : step === 1 ? '📤 SEND OTP' : step === 2 ? '✓ VERIFY OTP' : '🔄 RESET PASSWORD'}
           </button>
         </form>
 
         <div style={styles.links}>
           <span onClick={() => router.push('/login')} style={styles.link}>
-            Back to Login
+            ← Back to Login
           </span>
         </div>
       </div>

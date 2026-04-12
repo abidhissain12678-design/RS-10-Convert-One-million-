@@ -201,10 +201,10 @@ export const updatePassword = async (req: Request, res: Response) => {
 export const forgotPassword = async (req: Request, res: Response) => {
   try {
     const { email } = req.body;
-    console.log('Forgot password request for:', email);
+    console.log('🔐 Forgot password request for:', email);
     const user = await User.findOne({ email });
     if (!user) {
-      console.log('User not found');
+      console.log('❌ User not found:', email);
       return res.status(404).json({ message: 'User not found' });
     }
     const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit OTP
@@ -212,7 +212,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
     user.otp = otp;
     user.otpExpiry = otpExpiry;
     await user.save();
-    console.log('OTP generated:', otp, 'for user:', email);
+    console.log('✅ OTP generated:', otp, 'for user:', email);
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
@@ -221,12 +221,22 @@ export const forgotPassword = async (req: Request, res: Response) => {
       text: `Your OTP for password reset is: ${otp}. It expires in 10 minutes.`,
     };
 
-    console.log('Sending email to:', email, 'from:', process.env.EMAIL_USER);
-    await transporter.sendMail(mailOptions);
-    console.log('Email sent successfully');
+    console.log('📧 Sending email to:', email, 'from:', process.env.EMAIL_USER);
+    
+    // Send email asynchronously with timeout - don't block response
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      transporter.sendMail(mailOptions).then(() => {
+        console.log('✅ Email sent successfully to:', email);
+      }).catch((emailError: any) => {
+        console.warn('⚠️ Email send failed (but OTP saved):', emailError.message);
+      });
+    } else {
+      console.warn('⚠️ Email credentials not configured - OTP saved locally only');
+    }
+    
     res.json({ message: 'OTP sent to your email' });
   } catch (error: any) {
-    console.error('Error in forgotPassword:', error);
+    console.error('❌ Error in forgotPassword:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -234,13 +244,33 @@ export const forgotPassword = async (req: Request, res: Response) => {
 export const verifyOTP = async (req: Request, res: Response) => {
   try {
     const { email, otp } = req.body;
+    console.log('🔍 Verifying OTP for email:', email);
     const user = await User.findOne({ email });
-    if (!user || user.otp !== otp || !user.otpExpiry || user.otpExpiry < new Date()) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    
+    if (!user) {
+      console.log('❌ User not found for OTP verification:', email);
+      return res.status(400).json({ message: 'User not found' });
     }
-    // OTP verified, now allow password reset
+    
+    if (!user.otp) {
+      console.log('❌ No OTP found for user:', email);
+      return res.status(400).json({ message: 'No OTP request made. Please request an OTP first.' });
+    }
+    
+    if (!user.otpExpiry || user.otpExpiry < new Date()) {
+      console.log('❌ OTP expired for user:', email);
+      return res.status(400).json({ message: 'OTP has expired. Please request a new one.' });
+    }
+    
+    if (user.otp !== otp) {
+      console.log('❌ Invalid OTP for user:', email, '| Provided:', otp, '| Expected:', user.otp);
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+    
+    console.log('✅ OTP verified successfully for:', email);
     res.json({ message: 'OTP verified' });
   } catch (error: any) {
+    console.error('❌ Error in verifyOTP:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -248,17 +278,38 @@ export const verifyOTP = async (req: Request, res: Response) => {
 export const resetPassword = async (req: Request, res: Response) => {
   try {
     const { email, otp, newPassword } = req.body;
+    console.log('🔄 Resetting password for:', email);
     const user = await User.findOne({ email });
-    if (!user || user.otp !== otp || !user.otpExpiry || user.otpExpiry < new Date()) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
+    
+    if (!user) {
+      console.log('❌ User not found for password reset:', email);
+      return res.status(400).json({ message: 'User not found' });
     }
+    
+    if (!user.otp) {
+      console.log('❌ No OTP verification for user:', email);
+      return res.status(400).json({ message: 'Please verify OTP first' });
+    }
+    
+    if (user.otp !== otp) {
+      console.log('❌ Invalid OTP during password reset for:', email);
+      return res.status(400).json({ message: 'Invalid OTP' });
+    }
+    
+    if (!user.otpExpiry || user.otpExpiry < new Date()) {
+      console.log('❌ OTP expired during password reset for:', email);
+      return res.status(400).json({ message: 'OTP has expired' });
+    }
+    
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
     user.otp = undefined;
     user.otpExpiry = undefined;
     await user.save();
+    console.log('✅ Password reset successfully for:', email);
     res.json({ message: 'Password reset successfully' });
   } catch (error: any) {
+    console.error('❌ Error in resetPassword:', error);
     res.status(500).json({ error: error.message });
   }
 };
@@ -283,10 +334,18 @@ export const requestActivation = async (req: Request, res: Response) => {
       text: `User ${user.name} (${user.email}) has requested activation. Username: ${user.username}, Phone: ${user.phone}, City: ${user.city}`,
     };
 
-    await transporter.sendMail(mailOptions);
+    // Send email asynchronously - don't block response
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.ADMIN_EMAIL) {
+      transporter.sendMail(mailOptions).then(() => {
+        console.log('✅ Activation email sent to admin');
+      }).catch((error: any) => {
+        console.warn('⚠️ Failed to send activation email:', error.message);
+      });
+    }
+    
     res.json({ message: 'Activation request sent to admin' });
   } catch (error: any) {
-    console.error('Error in requestActivation:', error);
+    console.error('❌ Error in requestActivation:', error);
     res.status(500).json({ error: error.message });
   }
 };
