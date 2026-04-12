@@ -644,27 +644,28 @@ export const approveTaskSubmission = async (req: Request, res: Response) => {
     const submission = await UserTask.findByIdAndUpdate(
       submissionId,
       {
-        status: 'approved',
+        status: 'Approved',
         reviewedAt: new Date(),
         reviewedBy: 'admin'
       },
       { new: true }
-    ).populate('user').populate('task');
+    ).populate('userId').populate('taskId');
 
     if (!submission) {
       return res.status(404).json({ error: 'Task submission not found' });
     }
 
     // Update user's balance with task reward
-    if (submission.task && submission.task.reward) {
-      await User.findByIdAndUpdate(submission.user._id, {
-        $inc: { balance: submission.task.reward }
+    if (submission.taskId && (submission.taskId as any).reward) {
+      await User.findByIdAndUpdate(submission.userId, {
+        $inc: { balance: (submission.taskId as any).reward }
       });
     }
 
     res.json({ message: 'Task submission approved successfully', submission });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('approveTaskSubmission error:', error.message);
+    res.status(500).json({ error: error.message, details: process.env.NODE_ENV === 'development' ? error.stack : undefined });
   }
 };
 
@@ -676,12 +677,12 @@ export const rejectTaskSubmission = async (req: Request, res: Response) => {
     const submission = await UserTask.findByIdAndUpdate(
       submissionId,
       {
-        status: 'rejected',
+        status: 'Rejected',
         reviewedAt: new Date(),
         reviewedBy: 'admin'
       },
       { new: true }
-    ).populate('user').populate('task');
+    ).populate('userId').populate('taskId');
 
     if (!submission) {
       return res.status(404).json({ error: 'Task submission not found' });
@@ -689,6 +690,7 @@ export const rejectTaskSubmission = async (req: Request, res: Response) => {
 
     res.json({ message: 'Task submission rejected successfully', submission });
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    console.error('rejectTaskSubmission error:', error.message);
+    res.status(500).json({ error: error.message, details: process.env.NODE_ENV === 'development' ? error.stack : undefined });
   }
 };
