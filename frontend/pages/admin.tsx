@@ -258,7 +258,8 @@ const AdminPanel = () => {
         headers['Authorization'] = `Bearer ${token}`;
       }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/pending-payments', { headers });
+        const baseUrl = getApiBaseUrl();
+        const response = await fetch(`${baseUrl}/api/admin/pending-payments`, { headers });
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -753,11 +754,20 @@ const AdminPanel = () => {
                       <div><div style={{fontSize: '11px', color: '#888'}}>💵 AMOUNT</div><div style={{fontSize: '14px', color: '#FFD700', fontWeight: 'bold'}}>RS {req.amountType}</div></div>
                       <div><div style={{fontSize: '11px', color: '#888'}}>🧾 TID</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.transactionId || 'N/A'}</div></div>
                     </div>
-                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
-                      <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>{req.screenshotUrl ? <a href={req.screenshotUrl.startsWith('http') ? req.screenshotUrl : `https://rs-10-convert-one-million.onrender.com${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline'}}>View File</a> : <span style={{color: '#888'}}>N/A</span>}</div>
-                      <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
-                      <div><div style={{fontSize: '11px', color: '#888'}}>📅 CREATED</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A'}</div></div>
-                    </div>
+                    {req.type === 'Task Withdraw' ? (
+                      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '10px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
+                        <div><div style={{fontSize: '11px', color: '#888'}}>🏦 METHOD</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.withdrawMethod || 'N/A'}</div></div>
+                        <div><div style={{fontSize: '11px', color: '#888'}}>💳 ACCOUNT</div><div style={{fontSize: '12px', color: '#FFD700', fontWeight: 'bold'}}>{req.withdrawAccount || 'N/A'}</div></div>
+                        <div><div style={{fontSize: '11px', color: '#888'}}>👤 HOLDER</div><div style={{fontSize: '12px', color: '#FFD700', fontWeight: 'bold'}}>{req.accountHolderName || 'N/A'}</div></div>
+                        <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
+                      </div>
+                    ) : (
+                      <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
+                        <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>{req.screenshotUrl ? <a href={req.screenshotUrl.startsWith('http') ? req.screenshotUrl : `https://rs-10-convert-one-million.onrender.com${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline'}}>View File</a> : <span style={{color: '#888'}}>N/A</span>}</div>
+                        <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
+                        <div><div style={{fontSize: '11px', color: '#888'}}>📅 CREATED</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A'}</div></div>
+                      </div>
+                    )}
                     <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
                       {req.status === 'Pending' && (
                         <>
@@ -799,9 +809,10 @@ const AdminPanel = () => {
                       <div><div style={{fontSize: '11px', color: '#888'}}>💰 AMOUNT</div><div style={{fontSize: '16px', color: '#FFD700', fontWeight: 'bold'}}>RS {req.amountType}</div></div>
                       <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
                     </div>
-                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
-                      <div><div style={{fontSize: '11px', color: '#888'}}>🏦 PAYMENT METHOD</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.withdrawMethod || 'N/A'}</div></div>
-                      <div><div style={{fontSize: '11px', color: '#888'}}>💳 ACCOUNT</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.withdrawAccount || 'N/A'}</div></div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '12px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>🏦 METHOD</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.withdrawMethod || 'N/A'}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>💳 ACCOUNT</div><div style={{fontSize: '12px', color: '#FFD700', fontWeight: 'bold'}}>{req.withdrawAccount || 'N/A'}</div></div>
+                      <div><div style={{fontSize: '11px', color: '#888'}}>👤 HOLDER</div><div style={{fontSize: '12px', color: '#FFD700', fontWeight: 'bold'}}>{req.accountHolderName || 'N/A'}</div></div>
                       <div><div style={{fontSize: '11px', color: '#888'}}>📅 REQUESTED</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A'}</div></div>
                     </div>
                     <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap'}}>
