@@ -378,6 +378,9 @@ const MicroTasks: React.FC = () => {
 
     try {
       const baseUrl = getApiBaseUrl();
+      console.log('📤 Submitting proof to:', `${baseUrl}/api/tasks/submit-proof`);
+      console.log('📋 Task ID:', currentTask._id, '| Files:', proofFiles.length);
+      
       const response = await fetch(`${baseUrl}/api/tasks/submit-proof`, {
         method: 'POST',
         headers: {
@@ -386,19 +389,35 @@ const MicroTasks: React.FC = () => {
         body: formData
       });
 
+      console.log('📨 Server response status:', response.status);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        const message = errorData?.message || errorData?.error || 'Failed to submit proof';
-        alert(message);
-        throw new Error(message);
+        let errorMessage = 'Failed to submit proof';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData?.message || errorData?.error || `Server error (${response.status})`;
+          console.error('❌ Server error details:', errorData);
+        } catch (parseErr) {
+          const text = await response.text().catch(() => '');
+          if (text) {
+            errorMessage = `Server error (${response.status}): ${text.substring(0, 100)}`;
+            console.error('❌ Raw error response:', text);
+          }
+        }
+        alert(errorMessage);
+        throw new Error(errorMessage);
       }
 
-      alert('Proof submitted successfully!');
+      const result = await response.json();
+      console.log('✅ Proof submission success:', result);
+      alert('✅ Proof submitted successfully!');
       setShowModal(false);
+      setProofFiles([]);
       fetchCompletedTasks(); // Refresh completed tasks
     } catch (err: any) {
-      if (!err.message) {
-        alert('Failed to submit proof');
+      console.error('❌ Proof submission error:', err.message || err);
+      if (!err.message || err.message.includes('fetch')) {
+        alert('Network error - please check your connection and try again');
       }
     } finally {
       setSubmitting(false);

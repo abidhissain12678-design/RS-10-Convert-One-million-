@@ -85,7 +85,13 @@ exports.submitProof = [
         }
         catch (error) {
             console.error('submitProof error:', error);
-            res.status(500).json({ message: 'Server error' });
+            const errorMessage = error?.message || error?.toString() || 'Server error';
+            console.error('Error details:', { name: error?.name, message: error?.message, stack: error?.stack });
+            res.status(500).json({
+                message: 'Failed to submit proof',
+                error: errorMessage,
+                details: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+            });
         }
     }
 ];
