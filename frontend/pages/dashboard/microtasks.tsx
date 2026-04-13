@@ -615,7 +615,7 @@ const MicroTasks: React.FC = () => {
           RS {taskEarnings.toLocaleString()}
         </p>
         <p style={{ color: '#ccc', fontSize: '14px', margin: '10px 0 20px 0' }}>
-          Earnings from completed micro tasks
+          Minimum withdrawal amount is RS 100. Complete more tasks to increase your balance!
         </p>
         <button
           onClick={() => setShowWithdrawModal(true)}
@@ -688,7 +688,7 @@ const MicroTasks: React.FC = () => {
                 </div>
                 {isReferralNotVerified && !isFull && !alreadyCompleted && (
                   <p style={{ color: '#ffa500', fontSize: '12px', marginBottom: '10px', padding: '8px', background: '#1a1a1a', borderRadius: '5px' }}>
-                    ⏳ Complete referral payment verification to unlock tasks
+                    ⏳ Complete 11 referral verification to unlock tasks
                   </p>
                 )}
                 <button
