@@ -25,6 +25,14 @@ const registerQuillFonts = () => {
       'Verdana'
     ];
     Quill.register(Font, true);
+
+    // Register custom line-height attribute
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Parchment = require('parchment');
+    const LineHeightAttribute = new Parchment.Attributor.Style('lineHeight', 'line-height', {
+      scope: Parchment.Scope.INLINE
+    });
+    Quill.register(LineHeightAttribute, true);
   }
 };
 
@@ -83,6 +91,7 @@ const createModules = (onHtmlToggle: () => void) => ({
         ]}
       ],
       [{ 'size': ['small', 'normal', 'large', 'huge'] }],
+      [{ 'lineHeight': ['1.0', '1.2', '1.5', '1.8', '2.0', '2.5'] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'color': [] }, { 'background': [] }],
       [{ 'script': 'sub'}, { 'script': 'super' }],
@@ -110,7 +119,8 @@ const formats = [
   'blockquote', 'code-block',
   'list', 'bullet',
   'align', 'direction',
-  'link', 'image'
+  'link', 'image',
+  'lineHeight'
 ];
 
 const ManageBlogs: React.FC = () => {
@@ -887,6 +897,7 @@ const ManageBlogs: React.FC = () => {
         :global(.ql-editor) {
           min-height: 300px !important;
           color: #333 !important;
+          padding-bottom: 100px !important;
         }
         :global(.ql-editor.ql-blank::before) {
           color: #999 !important;
@@ -914,6 +925,16 @@ const ManageBlogs: React.FC = () => {
         }
         :global(.ql-snow .ql-direction-rtl) {
           direction: rtl;
+        }
+        :global(.ql-tooltip) {
+          position: absolute !important;
+          background: #FFF !important;
+          border: 1px solid #CCC !important;
+          z-index: 9999 !important;
+        }
+        :global(.ql-tooltip.ql-flip) {
+          position: absolute !important;
+          top: auto !important;
         }
         @font-face {
           font-family: 'MyCustomFont';
@@ -957,6 +978,33 @@ const ManageBlogs: React.FC = () => {
         }
         :global(.ql-toolbar .ql-formats button[value="redo"]:before) {
           content: '↷';
+        }
+        :global(.ql-lineHeight) {
+          width: 90px;
+        }
+        :global(.ql-snow .ql-picker.ql-lineHeight .ql-picker-label:before) {
+          content: 'Line Height';
+        }
+        :global(.ql-snow .ql-lineHeight .ql-picker-item:before) {
+          content: attr(data-value);
+        }
+        :global([style*="line-height: 1.0"]) {
+          line-height: 1.0 !important;
+        }
+        :global([style*="line-height: 1.2"]) {
+          line-height: 1.2 !important;
+        }
+        :global([style*="line-height: 1.5"]) {
+          line-height: 1.5 !important;
+        }
+        :global([style*="line-height: 1.8"]) {
+          line-height: 1.8 !important;
+        }
+        :global([style*="line-height: 2.0"]) {
+          line-height: 2.0 !important;
+        }
+        :global([style*="line-height: 2.5"]) {
+          line-height: 2.5 !important;
         }
       `}</style>
     </div>
