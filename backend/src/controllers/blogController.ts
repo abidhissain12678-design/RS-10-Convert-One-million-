@@ -6,15 +6,60 @@ import { calculateWordCount, calculateReadingTime, generateExcerpt } from '../ut
 
 const upload = multer({ storage: storage });
 
-// Generate slug from title
-const generateSlug = (title: string): string => {
+/**
+ * Generate a random alphanumeric slug for non-ASCII titles (e.g., Urdu)
+ */
+const generateRandomSlug = (length: number = 12): string => {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let slug = '';
+  for (let i = 0; i < length; i++) {
+    slug += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return slug;
+};
+
+/**
+ * Check if a string contains non-ASCII characters (like Urdu)
+ */
+const containsNonASCI = (str: string): boolean => {
+  return /[^\x00-\x7F]/.test(str);
+};
+
+/**
+ * Slugify title - handles both English and Urdu
+ * For English titles: converts to URL-friendly format
+ * For Urdu/non-ASCII titles: generates random alphanumeric slug
+ */
+const generateSlug = (title: string, manualSlug?: string): string => {
+  // If manual slug provided, validate and use it
+  if (manualSlug && manualSlug.trim()) {
+    const cleanSlug = manualSlug
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .substring(0, 100);
+    
+    if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(cleanSlug)) {
+      return cleanSlug;
+    }
+  }
+
+  // Check if title contains non-ASCII characters (Urdu, Arabic, etc.)
+  if (containsNonASCI(title)) {
+    // Generate random slug for non-ASCII titles
+    return generateRandomSlug(12);
+  }
+
+  // For ASCII titles, generate URL-friendly slug
   return title
     .toLowerCase()
     .trim()
     .replace(/[^\w\s-]/g, '') // Remove special characters
     .replace(/\s+/g, '-') // Replace spaces with hyphens
     .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
-    .substring(0, 100); // Limit slug length
+    .substring(0, 100);
 };
 
 /**
@@ -25,7 +70,7 @@ export const createBlog = [
   upload.single('thumbnail'),
   async (req: Request, res: Response) => {
     try {
-      const { title, content, author, status = 'draft', metaDescription, focusKeywords } = req.body;
+      const { title, content, author, status = 'draft', metaDescription, focusKeywords, slug: manualSlug } = req.body;
       const thumbnail = (req.file as any)?.path || req.body.thumbnailUrl;
 
       // Validation
@@ -40,16 +85,21 @@ export const createBlog = [
       const readingTime = calculateReadingTime(wordCount);
       const excerpt = generateExcerpt(content, 300);
 
-      // Generate slug from title
-      let slug = generateSlug(title);
+      // Generate slug from title (with optional manual slug)
+      let slug = generateSlug(title, manualSlug);
       
-      // Check if slug already exists
+      // Ensure slug is unique by appending counter if needed
       let slugExists = await Blog.findOne({ slug });
       let counter = 1;
       const baseSlug = slug;
       
       while (slugExists) {
-        slug = `${baseSlug}-${counter}`;
+        // For random slugs, regenerate instead of appending counter
+        if (containsNonASCI(title)) {
+          slug = generateRandomSlug(12) + '-' + counter;
+        } else {
+          slug = `${baseSlug}-${counter}`;
+        }
         slugExists = await Blog.findOne({ slug });
         counter++;
       }
@@ -166,7 +216,7 @@ export const updateBlog = [
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const { title, content, author, status, metaDescription, focusKeywords } = req.body;
+      const { title, content, author, status, metaDescription, focusKeywords, slug: manualSlug } = req.body;
       const thumbnail = (req.file as any)?.path;
 
       const blog = await Blog.findById(id);
@@ -181,7 +231,38 @@ export const updateBlog = [
       if (title) {
         blog.title = title.trim();
         // Generate new slug if title changed
-        blog.slug = generateSlug(title);
+        let newSlug = generateSlug(title, manualSlug);
+        
+        // Check if slug already exists (and is different from current)
+        if (newSlug !== blog.slug) {
+          let slugExists = await Blog.findOne({ slug: newSlug, _id: { $ne: id } });
+          let counter = 1;
+          const baseSlug = newSlug;
+          
+          while (slugExists) {
+            if (containsNonASCI(title)) {
+              newSlug = generateRandomSlug(12) + '-' + counter;
+            } else {
+              newSlug = `${baseSlug}-${counter}`;
+            }
+            slugExists = await Blog.findOne({ slug: newSlug, _id: { $ne: id } });
+            counter++;
+          }
+        }
+        blog.slug = newSlug;
+      } else if (manualSlug) {
+        // Update slug if manually provided without changing title
+        let newSlug = generateSlug(blog.title, manualSlug);
+        
+        if (newSlug !== blog.slug) {
+          let slugExists = await Blog.findOne({ slug: newSlug, _id: { $ne: id } });
+          if (slugExists) {
+            return res.status(400).json({ 
+              error: 'This slug is already in use. Please choose a different slug.' 
+            });
+          }
+          blog.slug = newSlug;
+        }
       }
       if (content) {
         blog.content = content.trim();

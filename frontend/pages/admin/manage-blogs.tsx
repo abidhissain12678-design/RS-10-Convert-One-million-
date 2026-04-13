@@ -53,6 +53,7 @@ const formats = [
 
 const ManageBlogs: React.FC = () => {
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('Million Hub');
   const [thumbnail, setThumbnail] = useState<File | null>(null);
@@ -132,6 +133,7 @@ const ManageBlogs: React.FC = () => {
   const handleEditBlog = (blog: Blog) => {
     setEditingBlog(blog);
     setTitle(blog.title);
+    setSlug(blog.slug);
     setContent(blog.content);
     setAuthor(blog.author);
     setStatus(blog.status);
@@ -145,6 +147,7 @@ const ManageBlogs: React.FC = () => {
   const handleCancelEdit = () => {
     setEditingBlog(null);
     setTitle('');
+    setSlug('');
     setContent('');
     setAuthor('Million Hub');
     setThumbnail(null);
@@ -200,6 +203,9 @@ const ManageBlogs: React.FC = () => {
       formData.append('status', status);
       formData.append('metaDescription', metaDescription);
       formData.append('focusKeywords', focusKeywords);
+      if (slug.trim()) {
+        formData.append('slug', slug);
+      }
       if (thumbnail) {
         formData.append('thumbnail', thumbnail);
       }
@@ -346,6 +352,32 @@ const ManageBlogs: React.FC = () => {
                   boxSizing: 'border-box'
                 }}
               />
+            </div>
+
+            {/* Slug Input (Optional) */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                URL Slug (Optional - Required for Urdu titles)
+              </label>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''))}
+                placeholder="e.g., my-blog-post (auto-generated if left empty)"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#FFF',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+              <small style={{ color: '#AAA', marginTop: '5px', display: 'block' }}>
+                💡 Tip: For Urdu titles, enter a custom English slug here (lowercase, hyphens only). It will be auto-generated if you leave this empty.
+              </small>
             </div>
 
             {/* Author Input */}
