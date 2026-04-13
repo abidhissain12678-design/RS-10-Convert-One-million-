@@ -22,12 +22,16 @@ const registerQuillFonts = () => {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const Quill = require('quill');
       const Font = Quill.import('formats/font');
-      if (Font && Font.whitelist !== undefined) {
+      
+      if (Font) {
+        // Set whitelist of available fonts
         Font.whitelist = [
-          'MyCustomFont',
+          'sans-serif',
+          'serif',
+          'monospace',
           'Roboto',
           'Poppins',
-          'Jameel Noori Nastaleeq',
+          'Nastaliq',
           'Arial',
           'Georgia',
           'Times',
@@ -35,7 +39,13 @@ const registerQuillFonts = () => {
           'Trebuchet',
           'Verdana'
         ];
+        
+        // Register the Font format with whitelist
         Quill.register(Font, true);
+        
+        // Map font display names to CSS values
+        const fontFormat = Quill.import('formats/font');
+        fontFormat.whitelist = Font.whitelist;
       }
     } catch (error) {
       console.warn('Could not register Quill fonts:', error);
@@ -78,10 +88,9 @@ const createModules = () => ({
           'sans-serif',
           'serif',
           'monospace',
-          'MyCustomFont',
           'Roboto',
           'Poppins',
-          'Jameel Noori Nastaleeq',
+          'Nastaliq',
           'Arial',
           'Georgia',
           'Times',
@@ -931,13 +940,6 @@ const ManageBlogs: React.FC = () => {
           top: auto !important;
         }
         @font-face {
-          font-family: 'MyCustomFont';
-          src: url('/fonts/custom-font.woff2') format('woff2'),
-               url('/fonts/custom-font.woff') format('woff');
-          font-weight: normal;
-          font-style: normal;
-        }
-        @font-face {
           font-family: 'Roboto';
           src: url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
           font-weight: 400;
@@ -950,13 +952,26 @@ const ManageBlogs: React.FC = () => {
           font-style: normal;
         }
         @font-face {
-          font-family: 'Jameel Noori Nastaleeq';
-          src: url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+          font-family: 'Nastaliq';
+          src: url('/fonts/static/NotoNastaliqUrdu-Regular.ttf') format('truetype'),
+               url('/fonts/NotoNastaliqUrdu-VariableFont_wght.ttf') format('truetype');
           font-weight: 400;
           font-style: normal;
+          font-display: swap;
         }
-        :global(.ql-font-MyCustomFont) {
-          font-family: 'MyCustomFont', sans-serif !important;
+        @font-face {
+          font-family: 'Nastaliq';
+          src: url('/fonts/static/NotoNastaliqUrdu-Bold.ttf') format('truetype');
+          font-weight: 700;
+          font-style: normal;
+          font-display: swap;
+        }
+        @font-face {
+          font-family: 'Nastaliq';
+          src: url('/fonts/static/NotoNastaliqUrdu-SemiBold.ttf') format('truetype');
+          font-weight: 600;
+          font-style: normal;
+          font-display: swap;
         }
         :global(.ql-font-Roboto) {
           font-family: 'Roboto', sans-serif !important;
@@ -964,8 +979,8 @@ const ManageBlogs: React.FC = () => {
         :global(.ql-font-Poppins) {
           font-family: 'Poppins', sans-serif !important;
         }
-        :global(.ql-font-Jameel\ Noori\ Nastaleeq) {
-          font-family: 'Jameel Noori Nastaleeq', 'Arial', sans-serif !important;
+        :global(.ql-font-Nastaliq) {
+          font-family: 'Nastaliq', 'Arial', sans-serif !important;
         }
         :global(.ql-toolbar .ql-formats button[value="undo"]:before) {
           content: '↶';
