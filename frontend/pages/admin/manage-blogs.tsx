@@ -941,46 +941,82 @@ const ManageBlogs: React.FC = () => {
         }
         @font-face {
           font-family: 'Roboto';
-          src: url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+          font-display: swap;
+          src: local('Roboto'), local('Roboto-Regular'),
+               url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap') format('truetype');
           font-weight: 400;
           font-style: normal;
         }
         @font-face {
           font-family: 'Poppins';
-          src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap');
+          font-display: swap;
+          src: local('Poppins'), local('Poppins-Regular'),
+               url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap') format('truetype');
           font-weight: 400;
           font-style: normal;
         }
+        /* Nastaliq Font - Regular */
         @font-face {
           font-family: 'Nastaliq';
-          src: url('/fonts/static/NotoNastaliqUrdu-Regular.ttf') format('truetype'),
-               url('/fonts/NotoNastaliqUrdu-VariableFont_wght.ttf') format('truetype');
+          font-display: swap;
+          src: local('Noto Nastaliq Urdu'), local('NotoNastaliqUrdu'),
+               url('/fonts/static/NotoNastaliqUrdu-Regular.ttf') format('truetype');
           font-weight: 400;
           font-style: normal;
-          font-display: swap;
+          font-stretch: normal;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
+        /* Nastaliq Font - Medium */
         @font-face {
           font-family: 'Nastaliq';
-          src: url('/fonts/static/NotoNastaliqUrdu-Bold.ttf') format('truetype');
-          font-weight: 700;
+          font-display: swap;
+          src: local('Noto Nastaliq Urdu Medium'), local('NotoNastaliqUrdu-Medium'),
+               url('/fonts/static/NotoNastaliqUrdu-Medium.ttf') format('truetype');
+          font-weight: 500;
           font-style: normal;
-          font-display: swap;
+          font-stretch: normal;
         }
+        /* Nastaliq Font - SemiBold */
         @font-face {
           font-family: 'Nastaliq';
-          src: url('/fonts/static/NotoNastaliqUrdu-SemiBold.ttf') format('truetype');
+          font-display: swap;
+          src: local('Noto Nastaliq Urdu SemiBold'), local('NotoNastaliqUrdu-SemiBold'),
+               url('/fonts/static/NotoNastaliqUrdu-SemiBold.ttf') format('truetype');
           font-weight: 600;
           font-style: normal;
+          font-stretch: normal;
+        }
+        /* Nastaliq Font - Bold */
+        @font-face {
+          font-family: 'Nastaliq';
           font-display: swap;
+          src: local('Noto Nastaliq Urdu Bold'), local('NotoNastaliqUrdu-Bold'),
+               url('/fonts/static/NotoNastaliqUrdu-Bold.ttf') format('truetype');
+          font-weight: 700;
+          font-style: normal;
+          font-stretch: normal;
         }
         :global(.ql-font-Roboto) {
-          font-family: 'Roboto', sans-serif !important;
+          font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
         }
         :global(.ql-font-Poppins) {
-          font-family: 'Poppins', sans-serif !important;
+          font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
         }
         :global(.ql-font-Nastaliq) {
-          font-family: 'Nastaliq', 'Arial', sans-serif !important;
+          font-family: 'Nastaliq', 'Urdu Typesetting', 'Jameel Noori Nastaleeq', 'Arial', serif !important;
+          font-weight: 400;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        /* Mobile-specific font adjustments */
+        @media (max-width: 768px) {
+          :global(.ql-font-Nastaliq) {
+            font-size: 1.05em;
+            line-height: 1.6;
+            letter-spacing: 0.02em;
+          }
         }
         :global(.ql-toolbar .ql-formats button[value="undo"]:before) {
           content: '↶';
