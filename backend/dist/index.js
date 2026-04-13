@@ -13,6 +13,7 @@ const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const paymentRoutes_1 = __importDefault(require("./routes/paymentRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
 const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
+const blogRoutes_1 = __importDefault(require("./routes/blogRoutes"));
 const adminController_1 = require("./controllers/adminController");
 // ✅ Configure DNS for MongoDB Atlas connection
 dns_1.default.setServers(['1.1.1.1', '8.8.8.8']);
@@ -69,6 +70,7 @@ app.use('/api/auth', authRoutes_1.default);
 app.use('/api/payment', paymentRoutes_1.default);
 app.use('/api/admin', adminRoutes_1.default);
 app.use('/api/tasks', taskRoutes_1.default);
+app.use('/api/blogs', blogRoutes_1.default);
 // Get MongoDB URI - use local for development, require MONGO_URI for production
 const mongoUri = process.env.MONGO_URI ||
     (process.env.NODE_ENV === 'production'

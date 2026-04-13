@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import adminRoutes from './routes/adminRoutes';
 import taskRoutes from './routes/taskRoutes';
+import blogRoutes from './routes/blogRoutes';
 import { expireOverdueUsersInternal } from './controllers/adminController';
 
 // ✅ Configure DNS for MongoDB Atlas connection
@@ -75,6 +76,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/blogs', blogRoutes);
 
 // Get MongoDB URI - use local for development, require MONGO_URI for production
 const mongoUri = process.env.MONGO_URI || 
