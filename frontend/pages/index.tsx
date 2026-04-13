@@ -293,6 +293,91 @@ const Index: React.FC = () => {
           </div>
         </section>
 
+        {/* Million Hub Earn Money Tasks Card */}
+        <section style={{
+          padding: '40px 15px',
+          background: 'rgba(15, 20, 25, 0.95)',
+          backdropFilter: 'blur(10px)',
+          width: '100%',
+          boxSizing: 'border-box'
+        }}>
+          <div style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+            <div style={{
+              background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%)',
+              border: '1px solid rgba(255, 215, 0, 0.3)',
+              borderRadius: '16px',
+              overflow: 'hidden',
+              boxShadow: '0 8px 32px rgba(255, 215, 0, 0.1)',
+              transition: 'all 0.3s ease',
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '30px',
+              alignItems: 'center',
+              padding: 'clamp(20px, 5vw, 30px)'
+            }}>
+              {/* Image */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                textAlign: 'center'
+              }}>
+                <img
+                  src="/million-hub-earn-money-tasks.jpg"
+                  alt="Million Hub Earn Money Online Simple Tasks"
+                  style={{
+                    maxWidth: '100%',
+                    height: 'auto',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                    display: 'block'
+                  }}
+                />
+              </div>
+
+              {/* Content */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '15px',
+                justifyContent: 'center',
+                textAlign: 'center'
+              }}>
+                <p style={{
+                  fontSize: 'clamp(0.85rem, 1.5vw, 1rem)',
+                  color: '#FFD700',
+                  fontWeight: '600',
+                  margin: '0',
+                  textTransform: 'uppercase',
+                  letterSpacing: '1px',
+                  textAlign: 'center'
+                }}>
+                  COMPLETE SIMPLE TASKS
+                </p>
+                <h3 style={{
+                  fontSize: 'clamp(1.5rem, 3vw, 2rem)',
+                  color: '#FFD700',
+                  fontWeight: '700',
+                  margin: '0 0 10px 0',
+                  lineHeight: '1.2',
+                  textAlign: 'center'
+                }}>
+                  Earn Money Instantly
+                </h3>
+                <p style={{
+                  fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
+                  color: '#CCC',
+                  margin: '0',
+                  lineHeight: '1.6',
+                  textAlign: 'center'
+                }}>
+                  COMPLETE SIMPLE TASK and earn money instantaly. MINIMUM PAY OUT RS100. Earn Money Online CARD ky nichy AND NETWORK YOUR PATH KY OPAR.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Why Choose Us */}
         <section className="why-choose-section" style={{
           padding: '60px 15px',
