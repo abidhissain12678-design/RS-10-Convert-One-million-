@@ -26,12 +26,14 @@ export const calculateReadingTime = (wordCount: number): number => {
  */
 export const generateExcerpt = (htmlContent: string, maxLength: number = 300): string => {
   // Remove HTML tags
-  const plainText = htmlContent.replace(/<[^>]*>/g, '');
+  const plainText = htmlContent.replace(/<[^>]*>/g, ' ');
   // Remove extra whitespace
   const excerpt = plainText.replace(/\s+/g, ' ').trim();
-  // Truncate and add ellipsis if needed
-  if (excerpt.length > maxLength) {
-    return excerpt.substring(0, maxLength).trim() + '...';
+  // If excerpt is already within limit, return it
+  if (excerpt.length <= maxLength) {
+    return excerpt;
   }
-  return excerpt;
+  // Truncate to maxLength - 3 to leave room for '...'
+  const truncated = excerpt.substring(0, maxLength - 3).trim();
+  return truncated + '...';
 };
