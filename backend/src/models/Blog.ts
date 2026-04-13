@@ -3,11 +3,18 @@ import mongoose, { Document, Schema } from 'mongoose';
 export interface BlogDocument extends Document {
   title: string;
   slug: string; // Unique page-friendly URL
-  content: string; // Supports HTML/rich text
+  content: string; // HTML/rich text content
   thumbnail: string; // Cloudinary URL
   author: string; // Admin name
+  status: 'draft' | 'published'; // Draft or Published
+  metaDescription: string; // SEO meta description
+  focusKeywords: string[]; // SEO focus keywords
+  wordCount: number; // Auto-calculated word count
+  readingTime: number; // Auto-calculated reading time in minutes
+  excerpt: string; // Short preview text
   createdAt: Date;
   updatedAt: Date;
+  publishedAt?: Date; // When blog was published
 }
 
 const BlogSchema = new Schema<BlogDocument>({
@@ -40,6 +47,37 @@ const BlogSchema = new Schema<BlogDocument>({
     type: String, 
     required: [true, 'Author name is required'],
     default: 'Million Hub'
+  },
+  status: {
+    type: String,
+    enum: ['draft', 'published'],
+    default: 'draft'
+  },
+  metaDescription: {
+    type: String,
+    maxlength: [160, 'Meta description must not exceed 160 characters'],
+    default: ''
+  },
+  focusKeywords: {
+    type: [String],
+    default: []
+  },
+  wordCount: {
+    type: Number,
+    default: 0
+  },
+  readingTime: {
+    type: Number, // in minutes
+    default: 0
+  },
+  excerpt: {
+    type: String,
+    maxlength: [300, 'Excerpt must not exceed 300 characters'],
+    default: ''
+  },
+  publishedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
@@ -48,5 +86,7 @@ const BlogSchema = new Schema<BlogDocument>({
 // Index for faster queries
 BlogSchema.index({ slug: 1 });
 BlogSchema.index({ createdAt: -1 });
+BlogSchema.index({ status: 1, publishedAt: -1 });
+BlogSchema.index({ focusKeywords: 1 });
 
 export default mongoose.models.Blog || mongoose.model<BlogDocument>('Blog', BlogSchema);

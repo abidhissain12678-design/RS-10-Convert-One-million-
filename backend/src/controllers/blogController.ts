@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Blog from '../models/Blog';
 import multer from 'multer';
 import { storage } from '../utils/cloudinary';
+import { calculateWordCount, calculateReadingTime, generateExcerpt } from '../utils/blogUtils';
 
 const upload = multer({ storage: storage });
 
@@ -24,7 +25,7 @@ export const createBlog = [
   upload.single('thumbnail'),
   async (req: Request, res: Response) => {
     try {
-      const { title, content, author } = req.body;
+      const { title, content, author, status = 'draft', metaDescription, focusKeywords } = req.body;
       const thumbnail = (req.file as any)?.path || req.body.thumbnailUrl;
 
       // Validation
@@ -33,6 +34,11 @@ export const createBlog = [
           error: 'Title, content, and thumbnail are required' 
         });
       }
+
+      // Calculate word count and reading time
+      const wordCount = calculateWordCount(content);
+      const readingTime = calculateReadingTime(wordCount);
+      const excerpt = generateExcerpt(content, 300);
 
       // Generate slug from title
       let slug = generateSlug(title);
@@ -48,13 +54,30 @@ export const createBlog = [
         counter++;
       }
 
+      // Parse focusKeywords if it's a string
+      let keywordsArray = [];
+      if (focusKeywords) {
+        if (typeof focusKeywords === 'string') {
+          keywordsArray = focusKeywords.split(',').map((k: string) => k.trim()).filter((k: string) => k.length > 0);
+        } else if (Array.isArray(focusKeywords)) {
+          keywordsArray = focusKeywords;
+        }
+      }
+
       // Create new blog
       const newBlog = new Blog({
         title: title.trim(),
         slug,
         content: content.trim(),
         thumbnail,
-        author: author || 'Million Hub'
+        author: author || 'Million Hub',
+        status: status || 'draft',
+        metaDescription: metaDescription?.trim() || '',
+        focusKeywords: keywordsArray,
+        wordCount,
+        readingTime,
+        excerpt,
+        publishedAt: status === 'published' ? new Date() : null
       });
 
       const savedBlog = await newBlog.save();
@@ -62,7 +85,10 @@ export const createBlog = [
       console.log('✅ Blog created successfully:', {
         id: savedBlog._id,
         title: savedBlog.title,
-        slug: savedBlog.slug
+        slug: savedBlog.slug,
+        status: savedBlog.status,
+        wordCount: savedBlog.wordCount,
+        readingTime: savedBlog.readingTime
       });
 
       res.status(201).json({
@@ -84,11 +110,11 @@ export const createBlog = [
  */
 export const getAllBlogs = async (req: Request, res: Response) => {
   try {
-    const blogs = await Blog.find()
-      .sort({ createdAt: -1 })
-      .select('_id title slug thumbnail author createdAt');
+    const blogs = await Blog.find({ status: 'published' })
+      .sort({ publishedAt: -1 })
+      .select('_id title slug thumbnail author createdAt readingTime excerpt focusKeywords');
 
-    console.log('📚 Fetched all blogs:', blogs.length);
+    console.log('📚 Fetched all published blogs:', blogs.length);
 
     res.status(200).json({
       count: blogs.length,
@@ -110,7 +136,7 @@ export const getBlogBySlug = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
 
-    const blog = await Blog.findOne({ slug });
+    const blog = await Blog.findOne({ slug, status: 'published' });
 
     if (!blog) {
       return res.status(404).json({ 
@@ -138,7 +164,7 @@ export const updateBlog = [
   async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const { title, content, author } = req.body;
+      const { title, content, author, status, metaDescription, focusKeywords } = req.body;
       const thumbnail = (req.file as any)?.path;
 
       const blog = await Blog.findById(id);
@@ -155,13 +181,43 @@ export const updateBlog = [
         // Generate new slug if title changed
         blog.slug = generateSlug(title);
       }
-      if (content) blog.content = content.trim();
+      if (content) {
+        blog.content = content.trim();
+        // Recalculate word count and reading time
+        blog.wordCount = calculateWordCount(content);
+        blog.readingTime = calculateReadingTime(blog.wordCount);
+        blog.excerpt = generateExcerpt(content, 300);
+      }
       if (thumbnail) blog.thumbnail = thumbnail;
       if (author) blog.author = author;
+      
+      if (status) {
+        blog.status = status;
+        // Set publishedAt when status changes to published
+        if (status === 'published' && !blog.publishedAt) {
+          blog.publishedAt = new Date();
+        }
+      }
+
+      if (metaDescription) blog.metaDescription = metaDescription.trim();
+      
+      if (focusKeywords) {
+        let keywordsArray = [];
+        if (typeof focusKeywords === 'string') {
+          keywordsArray = focusKeywords.split(',').map((k: string) => k.trim()).filter((k: string) => k.length > 0);
+        } else if (Array.isArray(focusKeywords)) {
+          keywordsArray = focusKeywords;
+        }
+        blog.focusKeywords = keywordsArray;
+      }
 
       const updatedBlog = await blog.save();
 
-      console.log('✏️ Blog updated successfully:', updatedBlog._id);
+      console.log('✏️ Blog updated successfully:', {
+        id: updatedBlog._id,
+        status: updatedBlog.status,
+        wordCount: updatedBlog.wordCount
+      });
 
       res.status(200).json({
         message: 'Blog updated successfully',
@@ -207,7 +263,7 @@ export const deleteBlog = async (req: Request, res: Response) => {
 };
 
 /**
- * GET BLOGS FOR ADMIN (with all fields) - Admin only
+ * GET BLOGS FOR ADMIN (with all fields, including drafts) - Admin only
  * GET /api/blogs/admin/all
  */
 export const getBlogsForAdmin = async (req: Request, res: Response) => {
@@ -225,6 +281,42 @@ export const getBlogsForAdmin = async (req: Request, res: Response) => {
     console.error('❌ Error fetching blogs for admin:', error);
     res.status(500).json({ 
       error: error.message || 'Failed to fetch blogs' 
+    });
+  }
+};
+
+/**
+ * Change blog publish status
+ * POST /api/blogs/:id/publish or /api/blogs/:id/unpublish
+ */
+export const togglePublishBlog = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { publish } = req.body; // true to publish, false to unpublish
+
+    const blog = await Blog.findById(id);
+
+    if (!blog) {
+      return res.status(404).json({ error: 'Blog not found' });
+    }
+
+    blog.status = publish ? 'published' : 'draft';
+    if (publish && !blog.publishedAt) {
+      blog.publishedAt = new Date();
+    }
+
+    const updatedBlog = await blog.save();
+
+    console.log(`📤 Blog ${publish ? 'published' : 'unpublished'}:`, blog._id);
+
+    res.status(200).json({
+      message: `Blog ${publish ? 'published' : 'unpublished'} successfully`,
+      blog: updatedBlog
+    });
+  } catch (error: any) {
+    console.error('❌ Error toggling publish status:', error);
+    res.status(500).json({ 
+      error: error.message || 'Failed to toggle publish status' 
     });
   }
 };

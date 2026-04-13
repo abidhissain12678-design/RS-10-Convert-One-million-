@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import { getApiBaseUrl } from '../../utils/api';
+
+// Dynamically import React-Quill to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
 interface Blog {
   _id: string;
@@ -8,8 +12,35 @@ interface Blog {
   content: string;
   thumbnail: string;
   author: string;
+  status: 'draft' | 'published';
+  metaDescription: string;
+  focusKeywords: string[];
+  wordCount: number;
+  readingTime: number;
+  excerpt: string;
   createdAt: string;
+  publishedAt?: string;
 }
+
+// Quill modules configuration
+const modules = {
+  toolbar: [
+    [{ 'header': [1, 2, 3, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    ['blockquote', 'code-block'],
+    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    ['link', 'image'],
+    ['clean']
+  ],
+};
+
+const formats = [
+  'header',
+  'bold', 'italic', 'underline', 'strike',
+  'blockquote', 'code-block',
+  'list', 'bullet',
+  'link', 'image'
+];
 
 const ManageBlogs: React.FC = () => {
   const [title, setTitle] = useState('');
@@ -17,17 +48,32 @@ const ManageBlogs: React.FC = () => {
   const [author, setAuthor] = useState('Million Hub');
   const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState('');
+  const [status, setStatus] = useState<'draft' | 'published'>('draft');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [focusKeywords, setFocusKeywords] = useState('');
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [loading, setLoading] = useState(false);
   const [blogsLoading, setBlogsLoading] = useState(true);
   const [blogsError, setBlogsError] = useState<string | null>(null);
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const [wordCount, setWordCount] = useState(0);
+  const [readingTime, setReadingTime] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadBlogs();
   }, []);
+
+  // Calculate word count and reading time when content changes
+  useEffect(() => {
+    const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '');
+    const plainText = stripHtml(content);
+    const words = plainText.trim().split(/\s+/).filter(w => w.length > 0).length;
+    setWordCount(words);
+    setReadingTime(Math.max(1, Math.ceil(words / 200)));
+  }, [content]);
 
   const loadBlogs = async () => {
     setBlogsLoading(true);
@@ -79,8 +125,12 @@ const ManageBlogs: React.FC = () => {
     setTitle(blog.title);
     setContent(blog.content);
     setAuthor(blog.author);
+    setStatus(blog.status);
+    setMetaDescription(blog.metaDescription);
+    setFocusKeywords(blog.focusKeywords.join(', '));
     setThumbnailPreview(blog.thumbnail);
     setThumbnail(null);
+    setMessage('');
   };
 
   const handleCancelEdit = () => {
@@ -90,34 +140,46 @@ const ManageBlogs: React.FC = () => {
     setAuthor('Million Hub');
     setThumbnail(null);
     setThumbnailPreview('');
+    setStatus('draft');
+    setMetaDescription('');
+    setFocusKeywords('');
     setMessage('');
+  };
+
+  const showMessage = (msg: string, type: 'success' | 'error' = 'success') => {
+    setMessage(msg);
+    setMessageType(type);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!title.trim()) {
-      setMessage('Blog title is required');
+      showMessage('Blog title is required', 'error');
       return;
     }
     
     if (!content.trim()) {
-      setMessage('Blog content is required');
+      showMessage('Blog content is required', 'error');
       return;
     }
 
     if (!editingBlog && !thumbnail) {
-      setMessage('Thumbnail is required for new blogs');
+      showMessage('Thumbnail is required for new blogs', 'error');
+      return;
+    }
+
+    if (metaDescription.length > 160) {
+      showMessage('Meta description must be 160 characters or less', 'error');
       return;
     }
 
     setLoading(true);
-    setMessage('');
 
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        setMessage('Authentication required');
+        showMessage('Authentication required', 'error');
         return;
       }
 
@@ -126,6 +188,9 @@ const ManageBlogs: React.FC = () => {
       formData.append('title', title);
       formData.append('content', content);
       formData.append('author', author);
+      formData.append('status', status);
+      formData.append('metaDescription', metaDescription);
+      formData.append('focusKeywords', focusKeywords);
       if (thumbnail) {
         formData.append('thumbnail', thumbnail);
       }
@@ -147,15 +212,15 @@ const ManageBlogs: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(editingBlog ? 'Blog updated successfully!' : 'Blog created successfully!');
+        showMessage(editingBlog ? '✅ Blog updated successfully!' : '✅ Blog created successfully!', 'success');
         handleCancelEdit();
         loadBlogs();
       } else {
-        setMessage(data.error || 'Failed to save blog');
+        showMessage(data.error || 'Failed to save blog', 'error');
       }
     } catch (error) {
       console.error('Error saving blog:', error);
-      setMessage('Error saving blog');
+      showMessage('Error saving blog', 'error');
     } finally {
       setLoading(false);
     }
@@ -177,15 +242,43 @@ const ManageBlogs: React.FC = () => {
       });
 
       if (response.ok) {
-        setMessage('Blog deleted successfully!');
+        showMessage('✅ Blog deleted successfully!', 'success');
         loadBlogs();
       } else {
         const data = await response.json();
-        setMessage(data.error || 'Failed to delete blog');
+        showMessage(data.error || 'Failed to delete blog', 'error');
       }
     } catch (error) {
       console.error('Error deleting blog:', error);
-      setMessage('Error deleting blog');
+      showMessage('Error deleting blog', 'error');
+    }
+  };
+
+  const handleTogglePublish = async (blog: Blog) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/blogs/${blog._id}/toggle-publish`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ publish: blog.status === 'draft' })
+      });
+
+      if (response.ok) {
+        showMessage(`✅ Blog ${blog.status === 'draft' ? 'published' : 'unpublished'} successfully!`, 'success');
+        loadBlogs();
+      } else {
+        const data = await response.json();
+        showMessage(data.error || 'Failed to toggle publish status', 'error');
+      }
+    } catch (error) {
+      console.error('Error toggling publish:', error);
+      showMessage('Error toggling publish status', 'error');
     }
   };
 
@@ -196,14 +289,14 @@ const ManageBlogs: React.FC = () => {
       padding: '40px 20px',
       fontFamily: 'Arial, sans-serif'
     }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <h1 style={{
           fontSize: 'clamp(2rem, 5vw, 3rem)',
           color: '#FFD700',
           marginBottom: '30px',
           textAlign: 'center'
         }}>
-          📝 Manage Blogs
+          📝 WordPress-Style Blog Management
         </h1>
 
         {/* Form Section */}
@@ -232,7 +325,7 @@ const ManageBlogs: React.FC = () => {
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Enter blog title (3-200 characters)"
+                placeholder="Enter blog title"
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -269,32 +362,80 @@ const ManageBlogs: React.FC = () => {
               />
             </div>
 
-            {/* Content Textarea */}
+            {/* Rich Text Editor */}
             <div>
               <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
-                Blog Content *
+                Blog Content * (Rich Text Editor)
+              </label>
+              <div style={{
+                backgroundColor: '#FFF',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 215, 0, 0.3)',
+                overflow: 'hidden'
+              }}>
+                <ReactQuill
+                  theme="snow"
+                  value={content}
+                  onChange={setContent}
+                  modules={modules}
+                  formats={formats}
+                  style={{ minHeight: '300px' }}
+                />
+              </div>
+              <small style={{ color: '#AAA', marginTop: '8px', display: 'block' }}>
+                📊 Word Count: {wordCount} | ⏱️ Reading Time: {readingTime} min{readingTime !== 1 ? 's' : ''}
+              </small>
+            </div>
+
+            {/* Meta Description */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                SEO Meta Description (Max 160 characters)
               </label>
               <textarea
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Enter blog content (supports HTML)"
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value.substring(0, 160))}
+                placeholder="Write a compelling meta description for search engines"
                 style={{
                   width: '100%',
-                  minHeight: '300px',
+                  minHeight: '80px',
                   padding: '12px',
                   borderRadius: '8px',
                   border: '1px solid rgba(255, 215, 0, 0.3)',
                   backgroundColor: 'rgba(255, 255, 255, 0.05)',
                   color: '#FFF',
                   fontSize: '1rem',
-                  fontFamily: 'Arial, sans-serif',
                   boxSizing: 'border-box',
-                  resize: 'vertical'
+                  resize: 'vertical',
+                  fontFamily: 'Arial, sans-serif'
                 }}
               />
-              <small style={{ color: '#CCC', marginTop: '5px', display: 'block' }}>
-                📝 You can use HTML tags for formatting (e.g., &lt;strong&gt;, &lt;em&gt;, &lt;p&gt;, &lt;ul&gt;, etc.)
+              <small style={{ color: '#AAA', marginTop: '5px', display: 'block' }}>
+                {metaDescription.length}/160 characters
               </small>
+            </div>
+
+            {/* Focus Keywords */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Focus Keywords (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={focusKeywords}
+                onChange={(e) => setFocusKeywords(e.target.value)}
+                placeholder="e.g., million hub, earning online, financial freedom"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#FFF',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
             </div>
 
             {/* Thumbnail Upload */}
@@ -314,18 +455,44 @@ const ManageBlogs: React.FC = () => {
                 }}
               />
               {thumbnailPreview && (
-                <img
-                  src={thumbnailPreview}
-                  alt="Thumbnail preview"
-                  style={{
-                    maxWidth: '200px',
-                    maxHeight: '200px',
-                    borderRadius: '8px',
-                    marginTop: '10px',
-                    border: '1px solid rgba(255, 215, 0, 0.3)'
-                  }}
-                />
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <img
+                    src={thumbnailPreview}
+                    alt="Thumbnail preview"
+                    style={{
+                      maxWidth: '300px',
+                      maxHeight: '200px',
+                      borderRadius: '8px',
+                      marginTop: '10px',
+                      border: '2px solid rgba(255, 215, 0, 0.5)'
+                    }}
+                  />
+                  <small style={{ color: '#AAA', display: 'block', marginTop: '5px' }}>
+                    Preview - Image will be optimized by Cloudinary
+                  </small>
+                </div>
               )}
+            </div>
+
+            {/* Status Toggle */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Publication Status
+              </label>
+              <div style={{ display: 'flex', gap: '15px' }}>
+                {(['draft', 'published'] as const).map((s) => (
+                  <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#FFF' }}>
+                    <input
+                      type="radio"
+                      name="status"
+                      value={s}
+                      checked={status === s}
+                      onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
+                    />
+                    {s === 'draft' ? '📋 Save as Draft' : '📈 Publish Now'}
+                  </label>
+                ))}
+              </div>
             </div>
 
             {/* Message Display */}
@@ -333,9 +500,9 @@ const ManageBlogs: React.FC = () => {
               <div style={{
                 padding: '12px',
                 borderRadius: '8px',
-                backgroundColor: message.includes('successfully') ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)',
-                color: message.includes('successfully') ? '#4CAF50' : '#F44336',
-                border: `1px solid ${message.includes('successfully') ? '#4CAF50' : '#F44336'}`
+                backgroundColor: messageType === 'success' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)',
+                color: messageType === 'success' ? '#4CAF50' : '#F44336',
+                border: `1px solid ${messageType === 'success' ? '#4CAF50' : '#F44336'}`
               }}>
                 {message}
               </div>
@@ -392,7 +559,7 @@ const ManageBlogs: React.FC = () => {
             color: '#FFD700',
             marginBottom: '20px'
           }}>
-            📚 Existing Blogs ({blogs.length})
+            📚 All Blogs ({blogs.length})
           </h2>
 
           {blogsLoading ? (
@@ -417,27 +584,42 @@ const ManageBlogs: React.FC = () => {
           ) : (
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
               gap: '20px'
             }}>
               {blogs.map((blog) => (
                 <article key={blog._id} style={{
                   background: 'rgba(255, 215, 0, 0.05)',
-                  border: '1px solid rgba(255, 215, 0, 0.2)',
+                  border: `2px solid ${blog.status === 'published' ? '#4CAF50' : '#FFA500'}`,
                   borderRadius: '12px',
                   overflow: 'hidden',
                   transition: 'all 0.3s'
                 }}>
                   {/* Blog Thumbnail */}
-                  <img
-                    src={blog.thumbnail}
-                    alt={blog.title}
-                    style={{
-                      width: '100%',
-                      height: '200px',
-                      objectFit: 'cover'
-                    }}
-                  />
+                  <div style={{ position: 'relative' }}>
+                    <img
+                      src={blog.thumbnail}
+                      alt={blog.title}
+                      style={{
+                        width: '100%',
+                        height: '200px',
+                        objectFit: 'cover'
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      backgroundColor: blog.status === 'published' ? '#4CAF50' : '#FFA500',
+                      color: '#FFF',
+                      fontSize: '0.8rem',
+                      fontWeight: 'bold'
+                    }}>
+                      {blog.status === 'published' ? '✅ Published' : '📋 Draft'}
+                    </div>
+                  </div>
 
                   {/* Blog Info */}
                   <div style={{ padding: '15px' }}>
@@ -452,55 +634,94 @@ const ManageBlogs: React.FC = () => {
                       {blog.title}
                     </h3>
 
+                    <div style={{
+                      display: 'flex',
+                      gap: '10px',
+                      marginBottom: '10px',
+                      fontSize: '0.85rem',
+                      color: '#AAA'
+                    }}>
+                      <span>📝 {blog.wordCount} words</span>
+                      <span>⏱️ {blog.readingTime} min read</span>
+                    </div>
+
                     <p style={{
                       color: '#CCC',
                       fontSize: '0.85rem',
-                      margin: '5px 0',
+                      margin: '5px 0 10px 0',
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical'
+                      WebkitBoxOrient: 'vertical',
+                      minHeight: '40px'
                     }}>
-                      {blog.content.replace(/<[^>]*>/g, '')}
+                      {blog.excerpt || 'No excerpt available'}
                     </p>
 
                     <div style={{ fontSize: '0.8rem', color: '#AAA', margin: '10px 0' }}>
                       By {blog.author} | {new Date(blog.createdAt).toLocaleDateString()}
                     </div>
 
+                    {blog.focusKeywords.length > 0 && (
+                      <div style={{ marginBottom: '10px' }}>
+                        <small style={{ color: '#5BC0EB' }}>
+                          🔍 Keywords: {blog.focusKeywords.join(', ')}
+                        </small>
+                      </div>
+                    )}
+
                     {/* Action Buttons */}
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
                       <button
-                        onClick={() => handleEditBlog(blog)}
+                        onClick={() => handleTogglePublish(blog)}
                         style={{
-                          flex: 1,
+                          width: '100%',
                           padding: '8px 12px',
-                          backgroundColor: 'rgba(255, 215, 0, 0.2)',
-                          color: '#FFD700',
-                          border: '1px solid #FFD700',
+                          backgroundColor: blog.status === 'draft' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 152, 0, 0.2)',
+                          color: blog.status === 'draft' ? '#4CAF50' : '#FF9800',
+                          border: `1px solid ${blog.status === 'draft' ? '#4CAF50' : '#FF9800'}`,
                           borderRadius: '6px',
                           cursor: 'pointer',
-                          fontSize: '0.9rem'
+                          fontSize: '0.9rem',
+                          fontWeight: '600'
                         }}
                       >
-                        ✏️ Edit
+                        {blog.status === 'draft' ? '📤 Publish' : '📋 Unpublish'}
                       </button>
-                      <button
-                        onClick={() => handleDeleteBlog(blog._id)}
-                        style={{
-                          flex: 1,
-                          padding: '8px 12px',
-                          backgroundColor: 'rgba(244, 67, 54, 0.2)',
-                          color: '#F44336',
-                          border: '1px solid #F44336',
-                          borderRadius: '6px',
-                          cursor: 'pointer',
-                          fontSize: '0.9rem'
-                        }}
-                      >
-                        🗑️ Delete
-                      </button>
+
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => handleEditBlog(blog)}
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                            color: '#FFD700',
+                            border: '1px solid #FFD700',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem'
+                          }}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBlog(blog._id)}
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                            color: '#F44336',
+                            border: '1px solid #F44336',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem'
+                          }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </article>
@@ -509,6 +730,22 @@ const ManageBlogs: React.FC = () => {
           )}
         </div>
       </div>
+
+      <style jsx>{`
+        :global(.ql-container) {
+          font-size: 1rem !important;
+          font-family: Arial, sans-serif !important;
+        }
+        :global(.ql-editor) {
+          min-height: 300px !important;
+          color: #333 !important;
+        }
+        :global(.ql-toolbar) {
+          border-top: 1px solid #DDD !important;
+          border-bottom: 1px solid #DDD !important;
+          background: #FAFAFA !important;
+        }
+      `}</style>
     </div>
   );
 };

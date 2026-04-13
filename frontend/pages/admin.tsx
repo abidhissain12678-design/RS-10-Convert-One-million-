@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { getApiBaseUrl } from '../utils/api';
-import ManageBlogs from './admin/manage-blogs';
+import dynamic from 'next/dynamic';
+
+const ManageBlogs = dynamic(() => import('./admin/manage-blogs'), { ssr: false });
 
 const AdminPanel = () => {
   const [isAdmin, setIsAdmin] = useState(false);

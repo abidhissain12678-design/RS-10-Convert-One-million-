@@ -5,7 +5,8 @@ import {
   getBlogBySlug, 
   updateBlog, 
   deleteBlog,
-  getBlogsForAdmin 
+  getBlogsForAdmin,
+  togglePublishBlog
 } from '../controllers/blogController';
 import { authMiddleware, adminMiddleware } from '../middleware/authmiddleware';
 
@@ -19,6 +20,7 @@ router.get('/:slug', getBlogBySlug);
 router.post('/create', authMiddleware, adminMiddleware, createBlog);
 router.put('/:id', authMiddleware, adminMiddleware, updateBlog);
 router.delete('/:id', authMiddleware, adminMiddleware, deleteBlog);
+router.post('/:id/toggle-publish', authMiddleware, adminMiddleware, togglePublishBlog);
 router.get('/admin/all', authMiddleware, adminMiddleware, getBlogsForAdmin);
 
 export default router;

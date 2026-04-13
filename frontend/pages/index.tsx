@@ -2234,6 +2234,16 @@ const StatCard: React.FC<{ number: string; label: string }> = ({ number, label }
 const BlogSection: React.FC = () => {
   const [blogs, setBlogs] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
+  const [dompurify, setDompurify] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    // Import dompurify dynamically for SSR compatibility
+    import('isomorphic-dompurify').then((module) => {
+      setDompurify(module.default);
+    }).catch((error) => {
+      console.warn('dompurify not available:', error);
+    });
+  }, []);
 
   React.useEffect(() => {
     const fetchBlogs = async () => {
@@ -2364,7 +2374,10 @@ const BlogSection: React.FC = () => {
                     color: '#AAA'
                   }}>
                     <span>👤 {blog.author}</span>
-                    <span>📅 {new Date(blog.createdAt).toLocaleDateString()}</span>
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                      {blog.readingTime && <span>⏱️ {blog.readingTime} min read</span>}
+                      <span>📅 {new Date(blog.createdAt).toLocaleDateString()}</span>
+                    </div>
                   </div>
 
                   {/* Blog Title */}
@@ -2395,7 +2408,7 @@ const BlogSection: React.FC = () => {
                     WebkitLineClamp: 2,
                     WebkitBoxOrient: 'vertical'
                   }}>
-                    {blog.content.replace(/<[^>]*>/g, '').substring(0, 120)}...
+                    {blog.excerpt || blog.content.replace(/<[^>]*>/g, '').substring(0, 120)}...
                   </p>
 
                   {/* Read More Button */}
