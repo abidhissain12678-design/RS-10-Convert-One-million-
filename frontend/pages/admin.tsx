@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getApiBaseUrl } from '../utils/api';
+import ManageBlogs from './admin/manage-blogs';
 
 const AdminPanel = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -715,6 +716,7 @@ const AdminPanel = () => {
         <button onClick={() => handleTabChange('task_submissions')} style={activeTab === 'task_submissions' ? styles.navBtnActive : styles.navBtn}>📋 Task Submissions</button>
         <button onClick={() => handleTabChange('social_settings')} style={activeTab === 'social_settings' ? styles.navBtnActive : styles.navBtn}>🌐 Social Settings</button>
         <button onClick={() => handleTabChange('manage_news')} style={activeTab === 'manage_news' ? styles.navBtnActive : styles.navBtn}>📰 Manage News</button>
+        <button onClick={() => handleTabChange('manage_blogs')} style={activeTab === 'manage_blogs' ? styles.navBtnActive : styles.navBtn}>📝 Manage Blogs</button>
         <button onClick={() => handleTabChange('maintenance')} style={activeTab === 'maintenance' ? styles.navBtnActive : styles.navBtn}>🛠️ Maintenance</button>
         <button onClick={() => { window.location.href = '/admin/customize-tasks'; }} style={styles.navBtn}>🧩 Customize Tasks</button>
         <button onClick={() => handleTabChange('change_password')} style={activeTab === 'change_password' ? styles.navBtnActive : styles.navBtn}>🔑 Change Password</button>
@@ -1429,6 +1431,11 @@ const AdminPanel = () => {
 )}
 
 {/* NOTIFICATION TAB removed as requested */}
+
+{/* MANAGE BLOGS TAB */}
+{activeTab === 'manage_blogs' && (
+  <ManageBlogs />
+)}
 
 {/* CHANGE PASSWORD TAB */}
 {activeTab === 'change_password' && (

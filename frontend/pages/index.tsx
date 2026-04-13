@@ -259,7 +259,8 @@ const Index: React.FC = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '15px',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                textAlign: 'center'
               }}>
                 <p style={{
                   fontSize: 'clamp(0.85rem, 1.5vw, 1rem)',
@@ -285,6 +286,7 @@ const Index: React.FC = () => {
                   color: '#CCC',
                   margin: '0',
                   lineHeight: '1.6'
+              
                 }}>
                   Transform RS 10 into RS 1,000,000 through our unique networking model.
                 </p>
