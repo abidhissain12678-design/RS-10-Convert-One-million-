@@ -9,6 +9,7 @@ const authRoutes_1 = __importDefault(require("./routes/authRoutes"));
 const paymentRoutes_1 = __importDefault(require("./routes/paymentRoutes"));
 const adminRoutes_1 = __importDefault(require("./routes/adminRoutes"));
 const taskRoutes_1 = __importDefault(require("./routes/taskRoutes"));
+const blogRoutes_1 = __importDefault(require("./routes/blogRoutes"));
 const app = (0, express_1.default)(); // 👈 YE LINE MUST HONA CHAHIYE (top par)
 // ✅ Step 1: allowed origins define karo
 const allowedOrigins = [
@@ -50,4 +51,5 @@ app.use('/api/auth', authRoutes_1.default);
 app.use('/api/payment', paymentRoutes_1.default);
 app.use('/api/admin', adminRoutes_1.default);
 app.use('/api/tasks', taskRoutes_1.default);
+app.use('/api/blogs', blogRoutes_1.default);
 exports.default = app;

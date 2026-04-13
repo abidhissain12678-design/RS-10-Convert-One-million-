@@ -4,6 +4,7 @@ import authRoutes from './routes/authRoutes';
 import paymentRoutes from './routes/paymentRoutes';
 import adminRoutes from './routes/adminRoutes';
 import taskRoutes from './routes/taskRoutes';
+import blogRoutes from './routes/blogRoutes';
 
 const app = express();  // 👈 YE LINE MUST HONA CHAHIYE (top par)
 
@@ -55,5 +56,6 @@ app.use('/api/auth', authRoutes);
 app.use('/api/payment', paymentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/blogs', blogRoutes);
 
 export default app;

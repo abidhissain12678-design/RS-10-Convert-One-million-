@@ -323,7 +323,7 @@ const Index: React.FC = () => {
                 textAlign: 'center'
               }}>
                 <img
-                  src="/million-hub-earn-money-tasks.jpg"
+                  src="/million-hub-earn-money-tasks.jpg.png"
                   alt="Million Hub Earn Money Online Simple Tasks"
                   style={{
                     maxWidth: '100%',
@@ -435,6 +435,8 @@ const Index: React.FC = () => {
           </div>
         </section>
 
+        {/* Blog Section */}
+        <BlogSection />
 
         {/* CTA Section */}
         <section style={{
@@ -2225,6 +2227,248 @@ const StatCard: React.FC<{ number: string; label: string }> = ({ number, label }
     </div>
   </div>
 );
+
+// Blog Section Component
+const BlogSection: React.FC = () => {
+  const [blogs, setBlogs] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        const baseUrl = process.env.NODE_ENV === 'production' 
+          ? 'https://rs-10-convert-one-million.onrender.com' 
+          : 'http://localhost:5000';
+        
+        const response = await fetch(`${baseUrl}/api/blogs`, {
+          cache: 'no-cache'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setBlogs(data.blogs || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch blogs:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogs();
+  }, []);
+
+  return (
+    <section style={{
+      padding: '60px 20px',
+      background: 'linear-gradient(135deg, rgba(15, 20, 30, 0.95), rgba(20, 25, 40, 0.95))',
+      width: '100%',
+      boxSizing: 'border-box'
+    }}>
+      <article style={{ maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+        {/* Section Header */}
+        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+          <h2 style={{
+            fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+            color: '#FFD700',
+            marginBottom: '15px',
+            fontWeight: '700'
+          }}>
+            📰 Latest News & Blogs
+          </h2>
+          <p style={{
+            fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
+            color: '#CCC',
+            maxWidth: '600px',
+            margin: '0 auto',
+            lineHeight: 1.6
+          }}>
+            Stay updated with the latest insights, tips, and success stories from Million Hub
+          </p>
+        </div>
+
+        {/* Blog Cards Grid */}
+        {loading ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '40px 20px',
+            color: '#CCC'
+          }}>
+            ⏳ Loading blogs...
+          </div>
+        ) : blogs.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '40px 20px',
+            color: '#CCC',
+            fontSize: '1.1rem'
+          }}>
+            No blog articles yet. Check back soon!
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+            gap: '30px'
+          }}>
+            {blogs.slice(0, 6).map((blog) => (
+              <article key={blog._id} style={{
+                background: 'rgba(255, 215, 0, 0.05)',
+                border: '1px solid rgba(255, 215, 0, 0.2)',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                const el = e.currentTarget;
+                el.style.transform = 'translateY(-8px)';
+                el.style.boxShadow = '0 12px 35px rgba(255, 215, 0, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                const el = e.currentTarget;
+                el.style.transform = 'translateY(0)';
+                el.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+              }}>
+                {/* Blog Thumbnail */}
+                <img
+                  src={blog.thumbnail}
+                  alt={blog.title}
+                  style={{
+                    width: '100%',
+                    height: '220px',
+                    objectFit: 'cover',
+                    display: 'block'
+                  }}
+                />
+
+                {/* Blog Content */}
+                <div style={{
+                  padding: '24px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  flex: 1
+                }}>
+                  {/* Metadata */}
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '12px',
+                    fontSize: '0.8rem',
+                    color: '#AAA'
+                  }}>
+                    <span>👤 {blog.author}</span>
+                    <span>📅 {new Date(blog.createdAt).toLocaleDateString()}</span>
+                  </div>
+
+                  {/* Blog Title */}
+                  <h3 style={{
+                    fontSize: 'clamp(1.1rem, 2.5vw, 1.3rem)',
+                    color: '#FFD700',
+                    margin: '0 0 12px 0',
+                    fontWeight: '700',
+                    lineHeight: 1.3,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical'
+                  }}>
+                    {blog.title}
+                  </h3>
+
+                  {/* Blog Excerpt */}
+                  <p style={{
+                    fontSize: 'clamp(0.9rem, 1.8vw, 0.95rem)',
+                    color: '#DDD',
+                    margin: '0 0 auto 0',
+                    lineHeight: 1.5,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical'
+                  }}>
+                    {blog.content.replace(/<[^>]*>/g, '').substring(0, 120)}...
+                  </p>
+
+                  {/* Read More Button */}
+                  <button
+                    onClick={() => {
+                      // This could open a blog detail page or modal
+                      alert(`Blog: ${blog.title}\n\nFull page coming soon!`);
+                    }}
+                    style={{
+                      marginTop: '16px',
+                      backgroundColor: 'rgba(255, 215, 0, 0.15)',
+                      color: '#FFD700',
+                      border: '2px solid #FFD700',
+                      padding: '10px 16px',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '0.9rem',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#FFD700';
+                      e.currentTarget.style.color = '#000';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 215, 0, 0.15)';
+                      e.currentTarget.style.color = '#FFD700';
+                    }}
+                  >
+                    📖 Read More →
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+
+        {/* See All Blogs Link */}
+        {blogs.length > 6 && (
+          <div style={{
+            textAlign: 'center',
+            marginTop: '40px'
+          }}>
+            <button
+              onClick={() => {
+                alert('Blog archive page coming soon!');
+              }}
+              style={{
+                backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                color: '#FFD700',
+                border: '2px solid #FFD700',
+                padding: '12px 30px',
+                borderRadius: '50px',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: '600',
+                transition: 'all 0.3s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#FFD700';
+                e.currentTarget.style.color = '#000';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 215, 0, 0.2)';
+                e.currentTarget.style.color = '#FFD700';
+              }}
+            >
+              📚 View All Articles
+            </button>
+          </div>
+        )}
+      </article>
+    </section>
+  );
+};
 
 export default Index;
 
