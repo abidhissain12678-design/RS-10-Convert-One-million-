@@ -293,77 +293,18 @@ const BlogDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Article Content - Coming Soon Message */}
-        <div style={{
-          fontSize: '1.05rem',
-          lineHeight: 1.9,
-          color: '#EEE',
-          marginBottom: '60px',
-          wordBreak: 'break-word',
-          padding: '60px 40px',
-          textAlign: 'center',
-          backgroundColor: 'rgba(255, 215, 0, 0.08)',
-          border: '2px dashed rgba(255, 215, 0, 0.4)',
-          borderRadius: '16px',
-          minHeight: '400px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}>
-          <div style={{
-            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-            marginBottom: '20px'
-          }}>
-            🚀
-          </div>
-          <h2 style={{
-            color: '#FFD700',
-            fontSize: '2rem',
-            marginBottom: '15px',
-            fontWeight: '700'
-          }}>
-            Full Page Coming Soon!
-          </h2>
-          <p style={{
-            fontSize: '1.1rem',
-            color: '#CCC',
-            marginBottom: '30px',
-            maxWidth: '500px',
-            lineHeight: 1.7
-          }}>
-            We're crafting an amazing detailed article about "{blog.title}". 
-          </p>
-          <p style={{
-            fontSize: '0.95rem',
-            color: '#AAA',
-            marginBottom: '30px',
-            fontStyle: 'italic'
-          }}>
-            Please check back soon for the complete article!
-          </p>
-          <Link href="/" style={{
-            backgroundColor: '#FFD700',
-            color: '#000',
-            padding: '12px 30px',
-            borderRadius: '8px',
-            textDecoration: 'none',
-            fontWeight: '600',
-            fontSize: '1rem',
-            transition: 'all 0.3s ease',
-            display: 'inline-block'
+        {/* Article Content - Rich HTML */}
+        <div
+          style={{
+            fontSize: '1.05rem',
+            lineHeight: 1.9,
+            color: '#EEE',
+            marginBottom: '60px',
+            wordBreak: 'break-word'
           }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)';
-            e.currentTarget.style.boxShadow = '0 8px 20px rgba(255, 215, 0, 0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}>
-            ← Back to Home
-          </Link>
-        </div>
+          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+          className="blog-content"
+        />
 
         {/* Author Bio Section */}
         <div
