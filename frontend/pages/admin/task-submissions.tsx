@@ -150,8 +150,15 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
-        alert('Payment approved successfully!');
-        loadSubmissions(); // Refresh the list
+        // Optimistically update submission status
+        setSubmissions(prevSubmissions =>
+          prevSubmissions.map(submission =>
+            submission._id === submissionId
+              ? { ...submission, completed: true }
+              : submission
+          )
+        );
+        alert('✅ Payment approved successfully!');
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to approve payment');
@@ -183,8 +190,11 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
-        alert('Payment rejected successfully!');
-        loadSubmissions(); // Refresh the list
+        // Remove rejected submission from list
+        setSubmissions(prevSubmissions =>
+          prevSubmissions.filter(submission => submission._id !== submissionId)
+        );
+        alert('❌ Payment rejected and removed from queue');
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to reject payment');
@@ -216,8 +226,15 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
-        alert('Withdrawal approved successfully!');
-        loadWithdrawals(); // Refresh the list
+        // Optimistically update withdrawal status
+        setWithdrawals(prevWithdrawals =>
+          prevWithdrawals.map(w =>
+            w._id === paymentId
+              ? { ...w, status: 'Approved' }
+              : w
+          )
+        );
+        alert('✅ Withdrawal approved successfully!');
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to approve withdrawal');
@@ -245,8 +262,11 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
-        alert('Withdrawal rejected successfully!');
-        loadWithdrawals();
+        // Remove rejected withdrawal from list
+        setWithdrawals(prevWithdrawals =>
+          prevWithdrawals.filter(w => w._id !== paymentId)
+        );
+        alert('❌ Withdrawal rejected and removed from queue');
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to reject withdrawal');

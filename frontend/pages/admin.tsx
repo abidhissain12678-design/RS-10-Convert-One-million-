@@ -105,8 +105,8 @@ const AdminPanel = () => {
       }
     };
     fetchPayments();
-    const interval = setInterval(fetchPayments, 10000); // Refresh every 10 seconds
-    return () => clearInterval(interval);
+    // Load once on mount - no auto-refresh
+    // Use manual Refresh button for updates
   }, []);
 
   // Fetch all payments (pending, approved, rejected)
@@ -140,8 +140,8 @@ const AdminPanel = () => {
       }
     };
     fetchAllPayments();
-    const interval = setInterval(fetchAllPayments, 15000); // Refresh every 15 seconds
-    return () => clearInterval(interval);
+    // Load once on mount - no auto-refresh
+    // Use manual Refresh button for updates
   }, []);
 
   // Fetch locked accounts
@@ -175,8 +175,8 @@ const AdminPanel = () => {
       }
     };
     fetchLockedAccounts();
-    const interval = setInterval(fetchLockedAccounts, 20000); // Refresh every 20 seconds
-    return () => clearInterval(interval);
+    // Load once on mount - no auto-refresh
+    // Use manual Refresh button for updates
   }, []);
 
   // Fetch task submissions
@@ -212,8 +212,8 @@ const AdminPanel = () => {
       }
     };
     fetchTaskSubmissions();
-    const interval = setInterval(fetchTaskSubmissions, 15000); // Refresh every 15 seconds
-    return () => clearInterval(interval);
+    // Load once on mount - no auto-refresh
+    // Use manual Refresh button for updates
   }, []);
 
   // Retry functions
