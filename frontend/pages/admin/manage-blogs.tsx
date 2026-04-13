@@ -4,35 +4,42 @@ import { getApiBaseUrl } from '../../utils/api';
 import 'react-quill/dist/quill.snow.css';
 
 // Dynamically import React-Quill to avoid SSR issues
-const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import('react-quill');
+    return RQ;
+  },
+  { 
+    ssr: false,
+    loading: () => <div style={{ color: '#AAA', padding: '20px' }}>Loading editor...</div>
+  }
+);
 
 // Register custom fonts after client-side mount
 const registerQuillFonts = () => {
   if (typeof window !== 'undefined') {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Quill = require('quill').default || require('quill');
-    const Font = Quill.import('formats/font');
-    Font.whitelist = [
-      'MyCustomFont',
-      'Roboto',
-      'Poppins',
-      'Jameel Noori Nastaleeq',
-      'Arial',
-      'Georgia',
-      'Times',
-      'Courier',
-      'Trebuchet',
-      'Verdana'
-    ];
-    Quill.register(Font, true);
-
-    // Register custom line-height attribute
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Parchment = require('parchment');
-    const LineHeightAttribute = new Parchment.Attributor.Style('lineHeight', 'line-height', {
-      scope: Parchment.Scope.INLINE
-    });
-    Quill.register(LineHeightAttribute, true);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const Quill = require('quill');
+      const Font = Quill.import('formats/font');
+      if (Font && Font.whitelist !== undefined) {
+        Font.whitelist = [
+          'MyCustomFont',
+          'Roboto',
+          'Poppins',
+          'Jameel Noori Nastaleeq',
+          'Arial',
+          'Georgia',
+          'Times',
+          'Courier',
+          'Trebuchet',
+          'Verdana'
+        ];
+        Quill.register(Font, true);
+      }
+    } catch (error) {
+      console.warn('Could not register Quill fonts:', error);
+    }
   }
 };
 
@@ -53,15 +60,8 @@ interface Blog {
   publishedAt?: string;
 }
 
-// Custom handler for HTML view toggle
-const createHtmlToggleHandler = (onToggle: () => void) => {
-  return () => {
-    onToggle();
-  };
-};
-
 // Quill modules configuration
-const createModules = (onHtmlToggle: () => void) => ({
+const createModules = () => ({
   clipboard: {
     matchVisibility: true,
   },
@@ -91,7 +91,6 @@ const createModules = (onHtmlToggle: () => void) => ({
         ]}
       ],
       [{ 'size': ['small', 'normal', 'large', 'huge'] }],
-      [{ 'lineHeight': ['1.0', '1.2', '1.5', '1.8', '2.0', '2.5'] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'color': [] }, { 'background': [] }],
       [{ 'script': 'sub'}, { 'script': 'super' }],
@@ -100,13 +99,8 @@ const createModules = (onHtmlToggle: () => void) => ({
       [{ 'align': ['', 'center', 'right', 'justify'] }],
       [{ 'direction': 'rtl' }],
       ['link', 'image'],
-      ['undo', 'redo'],
       ['clean']
-    ],
-    handlers: {
-      'undo': () => {},
-      'redo': () => {},
-    }
+    ]
   }
 });
 
@@ -119,8 +113,7 @@ const formats = [
   'blockquote', 'code-block',
   'list', 'bullet',
   'align', 'direction',
-  'link', 'image',
-  'lineHeight'
+  'link', 'image'
 ];
 
 const ManageBlogs: React.FC = () => {
@@ -144,7 +137,7 @@ const ManageBlogs: React.FC = () => {
   const [readingTime, setReadingTime] = useState(0);
   const [htmlViewActive, setHtmlViewActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [modules, setModules] = useState(createModules(() => setHtmlViewActive(!htmlViewActive)));
+  const [modules] = useState(createModules());
 
   useEffect(() => {
     registerQuillFonts();
@@ -530,14 +523,15 @@ const ManageBlogs: React.FC = () => {
                   border: '1px solid rgba(255, 215, 0, 0.3)',
                   overflow: 'hidden'
                 }}>
-                  <ReactQuill
-                    theme="snow"
-                    value={content}
-                    onChange={setContent}
-                    modules={modules}
-                    formats={formats}
-                    style={{ minHeight: '300px' }}
-                  />
+                  {typeof window !== 'undefined' && (
+                    <ReactQuill
+                      theme="snow"
+                      value={content}
+                      onChange={setContent}
+                      modules={modules}
+                      formats={formats}
+                    />
+                  )}
                 </div>
               )}
               <small style={{ color: '#AAA', marginTop: '8px', display: 'block' }}>
@@ -978,33 +972,6 @@ const ManageBlogs: React.FC = () => {
         }
         :global(.ql-toolbar .ql-formats button[value="redo"]:before) {
           content: '↷';
-        }
-        :global(.ql-lineHeight) {
-          width: 90px;
-        }
-        :global(.ql-snow .ql-picker.ql-lineHeight .ql-picker-label:before) {
-          content: 'Line Height';
-        }
-        :global(.ql-snow .ql-lineHeight .ql-picker-item:before) {
-          content: attr(data-value);
-        }
-        :global([style*="line-height: 1.0"]) {
-          line-height: 1.0 !important;
-        }
-        :global([style*="line-height: 1.2"]) {
-          line-height: 1.2 !important;
-        }
-        :global([style*="line-height: 1.5"]) {
-          line-height: 1.5 !important;
-        }
-        :global([style*="line-height: 1.8"]) {
-          line-height: 1.8 !important;
-        }
-        :global([style*="line-height: 2.0"]) {
-          line-height: 2.0 !important;
-        }
-        :global([style*="line-height: 2.5"]) {
-          line-height: 2.5 !important;
         }
       `}</style>
     </div>

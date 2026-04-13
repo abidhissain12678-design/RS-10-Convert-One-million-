@@ -181,23 +181,33 @@ const BlogDetailPage: React.FC = () => {
       <article style={{
         maxWidth: '800px',
         margin: '0 auto',
-        padding: '60px 20px 80px'
+        padding: '60px 20px 80px',
+        backgroundColor: 'rgba(26, 26, 46, 0.8)',
+        borderRadius: '20px',
+        border: '1px solid rgba(255, 215, 0, 0.1)',
+        backdropFilter: 'blur(10px)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        paddingLeft: '30px',
+        paddingRight: '30px'
       }}>
         {/* Hero Section with Thumbnail */}
         <div style={{
           marginBottom: '50px',
           borderRadius: '16px',
           overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+          backgroundColor: '#1a1a2e'
         }}>
           <img
             src={blog.thumbnail}
             alt={blog.title}
             style={{
               width: '100%',
-              height: '400px',
-              objectFit: 'cover',
-              display: 'block'
+              height: 'auto',
+              maxHeight: '500px',
+              objectFit: 'contain',
+              display: 'block',
+              aspectRatio: '16/9'
             }}
           />
         </div>
@@ -297,40 +307,49 @@ const BlogDetailPage: React.FC = () => {
         <div
           style={{
             fontSize: '1.05rem',
-            lineHeight: 1.9,
+            lineHeight: 2,
             color: '#EEE',
             marginBottom: '60px',
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
+            fontFamily: '"Jameel Noori Nastaleeq", "Segoe UI", Tahoma, san-serif'
           }}
           dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           className="blog-content"
         />
 
-        {/* Author Bio Section */}
+        {/* Author Bio Section - Glassmorphism */}
         <div
           style={{
-            backgroundColor: 'rgba(255, 215, 0, 0.05)',
-            border: '2px solid rgba(255, 215, 0, 0.2)',
-            borderRadius: '12px',
-            padding: '30px',
-            marginBottom: '60px'
+            backgroundColor: 'rgba(255, 215, 0, 0.08)',
+            border: '2px solid rgba(255, 215, 0, 0.25)',
+            borderRadius: '16px',
+            padding: '35px',
+            marginBottom: '60px',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            boxShadow: '0 8px 32px rgba(255, 215, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
+            borderLeft: '5px solid rgba(255, 215, 0, 0.6)'
           }}
         >
           <h3 style={{
             color: '#FFD700',
-            marginBottom: '12px',
-            fontSize: '1.2rem',
-            fontWeight: '700'
+            marginBottom: '15px',
+            fontSize: '1.3rem',
+            fontWeight: '700',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
           }}>
             ✍️ About the Author
           </h3>
           <p style={{
-            color: '#CCC',
+            color: '#DDD',
             lineHeight: 1.8,
-            margin: 0
+            margin: '0',
+            fontSize: '1rem'
           }}>
-            {blog.author} is a contributor at Million Hub, sharing insights and expertise on earning
-            opportunities, financial freedom, and personal growth strategies.
+            <strong style={{ color: '#FFD700', fontWeight: '700' }}>{blog.author}</strong> is a contributor at Million Hub, sharing insights and expertise on earning
+            opportunities, financial freedom, and personal growth strategies. With a passion for helping others succeed, we provide actionable advice and proven methods.
           </p>
         </div>
 
@@ -433,6 +452,13 @@ const BlogDetailPage: React.FC = () => {
 
       {/* Global Blog Content Styles */}
       <style jsx global>{`
+        @font-face {
+          font-family: 'Jameel Noori Nastaleeq';
+          src: url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+          font-weight: 400;
+          font-style: normal;
+        }
+
         .blog-content h1,
         .blog-content h2,
         .blog-content h3,
@@ -454,15 +480,29 @@ const BlogDetailPage: React.FC = () => {
 
         .blog-content h2 {
           font-size: 1.6rem;
+          border-left: 5px solid rgba(255, 215, 0, 0.7);
+          padding-left: 20px;
+          margin-left: -20px;
+          background: linear-gradient(90deg, rgba(255, 215, 0, 0.05), transparent);
+          padding: 10px 15px 10px 20px;
+          border-radius: 0 8px 8px 0;
         }
 
         .blog-content h3 {
           font-size: 1.3rem;
+          border-left: 4px solid rgba(255, 215, 0, 0.6);
+          padding-left: 16px;
+          margin-left: -16px;
+          background: linear-gradient(90deg, rgba(255, 215, 0, 0.03), transparent);
+          padding: 8px 12px 8px 16px;
+          border-radius: 0 6px 6px 0;
         }
 
         .blog-content p {
           margin: 0 0 20px 0;
           text-align: justify;
+          line-height: 2;
+          letter-spacing: 0.3px;
         }
 
         .blog-content a {
@@ -483,19 +523,22 @@ const BlogDetailPage: React.FC = () => {
         }
 
         .blog-content li {
-          margin-bottom: 10px;
-          line-height: 1.8;
+          margin-bottom: 12px;
+          line-height: 1.9;
+          letter-spacing: 0.2px;
         }
 
         .blog-content blockquote {
           margin: 25px 0;
           padding: 20px;
-          border-left: 4px solid rgba(255, 215, 0, 0.5);
-          background: rgba(255, 215, 0, 0.05);
+          border-left: 5px solid rgba(255, 215, 0, 0.6);
+          background: rgba(255, 215, 0, 0.08);
           border-radius: 8px;
           font-style: italic;
           color: #DDD;
           font-size: 1.1rem;
+          line-height: 1.9;
+          backdrop-filter: blur(10px);
         }
 
         .blog-content code {
