@@ -350,54 +350,6 @@ const Index: React.FC = () => {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section style={{
-          padding: '50px 15px',
-          background: 'rgba(0, 0, 0, 0.7)',
-          textAlign: 'center',
-          width: '100%',
-          boxSizing: 'border-box'
-        }}>
-          <div style={{ maxWidth: '1000px', margin: '0 auto', width: '100%' }}>
-            <h2 style={{
-              fontSize: 'clamp(1.6rem, 4vw, 2.5rem)',
-              color: '#FFD700',
-              marginBottom: '35px',
-              fontWeight: '700'
-            }}>
-              The Mathematics of Success
-            </h2>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-              gap: '20px',
-              marginBottom: '40px'
-            }}>
-              <StatCard number="11" label="Level 1 Members" />
-              <StatCard number="121" label="Level 2 Members" />
-              <StatCard number="1,331" label="Level 3 Members" />
-              <StatCard number="14,641" label="Level 4 Members" />
-              <StatCard number="161,051" label="Level 5 Members" />
-              <StatCard number="1,771,561" label="Level 6 Members" />
-            </div>
-            <div style={{
-              background: 'rgba(255, 215, 0, 0.1)',
-              padding: '25px 20px',
-              borderRadius: '12px',
-              border: '1px solid rgba(255, 215, 0, 0.3)'
-            }}>
-              <h3 style={{ color: '#FFD700', fontSize: 'clamp(1.3rem, 3vw, 1.8rem)', marginBottom: '10px' }}>
-                Total Network Potential
-              </h3>
-              <p style={{ color: '#FFF', fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 'bold', margin: '0' }}>
-                1,771,561 Members
-              </p>
-              <p style={{ color: '#CCC', marginTop: '8px', fontSize: '0.9rem' }}>
-                From your single referral action
-              </p>
-            </div>
-          </div>
-        </section>
 
         {/* CTA Section */}
         <section style={{
