@@ -47,6 +47,9 @@ const MicroTasks: React.FC = () => {
     accountHolderName: ''
   });
   const [withdrawSubmitting, setWithdrawSubmitting] = useState(false);
+  const [referralPaymentVerified, setReferralPaymentVerified] = useState(false);
+  const [userReferrals, setUserReferrals] = useState<any[]>([]);
+  const [loadingReferralStatus, setLoadingReferralStatus] = useState(true);
   
   // YouTube Player states
   const playerRef = useRef<any | null>(null);
@@ -77,6 +80,40 @@ const MicroTasks: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to fetch task earnings');
+    }
+  };
+
+  const fetchReferralPaymentStatus = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoadingReferralStatus(false);
+      return;
+    }
+
+    try {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/auth/user`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUserReferrals(userData.networkReferrals || []);
+        
+        // Check if user has any referral with unlocked status and payment approved
+        const hasVerifiedReferral = (userData.networkReferrals || []).some(
+          (referral: any) => referral.status === 'unlocked' && referral.paymentApproved === true
+        );
+        
+        setReferralPaymentVerified(hasVerifiedReferral);
+      }
+    } catch (err) {
+      console.error('Failed to fetch referral payment status');
+    } finally {
+      setLoadingReferralStatus(false);
     }
   };
 
@@ -147,6 +184,7 @@ const MicroTasks: React.FC = () => {
     fetchTasks();
     fetchTaskEarnings();
     fetchCompletedTasks();
+    fetchReferralPaymentStatus();
   }, []);
 
   // Load YouTube API script
@@ -605,8 +643,14 @@ const MicroTasks: React.FC = () => {
             const progress = Math.round((task.completedQuantity / task.totalQuantity) * 100);
             const isFull = task.completedQuantity >= task.totalQuantity;
             const alreadyCompleted = completedTaskIds.has(task._id);
-            const buttonLabel = isFull ? 'Task Full' : alreadyCompleted ? 'Already Completed' : 'Start Task';
-            const disabledButton = isFull || alreadyCompleted;
+            const isReferralNotVerified = !referralPaymentVerified;
+            
+            let buttonLabel = isFull ? 'Task Full' : alreadyCompleted ? 'Already Completed' : 'Start Task';
+            let disabledButton = isFull || alreadyCompleted || isReferralNotVerified;
+            
+            if (isReferralNotVerified && !isFull && !alreadyCompleted) {
+              buttonLabel = 'Referral Pending';
+            }
 
             return (
               <div key={task._id} style={{
@@ -642,6 +686,11 @@ const MicroTasks: React.FC = () => {
                     {task.completedQuantity}/{task.totalQuantity} ({progress}%)
                   </p>
                 </div>
+                {isReferralNotVerified && !isFull && !alreadyCompleted && (
+                  <p style={{ color: '#ffa500', fontSize: '12px', marginBottom: '10px', padding: '8px', background: '#1a1a1a', borderRadius: '5px' }}>
+                    ⏳ Complete referral payment verification to unlock tasks
+                  </p>
+                )}
                 <button
                   onClick={() => handleStartTask(task)}
                   disabled={disabledButton}
