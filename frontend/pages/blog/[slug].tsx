@@ -46,7 +46,8 @@ const BlogDetailPage: React.FC = () => {
         }
 
         const data = await response.json();
-        setBlog(data.blog);
+        // Handle both formats: { blog } and direct blog object
+        setBlog(data.blog || data);
 
         // Fetch related blogs (same keywords)
         const allBlogsResponse = await fetch(`${baseUrl}/api/blogs`, {

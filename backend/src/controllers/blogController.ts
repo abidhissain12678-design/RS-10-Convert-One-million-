@@ -110,9 +110,10 @@ export const createBlog = [
  */
 export const getAllBlogs = async (req: Request, res: Response) => {
   try {
+    // Get published blogs, sorted by date
     const blogs = await Blog.find({ status: 'published' })
-      .sort({ publishedAt: -1 })
-      .select('_id title slug thumbnail author createdAt readingTime excerpt focusKeywords');
+      .sort({ publishedAt: -1, createdAt: -1 })
+      .select('_id title slug thumbnail author createdAt readingTime excerpt focusKeywords wordCount');
 
     console.log('📚 Fetched all published blogs:', blogs.length);
 
@@ -136,7 +137,8 @@ export const getBlogBySlug = async (req: Request, res: Response) => {
   try {
     const { slug } = req.params;
 
-    const blog = await Blog.findOne({ slug, status: 'published' });
+    // Find blog by slug (published or draft)
+    const blog = await Blog.findOne({ slug });
 
     if (!blog) {
       return res.status(404).json({ 
@@ -146,7 +148,7 @@ export const getBlogBySlug = async (req: Request, res: Response) => {
 
     console.log('📖 Fetched blog:', blog.slug);
 
-    res.status(200).json(blog);
+    res.status(200).json({ blog });
   } catch (error: any) {
     console.error('❌ Error fetching blog:', error);
     res.status(500).json({ 

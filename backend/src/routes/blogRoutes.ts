@@ -12,15 +12,15 @@ import { authMiddleware, adminMiddleware } from '../middleware/authmiddleware';
 
 const router = express.Router();
 
-// Public routes
-router.get('/', getAllBlogs);
-router.get('/:slug', getBlogBySlug);
-
-// Admin routes
+// Admin routes MUST come before wildcard routes
 router.post('/create', authMiddleware, adminMiddleware, createBlog);
+router.get('/admin/all', authMiddleware, adminMiddleware, getBlogsForAdmin);
 router.put('/:id', authMiddleware, adminMiddleware, updateBlog);
 router.delete('/:id', authMiddleware, adminMiddleware, deleteBlog);
 router.post('/:id/toggle-publish', authMiddleware, adminMiddleware, togglePublishBlog);
-router.get('/admin/all', authMiddleware, adminMiddleware, getBlogsForAdmin);
+
+// Public routes
+router.get('/', getAllBlogs);
+router.get('/:slug', getBlogBySlug);
 
 export default router;
