@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { getApiBaseUrl } from '../../utils/api';
+import 'react-quill/dist/quill.snow.css';
 
 // Dynamically import React-Quill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
@@ -26,9 +27,14 @@ interface Blog {
 const modules = {
   toolbar: [
     [{ 'header': [1, 2, 3, false] }],
+    [{ 'font': ['Arial', 'Georgia', 'Times', 'Courier', 'Trebuchet', 'Verdana'] }],
+    [{ 'size': ['small', 'normal', 'large', 'huge'] }],
     ['bold', 'italic', 'underline', 'strike'],
+    [{ 'color': [] }, { 'background': [] }],
     ['blockquote', 'code-block'],
     [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+    [{ 'align': ['', 'center', 'right', 'justify'] }],
+    [{ 'direction': 'rtl' }],
     ['link', 'image'],
     ['clean']
   ],
@@ -36,9 +42,12 @@ const modules = {
 
 const formats = [
   'header',
+  'font', 'size',
   'bold', 'italic', 'underline', 'strike',
+  'color', 'background',
   'blockquote', 'code-block',
   'list', 'bullet',
+  'align', 'direction',
   'link', 'image'
 ];
 
