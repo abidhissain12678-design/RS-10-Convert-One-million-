@@ -6,6 +6,28 @@ import 'react-quill/dist/quill.snow.css';
 // Dynamically import React-Quill to avoid SSR issues
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false });
 
+// Register custom fonts after client-side mount
+const registerQuillFonts = () => {
+  if (typeof window !== 'undefined') {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const Quill = require('quill').default || require('quill');
+    const Font = Quill.import('formats/font');
+    Font.whitelist = [
+      'MyCustomFont',
+      'Roboto',
+      'Poppins',
+      'Jameel Noori Nastaleeq',
+      'Arial',
+      'Georgia',
+      'Times',
+      'Courier',
+      'Trebuchet',
+      'Verdana'
+    ];
+    Quill.register(Font, true);
+  }
+};
+
 interface Blog {
   _id: string;
   title: string;
@@ -23,28 +45,68 @@ interface Blog {
   publishedAt?: string;
 }
 
-// Quill modules configuration
-const modules = {
-  toolbar: [
-    [{ 'header': [1, 2, 3, false] }],
-    [{ 'font': ['MyCustomFont', 'Arial', 'Georgia', 'Times', 'Courier', 'Trebuchet', 'Verdana'] }],
-    [{ 'size': ['small', 'normal', 'large', 'huge'] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ 'color': [] }, { 'background': [] }],
-    ['blockquote', 'code-block'],
-    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-    [{ 'align': ['', 'center', 'right', 'justify'] }],
-    [{ 'direction': 'rtl' }],
-    ['link', 'image'],
-    ['clean']
-  ],
+// Custom handler for HTML view toggle
+const createHtmlToggleHandler = (onToggle: () => void) => {
+  return () => {
+    onToggle();
+  };
 };
+
+// Quill modules configuration
+const createModules = (onHtmlToggle: () => void) => ({
+  clipboard: {
+    matchVisibility: true,
+  },
+  history: {
+    delay: 1000,
+    maxStack: 50,
+    userOnly: true
+  },
+  toolbar: {
+    container: [
+      [{ 'header': [1, 2, 3, false] }],
+      [
+        { 'font': [
+          'sans-serif',
+          'serif',
+          'monospace',
+          'MyCustomFont',
+          'Roboto',
+          'Poppins',
+          'Jameel Noori Nastaleeq',
+          'Arial',
+          'Georgia',
+          'Times',
+          'Courier',
+          'Trebuchet',
+          'Verdana'
+        ]}
+      ],
+      [{ 'size': ['small', 'normal', 'large', 'huge'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      ['blockquote', 'code-block'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': ['', 'center', 'right', 'justify'] }],
+      [{ 'direction': 'rtl' }],
+      ['link', 'image'],
+      ['undo', 'redo'],
+      ['clean']
+    ],
+    handlers: {
+      'undo': () => {},
+      'redo': () => {},
+    }
+  }
+});
 
 const formats = [
   'header',
   'font', 'size',
   'bold', 'italic', 'underline', 'strike',
   'color', 'background',
+  'script',
   'blockquote', 'code-block',
   'list', 'bullet',
   'align', 'direction',
@@ -70,9 +132,12 @@ const ManageBlogs: React.FC = () => {
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
+  const [htmlViewActive, setHtmlViewActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [modules, setModules] = useState(createModules(() => setHtmlViewActive(!htmlViewActive)));
 
   useEffect(() => {
+    registerQuillFonts();
     loadBlogs();
   }, []);
 
@@ -156,6 +221,7 @@ const ManageBlogs: React.FC = () => {
     setMetaDescription('');
     setFocusKeywords('');
     setMessage('');
+    setHtmlViewActive(false);
   };
 
   const showMessage = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -405,24 +471,65 @@ const ManageBlogs: React.FC = () => {
 
             {/* Rich Text Editor */}
             <div>
-              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
-                Blog Content * (Rich Text Editor)
-              </label>
-              <div style={{
-                backgroundColor: '#FFF',
-                borderRadius: '8px',
-                border: '1px solid rgba(255, 215, 0, 0.3)',
-                overflow: 'hidden'
-              }}>
-                <ReactQuill
-                  theme="snow"
-                  value={content}
-                  onChange={setContent}
-                  modules={modules}
-                  formats={formats}
-                  style={{ minHeight: '300px' }}
-                />
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label style={{ color: '#FFD700', fontWeight: '600' }}>
+                  Blog Content * (Rich Text Editor)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setHtmlViewActive(!htmlViewActive)}
+                  style={{
+                    padding: '6px 12px',
+                    backgroundColor: htmlViewActive ? 'rgba(100, 200, 255, 0.2)' : 'rgba(255, 215, 0, 0.2)',
+                    color: htmlViewActive ? '#64C8FF' : '#FFD700',
+                    border: `1px solid ${htmlViewActive ? '#64C8FF' : '#FFD700'}`,
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  {htmlViewActive ? '</> HTML' : '<> Rich Text'}
+                </button>
               </div>
+
+              {htmlViewActive ? (
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Enter raw HTML code here"
+                  style={{
+                    width: '100%',
+                    minHeight: '300px',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 215, 0, 0.3)',
+                    backgroundColor: '#1a1a1a',
+                    color: '#FFD700',
+                    fontFamily: '"Courier New", monospace',
+                    fontSize: '0.9rem',
+                    boxSizing: 'border-box',
+                    resize: 'vertical',
+                    lineHeight: '1.5'
+                  }}
+                />
+              ) : (
+                <div style={{
+                  backgroundColor: '#FFF',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  overflow: 'hidden'
+                }}>
+                  <ReactQuill
+                    theme="snow"
+                    value={content}
+                    onChange={setContent}
+                    modules={modules}
+                    formats={formats}
+                    style={{ minHeight: '300px' }}
+                  />
+                </div>
+              )}
               <small style={{ color: '#AAA', marginTop: '8px', display: 'block' }}>
                 📊 Word Count: {wordCount} | ⏱️ Reading Time: {readingTime} min{readingTime !== 1 ? 's' : ''}
               </small>
@@ -781,10 +888,75 @@ const ManageBlogs: React.FC = () => {
           min-height: 300px !important;
           color: #333 !important;
         }
+        :global(.ql-editor.ql-blank::before) {
+          color: #999 !important;
+        }
         :global(.ql-toolbar) {
           border-top: 1px solid #DDD !important;
           border-bottom: 1px solid #DDD !important;
           background: #FAFAFA !important;
+        }
+        :global(.ql-snow .ql-stroke) {
+          stroke: #444 !important;
+        }
+        :global(.ql-snow .ql-fill) {
+          fill: #444 !important;
+        }
+        :global(.ql-snow .ql-picker-label) {
+          color: #444 !important;
+        }
+        :global(.ql-editor) {
+          direction: ltr;
+        }
+        :global(.ql-editor[style*="direction: rtl"]) {
+          direction: rtl;
+          text-align: right;
+        }
+        :global(.ql-snow .ql-direction-rtl) {
+          direction: rtl;
+        }
+        @font-face {
+          font-family: 'MyCustomFont';
+          src: url('/fonts/custom-font.woff2') format('woff2'),
+               url('/fonts/custom-font.woff') format('woff');
+          font-weight: normal;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: 'Roboto';
+          src: url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+          font-weight: 400;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: 'Poppins';
+          src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap');
+          font-weight: 400;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: 'Jameel Noori Nastaleeq';
+          src: url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+          font-weight: 400;
+          font-style: normal;
+        }
+        :global(.ql-font-MyCustomFont) {
+          font-family: 'MyCustomFont', sans-serif !important;
+        }
+        :global(.ql-font-Roboto) {
+          font-family: 'Roboto', sans-serif !important;
+        }
+        :global(.ql-font-Poppins) {
+          font-family: 'Poppins', sans-serif !important;
+        }
+        :global(.ql-font-Jameel\ Noori\ Nastaleeq) {
+          font-family: 'Jameel Noori Nastaleeq', 'Arial', sans-serif !important;
+        }
+        :global(.ql-toolbar .ql-formats button[value="undo"]:before) {
+          content: '↶';
+        }
+        :global(.ql-toolbar .ql-formats button[value="redo"]:before) {
+          content: '↷';
         }
       `}</style>
     </div>
