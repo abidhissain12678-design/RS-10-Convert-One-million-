@@ -2412,11 +2412,8 @@ const BlogSection: React.FC = () => {
                   </p>
 
                   {/* Read More Button */}
-                  <button
-                    onClick={() => {
-                      // This could open a blog detail page or modal
-                      alert(`Blog: ${blog.title}\n\nFull page coming soon!`);
-                    }}
+                  <a
+                    href={`/blog/${blog.slug}`}
                     style={{
                       marginTop: '16px',
                       backgroundColor: 'rgba(255, 215, 0, 0.15)',
@@ -2427,7 +2424,10 @@ const BlogSection: React.FC = () => {
                       cursor: 'pointer',
                       fontWeight: '600',
                       fontSize: '0.9rem',
-                      transition: 'all 0.3s ease'
+                      transition: 'all 0.3s ease',
+                      textDecoration: 'none',
+                      display: 'inline-block',
+                      textAlign: 'center'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.backgroundColor = '#FFD700';
@@ -2439,7 +2439,7 @@ const BlogSection: React.FC = () => {
                     }}
                   >
                     📖 Read More →
-                  </button>
+                  </a>
                 </div>
               </article>
             ))}
