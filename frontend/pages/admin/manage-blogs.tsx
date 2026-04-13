@@ -27,7 +27,7 @@ interface Blog {
 const modules = {
   toolbar: [
     [{ 'header': [1, 2, 3, false] }],
-    [{ 'font': ['Arial', 'Georgia', 'Times', 'Courier', 'Trebuchet', 'Verdana'] }],
+    [{ 'font': ['MyCustomFont', 'Arial', 'Georgia', 'Times', 'Courier', 'Trebuchet', 'Verdana'] }],
     [{ 'size': ['small', 'normal', 'large', 'huge'] }],
     ['bold', 'italic', 'underline', 'strike'],
     [{ 'color': [] }, { 'background': [] }],
