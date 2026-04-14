@@ -1,4 +1,75 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+const MillionHubFAQ = () => {
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  const faqs = [
+    { q: "Million Hub kya hai?", a: "Million Hub ek digital platform hai jo online earning aur skills ke liye banaya gaya hai." },
+    { q: "How to join the Digital Revolution Panel?", a: "Register on our website and choose your preferred skill track to start." },
+    { q: "Kya ye services free hain?", a: "Hamari basic guidance aur news updates bilkul muft hain." },
+    { q: "How can I earn 100k monthly?", a: "By mastering high-ticket digital skills like AI development or Digital Marketing." },
+    { q: "Account verify kaise karein?", a: "Profile settings mein ja kar apna CNIC ya email verify karwayein." },
+    { q: "Is Million Hub available globally?", a: "Yes, our platform is accessible from anywhere in the world." },
+    { q: "Karobar section mein kya shamil hai?", a: "Yahan naye business ideas aur startup growth ki tips di jati hain." },
+    { q: "How to contact support?", a: "You can email us at info@millionhub.pk for any queries." }
+  ];
+
+  // Logic to detect if the question is English or Urdu for alignment
+  const isEnglish = (text: string) => /^[A-Za-z0-9\s?]+$/.test(text);
+
+  return (
+    <div className="max-w-4xl mx-auto p-4 sm:p-8 bg-[#000] rounded-[2rem] border border-slate-800 shadow-2xl my-10 font-sans">
+      <div className="text-center mb-12">
+        <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase">
+          Frequently Asked <span className="text-[#fbbf24]">Questions</span>
+        </h2>
+        <p className="text-slate-500 text-[10px] font-bold mt-2 uppercase tracking-[0.3em]">
+          Aam Tor Par Pooche Janay Walay Sawalat
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        {faqs.map((faq, index) => {
+          const eng = isEnglish(faq.q);
+          return (
+            <div 
+              key={index} 
+              className={`group border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/20 transition-all ${activeIndex === index ? 'border-[#fbbf24]/50' : 'hover:border-slate-600'}`}
+            >
+              <button 
+                onClick={() => setActiveIndex(activeIndex === index ? null : index)}
+                className={`w-full flex items-center p-5 gap-4 transition-all ${eng ? 'flex-row' : 'flex-row-reverse'}`}
+                style={{ direction: eng ? 'ltr' : 'rtl' }}
+              >
+                {/* Arrow Icon */}
+                <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition-transform duration-300 ${activeIndex === index ? 'rotate-180 bg-[#fbbf24] text-black' : 'text-[#fbbf24]'}`}>
+                  <span className="text-[10px]">▼</span>
+                </div>
+
+                {/* Question Text */}
+                <span className={`flex-1 text-sm font-black tracking-tight ${eng ? 'text-left font-sans' : 'text-right urdu-text'} ${activeIndex === index ? 'text-[#fbbf24]' : 'text-slate-200'}`}>
+                  {faq.q}
+                </span>
+              </button>
+              
+              {/* Answer Section */}
+              <div 
+                className={`transition-all duration-500 ease-in-out overflow-hidden ${activeIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
+              >
+                <div 
+                  className={`p-6 pt-0 text-slate-400 text-[13px] leading-relaxed border-t border-slate-800/50 mt-2 ${eng ? 'text-left' : 'text-right urdu-text'}`}
+                  style={{ direction: eng ? 'ltr' : 'rtl' }}
+                >
+                  {faq.a}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
 
 const Index: React.FC = () => {
   const navButton = (href: string, label: string) => (
@@ -501,6 +572,7 @@ const Index: React.FC = () => {
             <div>📧 support@millionhub.com</div>
             <div>📱 +92 3299545214</div>
             <div>💬 WhatsApp: +92 300 1234567</div>
+            <div>© 2026 MILLION HUB DIGITAL | THE FUTURE IS HERE</div>
           </div>
         </section>
       </main>
@@ -2480,8 +2552,11 @@ const BlogSection: React.FC = () => {
             </button>
           </div>
         )}
-         © 2026 MILLION HUB DIGITAL | THE FUTURE IS HERE
+         
       </article>
+
+      {/* Frequently Asked Questions Section */}
+      <MillionHubFAQ />
     </section>
   );
 };
