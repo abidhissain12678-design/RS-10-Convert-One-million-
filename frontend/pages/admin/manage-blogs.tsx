@@ -555,7 +555,7 @@ const ManageBlogs: React.FC = () => {
           marginBottom: '30px',
           textAlign: 'center'
         }}>
-          📝 WordPress-Style Blog Management
+          📝 MILLION HUB-Digital Blog Management
         </h1>
 
         {/* Tab Navigation */}
