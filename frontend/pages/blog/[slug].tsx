@@ -328,14 +328,14 @@ const BlogDetail: React.FC = () => {
             textDecoration: 'none',
             whiteSpace: 'nowrap'
           }}>
-            Safha Awal
+            HOME 
           </a>
-          {['Karobar', 'Kamyabiyan', 'Digital Skills'].map((item) => (
+          {['BUSSINES', 'MILLION WINNER', 'Digital Skills'].map((item) => (
             <a key={item} href="#" style={{
               padding: 'clamp(12px, 3vw, 20px) clamp(16px, 4vw, 32px)',
               fontWeight: 'bold',
               color: '#1f2937',
-              fontFamily: 'Jameel Noori Nastaleeq',
+              fontFamily: 'Poppins',
               fontSize: 'clamp(0.9rem, 2vw, 1.25rem)',
               textDecoration: 'none',
               whiteSpace: 'nowrap',
@@ -448,7 +448,7 @@ const BlogDetail: React.FC = () => {
               }}>
                 MH
               </div>
-              <div style={{ textAlign: 'right' }}>
+              <div style={{ textAlign: 'left' }}>
                 <p style={{
                   fontWeight: 900,
                   color: '#111',
@@ -522,11 +522,15 @@ const BlogDetail: React.FC = () => {
           )}
 
           {/* Blog Body Content */}
-          <div
-            className="article-content urdu-font"
-            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-            style={{ fontFamily: 'Jameel Noori Nastaleeq' }}
-          />
+          {/* Blog Body Content */}
+<div 
+  className="article-content urdu-font english-fallback"
+  dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+  style={{ 
+    fontFamily: "'Jameel Noori Nastaleeq', 'Inter', 'Poppins', sans-serif",
+    lineHeight: '2.2'
+  }}
+/>
 
           {/* Call to Action Box */}
           <div style={{
@@ -587,7 +591,7 @@ const BlogDetail: React.FC = () => {
             padding: 'clamp(20px, 4vw, 40px)',
             position: 'relative',
             overflow: 'hidden',
-            textAlign: 'right'
+            textAlign: 'left'
           }}>
             <div style={{
               position: 'absolute',
@@ -645,7 +649,7 @@ const BlogDetail: React.FC = () => {
                     >
                       {i + 1}
                     </div>
-                    <div style={{ textAlign: 'right', flex: 1 }}>
+                    <div style={{ textAlign: 'left', flex: 1 }}>
                       <h4 style={{
                         fontWeight: 'bold',
                         fontSize: 'clamp(13px, 2vw, 16px)',
