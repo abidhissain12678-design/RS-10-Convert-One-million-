@@ -88,8 +88,18 @@ const BlogDetail: React.FC = () => {
     author: "Editor Million Hub"
   };
 
+  // Language detection function
+  const isUrduText = (text: string): boolean => {
+    if (!text) return false;
+    const urduArabicRegex = /[\u0600-\u06FF]/g;
+    const matches = text.match(urduArabicRegex) || [];
+    return matches.length > text.length * 0.3; // More than 30% Urdu/Arabic characters
+  };
+
   const data = blog || defaultData;
   const sanitizedContent = blog ? DOMPurify.sanitize(blog.content) : data.content;
+  const titleIsUrdu = isUrduText(data.title);
+  const contentIsUrdu = isUrduText(data.content);
 
   if (loading) {
     return (
@@ -141,17 +151,45 @@ const BlogDetail: React.FC = () => {
   }
 
   return (
-    <div style={{ background: '#f9fafb', textAlign: 'right', direction: 'rtl', minHeight: '100vh' }}>
+    <div style={{ background: '#f9fafb', textAlign: 'left', direction: 'ltr', minHeight: '100vh' }}>
       <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.cdnfonts.com/css/jameel-noori-nastaleeq');
-        .urdu-font { font-family: 'Jameel Noori Nastaleeq', serif !important; }
+        
+        /* English content - Left aligned */
+        .urdu-font { 
+          font-family: 'Jameel Noori Nastaleeq', serif !important; 
+          direction: rtl;
+          text-align: right;
+        }
+        
+        .english-font {
+          font-family: 'Inter', 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+          direction: ltr;
+          text-align: left;
+        }
+        
+        .article-content { 
+          direction: ltr;
+          text-align: left;
+        }
+        
         .article-content p { 
-          line-height: 2.3; 
+          line-height: 2.0; 
           margin-bottom: 1.8rem; 
           font-size: clamp(0.95rem, 2.5vw, 1.4rem); 
-          text-align: justify;
+          text-align: left;
           color: #1a202c;
+          font-family: 'Inter', 'Poppins', -apple-system, sans-serif;
+          direction: ltr;
         }
+        
+        .article-content p:lang(ur), 
+        .article-content p:lang(ar) {
+          font-family: 'Jameel Noori Nastaleeq', serif;
+          direction: rtl;
+          text-align: right;
+        }
+        
         .article-content img { 
           border-radius: 15px; 
           margin: 30px 0; 
@@ -160,21 +198,45 @@ const BlogDetail: React.FC = () => {
           object-fit: cover;
           box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
+        
         .article-content blockquote {
-          border-right: 10px solid #dc2626;
+          border-left: 10px solid #dc2626;
           background: #fff5f5;
           padding: 25px;
           margin: 40px 0;
           font-size: clamp(1rem, 2.5vw, 1.6rem);
           font-weight: bold;
           box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+          direction: ltr;
+          text-align: left;
         }
+        
+        .article-content blockquote:lang(ur),
+        .article-content blockquote:lang(ar) {
+          border-left: none;
+          border-right: 10px solid #dc2626;
+          direction: rtl;
+          text-align: right;
+        }
+        
         .article-content h1, .article-content h2, .article-content h3 {
           color: #1a202c;
           margin-top: 30px;
           margin-bottom: 15px;
           font-weight: 700;
+          font-family: 'Inter', 'Poppins', -apple-system, sans-serif;
+          direction: ltr;
+          text-align: left;
         }
+        
+        .article-content h1:lang(ur), .article-content h1:lang(ar),
+        .article-content h2:lang(ur), .article-content h2:lang(ar),
+        .article-content h3:lang(ur), .article-content h3:lang(ar) {
+          font-family: 'Jameel Noori Nastaleeq', serif;
+          direction: rtl;
+          text-align: right;
+        }
+        
         .article-content h1 {
           font-size: clamp(1.3rem, 4vw, 1.8rem);
         }
@@ -187,28 +249,42 @@ const BlogDetail: React.FC = () => {
         .article-content a {
           color: #dc2626;
           text-decoration: underline;
+          direction: ltr;
         }
         .article-content ul, .article-content ol {
           margin: 20px 0 20px 30px;
           font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+          direction: ltr;
+          text-align: left;
         }
+        
+        .article-content ul:lang(ur), .article-content ul:lang(ar),
+        .article-content ol:lang(ur), .article-content ol:lang(ar) {
+          margin: 20px 30px 20px 0;
+          direction: rtl;
+          text-align: right;
+        }
+        
         .article-content li {
           margin-bottom: 12px;
           line-height: 1.8;
         }
         .article-content code {
           font-size: clamp(0.75rem, 2vw, 0.9rem);
+          direction: ltr;
         }
         .article-content table {
           font-size: clamp(0.85rem, 2vw, 1rem);
+          direction: ltr;
+          text-align: left;
         }
         
         @media (max-width: 768px) {
           .article-content {
-            line-height: 2;
+            line-height: 1.9;
           }
-          .urdu-font {
-            word-spacing: 0.1em;
+          .article-content p {
+            font-size: 0.95rem;
           }
         }
         
@@ -222,6 +298,7 @@ const BlogDetail: React.FC = () => {
           }
         }
       `}} />
+    
 
       {/* Top Black Bar */}
       <div style={{
@@ -416,9 +493,11 @@ const BlogDetail: React.FC = () => {
             fontWeight: 900,
             color: '#111',
             lineHeight: 1.15,
-            fontFamily: 'Jameel Noori Nastaleeq',
+            fontFamily: titleIsUrdu ? "'Jameel Noori Nastaleeq', serif" : "'Poppins', -apple-system, sans-serif",
             marginBottom: 'clamp(24px, 5vw, 48px)',
-            marginTop: '16px'
+            marginTop: '16px',
+            direction: titleIsUrdu ? 'rtl' : 'ltr',
+            textAlign: titleIsUrdu ? 'right' : 'left'
           }}>
             {data.title}
           </h1>
@@ -529,15 +608,16 @@ const BlogDetail: React.FC = () => {
           )}
 
           {/* Blog Body Content */}
-          {/* Blog Body Content */}
-<div 
-  className="article-content urdu-font english-fallback"
-  dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-  style={{ 
-    fontFamily: "'Jameel Noori Nastaleeq', 'Inter', 'Poppins', sans-serif",
-    lineHeight: '2.2'
-  }}
-/>
+          <div 
+            className="article-content"
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+            style={{ 
+              fontFamily: contentIsUrdu ? "'Jameel Noori Nastaleeq', serif" : "'Inter', 'Poppins', -apple-system, sans-serif",
+              direction: contentIsUrdu ? 'rtl' : 'ltr',
+              textAlign: contentIsUrdu ? 'right' : 'left',
+              lineHeight: '2.0'
+            }}
+          />
 
           {/* Call to Action Box */}
           <div style={{
@@ -571,7 +651,9 @@ const BlogDetail: React.FC = () => {
               color: '#b91c1c',
               fontFamily: "'Poppins', sans-serif",
               position: 'relative',
-              zIndex: 10
+              zIndex: 10,
+              direction: 'ltr',
+              textAlign: 'left'
             }}>
               Zaroori Maloomat:
             </h3>
@@ -669,13 +751,13 @@ const BlogDetail: React.FC = () => {
                       <h4 style={{
                         fontWeight: 'bold',
                         fontSize: 'clamp(13px, 2vw, 16px)',
-                        fontFamily: "'Jameel Noori Nastaleeq', serif",
+                        fontFamily: isUrduText(item.title) ? "'Jameel Noori Nastaleeq', serif" : "'Inter', 'Poppins', sans-serif",
                         lineHeight: 1.3,
                         color: '#1f2937',
                         marginBottom: '8px',
                         margin: '0 0 8px 0',
-                        direction: 'rtl',
-                        textAlign: 'right'
+                        direction: isUrduText(item.title) ? 'rtl' : 'ltr',
+                        textAlign: isUrduText(item.title) ? 'right' : 'left'
                       }}>
                         {item.title}
                       </h4>

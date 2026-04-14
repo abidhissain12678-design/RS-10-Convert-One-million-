@@ -30,8 +30,10 @@ const registerQuillFonts = () => {
           'sans-serif',
           'serif',
           'monospace',
-          'Roboto',
+          'Inter',
           'Poppins',
+          'Montserrat',
+          'Roboto',
           'Nastaliq',
           'Arial',
           'Georgia',
@@ -130,8 +132,10 @@ const createModules = () => ({
           'sans-serif',
           'serif',
           'monospace',
-          'Roboto',
+          'Inter',
           'Poppins',
+          'Montserrat',
+          'Roboto',
           'Nastaliq',
           'Arial',
           'Georgia',
@@ -148,8 +152,8 @@ const createModules = () => ({
       [{ 'script': 'sub'}, { 'script': 'super' }],
       ['blockquote', 'code-block'],
       [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'align': ['', 'center', 'right', 'justify'] }],
-      [{ 'direction': 'rtl' }],
+      [{ 'align': ['left', 'center', 'right', 'justify'] }],
+      [{ 'direction': ['ltr', 'rtl'] }],
       ['link', 'image'],
       ['clean']
     ]
@@ -163,7 +167,7 @@ const formats = [
   'color', 'background',
   'script',
   'blockquote', 'code-block',
-  'list', 'bullet',
+  'list', 'bullet', 'indent',
   'align', 'direction',
   'link', 'image'
 ];
@@ -298,6 +302,7 @@ const ManageBlogs: React.FC = () => {
 
   useEffect(() => {
     registerQuillFonts();
+    registerQuillLineHeight();
     registerQuillLineHeight();
     loadBlogs();
   }, []);
