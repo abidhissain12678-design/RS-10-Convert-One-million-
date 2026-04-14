@@ -304,3 +304,26 @@ html, body {
 .mobile-overlay.show {
   display: block;
 }
+
+/* English Font Classes */
+.font-english {
+  font-family: 'Inter', 'Poppins', -apple-system, sans-serif !important;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.font-heading-en {
+  font-family: 'Montserrat', 'Oswald', sans-serif !important;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* Inline English Words in Urdu Text */
+.en-inline {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  direction: ltr;
+  display: inline-block;
+}

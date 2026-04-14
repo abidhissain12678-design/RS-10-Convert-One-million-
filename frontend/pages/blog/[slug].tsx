@@ -709,7 +709,7 @@ const BlogDetail: React.FC = () => {
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
                 border: 'none',
                 boxSizing: 'border-box',
-                textAlign: 'right',
+                textAlign: 'left',
                 fontSize: 'clamp(12px, 2vw, 16px)'
               }}
             />
@@ -774,7 +774,7 @@ const BlogDetail: React.FC = () => {
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: 'clamp(30px, 5vw, 80px)',
-          textAlign: 'right',
+          textAlign: 'left',
           marginBottom: 'clamp(30px, 5vw, 80px)'
         }}>
           <div>
