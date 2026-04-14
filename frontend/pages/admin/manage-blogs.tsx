@@ -166,6 +166,107 @@ const formats = [
   'link', 'image'
 ];
 
+// Newsletter Manager Component
+const NewsletterManager: React.FC = () => {
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [stats] = useState({ totalSubscribers: 5420, openRate: '24%', lastSent: '2 days ago' });
+
+  const sendNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSending(true);
+    setTimeout(() => {
+      setIsSending(false);
+      alert('✅ Newsletter sabhi subscribers ko bhej diya gaya hai!');
+      setSubject('');
+      setMessage('');
+    }, 2000);
+  };
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '32px', marginTop: '30px' }}>
+      {/* Compose Section */}
+      <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ background: '#1e293b', borderRadius: '16px', border: '1px solid #334155', padding: '32px', boxShadow: '0 20px 25px rgba(0, 0, 0, 0.4)' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: 900, color: '#fbbf24', marginBottom: '24px', textTransform: 'uppercase', fontStyle: 'italic', letterSpacing: '0.05em' }}>Compose New Announcement</h2>
+          <form onSubmit={sendNewsletter} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div>
+              <label style={{ fontSize: '10px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Email Subject</label>
+              <input 
+                type="text" 
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', padding: '16px', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s', color: '#cbd5e1' }}
+                placeholder="E.g. Million Hub Weekly Update"
+                onFocus={(e) => e.currentTarget.style.borderColor = '#fbbf24'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#1e293b'}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '10px', fontWeight: 900, color: '#94a3b8', textTransform: 'uppercase', marginBottom: '8px', display: 'block' }}>Message Body</label>
+              <textarea 
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={8}
+                style={{ width: '100%', background: '#0f172a', border: '1px solid #1e293b', borderRadius: '12px', padding: '16px', outline: 'none', boxSizing: 'border-box', transition: 'border-color 0.2s', color: '#cbd5e1', fontFamily: 'inherit', resize: 'none' }}
+                placeholder="Apna paigham yahan likhein..."
+                onFocus={(e) => e.currentTarget.style.borderColor = '#fbbf24'}
+                onBlur={(e) => e.currentTarget.style.borderColor = '#1e293b'}
+              ></textarea>
+            </div>
+            <button 
+              type="submit"
+              disabled={isSending}
+              style={{ width: '100%', background: '#fbbf24', color: '#000', fontWeight: 900, padding: '16px', borderRadius: '12px', boxShadow: '0 10px 15px rgba(251, 191, 36, 0.2)', cursor: isSending ? 'not-allowed' : 'pointer', transition: 'all 0.2s', opacity: isSending ? 0.6 : 1, transform: isSending ? 'scale(0.98)' : 'scale(1)', border: 'none', fontSize: '14px', textTransform: 'uppercase', fontStyle: 'italic', letterSpacing: '0.05em' }}
+              onMouseEnter={(e) => !isSending && (e.currentTarget.style.transform = 'scale(1.01)')}
+              onMouseLeave={(e) => !isSending && (e.currentTarget.style.transform = 'scale(1)')}
+            >
+              {isSending ? 'Sending Emails...' : 'Broadcast to All Subscribers 📣'}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {/* Stats Section */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        <div style={{ background: '#0f172a', border: '1px solid #1e293b', borderRadius: '16px', padding: '24px', boxShadow: '0 20px 25px rgba(0, 0, 0, 0.4)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: 0, right: 0, width: '128px', height: '128px', background: '#fbbf24', opacity: 0.05, borderRadius: '50%', marginRight: '-64px', marginTop: '-64px' }}></div>
+          <h3 style={{ fontSize: '10px', fontWeight: 900, color: '#94a3b8', marginBottom: '24px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Audience Insights</h3>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+              <div>
+                <p style={{ fontSize: '30px', fontWeight: 900, color: '#fff', margin: 0 }}>{stats.totalSubscribers}</p>
+                <p style={{ fontSize: '10px', fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', margin: '4px 0 0 0' }}>Subscribers</p>
+              </div>
+              <span style={{ color: '#22c55e', fontSize: '12px', fontWeight: 700 }}>+12% ↑</span>
+            </div>
+            
+            <div style={{ height: '1px', background: '#1e293b' }}></div>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ background: 'rgba(30, 41, 59, 0.5)', padding: '12px', borderRadius: '12px', border: '1px solid #334155' }}>
+                <p style={{ fontSize: '14px', fontWeight: 900, color: '#fbbf24', margin: 0 }}>{stats.openRate}</p>
+                <p style={{ fontSize: '8px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', margin: '4px 0 0 0' }}>Open Rate</p>
+              </div>
+              <div style={{ background: 'rgba(30, 41, 59, 0.5)', padding: '12px', borderRadius: '12px', border: '1px solid #334155' }}>
+                <p style={{ fontSize: '14px', fontWeight: 900, color: '#fff', margin: 0 }}>{stats.lastSent}</p>
+                <p style={{ fontSize: '8px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', margin: '4px 0 0 0' }}>Last Blast</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ background: '#fbbf24', borderRadius: '16px', padding: '24px', color: '#000' }}>
+          <h4 style={{ fontWeight: 900, textTransform: 'uppercase', fontStyle: 'italic', fontSize: '12px', margin: '0 0 8px 0' }}>Pro Tip</h4>
+          <p style={{ fontSize: '12px', fontWeight: 700, lineHeight: '1.5', margin: 0 }}>Zyada engagement ke liye images aur catchy subjects ka istemal karein!</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ManageBlogs: React.FC = () => {
   const [title, setTitle] = useState('');
   const [slug, setSlug] = useState('');
@@ -186,6 +287,7 @@ const ManageBlogs: React.FC = () => {
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
   const [htmlViewActive, setHtmlViewActive] = useState(false);
+  const [activeTab, setActiveTab] = useState<'blogs' | 'newsletter'>('blogs');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [modules] = useState(createModules());
 
@@ -445,6 +547,52 @@ const ManageBlogs: React.FC = () => {
           📝 WordPress-Style Blog Management
         </h1>
 
+        {/* Tab Navigation */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '30px', justifyContent: 'center' }}>
+          <button
+            onClick={() => setActiveTab('blogs')}
+            style={{
+              padding: '12px 24px',
+              background: activeTab === 'blogs' ? '#FFD700' : '#334155',
+              color: activeTab === 'blogs' ? '#000' : '#CBD5E1',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.3s',
+              boxShadow: activeTab === 'blogs' ? '0 10px 15px rgba(255, 215, 0, 0.3)' : 'none'
+            }}
+            onMouseEnter={(e) => activeTab !== 'blogs' && (e.currentTarget.style.background = '#475569')}
+            onMouseLeave={(e) => activeTab !== 'blogs' && (e.currentTarget.style.background = '#334155')}
+          >
+            📚 Manage Blogs
+          </button>
+          <button
+            onClick={() => setActiveTab('newsletter')}
+            style={{
+              padding: '12px 24px',
+              background: activeTab === 'newsletter' ? '#FFD700' : '#334155',
+              color: activeTab === 'newsletter' ? '#000' : '#CBD5E1',
+              border: 'none',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              fontSize: '14px',
+              transition: 'all 0.3s',
+              boxShadow: activeTab === 'newsletter' ? '0 10px 15px rgba(255, 215, 0, 0.3)' : 'none'
+            }}
+            onMouseEnter={(e) => activeTab !== 'newsletter' && (e.currentTarget.style.background = '#475569')}
+            onMouseLeave={(e) => activeTab !== 'newsletter' && (e.currentTarget.style.background = '#334155')}
+          >
+            📬 Newsletter
+          </button>
+        </div>
+
+        {activeTab === 'blogs' && (
+        <>
         {/* Form Section */}
         <div style={{
           background: 'rgba(255, 215, 0, 0.05)',
@@ -943,6 +1091,12 @@ const ManageBlogs: React.FC = () => {
             </div>
           )}
         </div>
+        </>
+        )}
+
+        {activeTab === 'newsletter' && (
+          <NewsletterManager />
+        )}
       </div>
 
       <style jsx>{`
