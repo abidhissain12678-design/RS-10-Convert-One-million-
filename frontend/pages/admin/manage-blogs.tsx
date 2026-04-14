@@ -1067,10 +1067,12 @@ const ManageBlogs: React.FC = () => {
                 overflowY: 'auto',
                 background: '#fff',
                 padding: '16px',
-                height: '700px'
+                height: '700px',
+                direction: 'rtl',
+                textAlign: 'right'
               }}>
-                {/* Category Label */}
-                <div style={{ marginBottom: '8px' }}>
+                {/* Category Label - English (Left Aligned) */}
+                <div style={{ marginBottom: '8px', direction: 'ltr', textAlign: 'left' }}>
                   <span style={{
                     color: '#fbbf24',
                     fontWeight: 900,
@@ -1080,20 +1082,23 @@ const ManageBlogs: React.FC = () => {
                     background: '#000',
                     padding: '4px 8px',
                     borderRadius: '4px',
-                    display: 'inline-block'
+                    display: 'inline-block',
+                    fontFamily: "'Inter', 'Poppins', -apple-system, sans-serif"
                   }}>
                     {category || 'Category'}
                   </span>
                 </div>
 
-                {/* Blog Title */}
+                {/* Blog Title - Urdu (Right Aligned, Nastaliq) */}
                 <h1 style={{
                   fontSize: '1.25rem',
                   fontWeight: 900,
                   color: '#000',
                   marginBottom: '16px',
-                  lineHeight: 1.2,
-                  fontFamily: 'Arial, sans-serif'
+                  lineHeight: 1.3,
+                  fontFamily: "'Jameel Noori Nastaleeq', 'Nastaliq', serif",
+                  direction: 'rtl',
+                  textAlign: 'right'
                 }}>
                   {title || 'Yahan aapka blog title dikhay ga...'}
                 </h1>
@@ -1105,7 +1110,9 @@ const ManageBlogs: React.FC = () => {
                   gap: '8px',
                   marginBottom: '16px',
                   borderBottom: '1px solid #e2e8f0',
-                  paddingBottom: '12px'
+                  paddingBottom: '12px',
+                  direction: 'rtl',
+                  flexDirection: 'row-reverse'
                 }}>
                   <div style={{
                     width: '32px',
@@ -1117,13 +1124,14 @@ const ManageBlogs: React.FC = () => {
                     justifyContent: 'center',
                     fontSize: '10px',
                     fontWeight: 700,
-                    color: '#9ca3af'
+                    color: '#9ca3af',
+                    flexShrink: 0
                   }}>
                     MH
                   </div>
-                  <div style={{ fontSize: '10px' }}>
-                    <p style={{ fontWeight: 700, color: '#000', margin: 0 }}>{author || 'Million Hub'}</p>
-                    <p style={{ color: '#9ca3af', margin: '4px 0 0 0' }}>Published • {new Date().toLocaleDateString()}</p>
+                  <div style={{ fontSize: '10px', textAlign: 'right' }}>
+                    <p style={{ fontWeight: 700, color: '#000', margin: 0, fontFamily: "'Jameel Noori Nastaleeq', serif" }}>{author || 'Million Hub'}</p>
+                    <p style={{ color: '#9ca3af', margin: '4px 0 0 0', fontSize: '9px' }}>منشور • {new Date().toLocaleDateString('en-PK')}</p>
                   </div>
                 </div>
 
@@ -1156,11 +1164,28 @@ const ManageBlogs: React.FC = () => {
                 )}
 
                 {/* Real-time Content Rendering */}
+                {isTrending && (
+                  <div style={{
+                    display: 'inline-block',
+                    background: '#dc2626',
+                    color: '#fff',
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '9px',
+                    fontWeight: 700,
+                    marginBottom: '12px',
+                    direction: 'ltr'
+                  }}>
+                    🔥 Trending
+                  </div>
+                )}
                 <div style={{
                   fontSize: '14px',
                   lineHeight: 2,
                   color: '#475569',
-                  direction: 'rtl'
+                  direction: 'rtl',
+                  textAlign: 'right',
+                  fontFamily: "'Jameel Noori Nastaleeq', serif"
                 }} dangerouslySetInnerHTML={{ __html: content || '<p style="color: #d1d5db;">Apna content likhna shuru karein...</p>' }} />
               </div>
 
@@ -1251,6 +1276,21 @@ const ManageBlogs: React.FC = () => {
                     }}>
                       {blog.status === 'published' ? '✅ Published' : '📋 Draft'}
                     </div>
+                    {blog.isTrending && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        left: '10px',
+                        padding: '6px 12px',
+                        borderRadius: '20px',
+                        backgroundColor: '#dc2626',
+                        color: '#FFF',
+                        fontSize: '0.8rem',
+                        fontWeight: 'bold'
+                      }}>
+                        🔥 Trending
+                      </div>
+                    )}
                   </div>
 
                   {/* Blog Info */}
@@ -1294,6 +1334,14 @@ const ManageBlogs: React.FC = () => {
                     <div style={{ fontSize: '0.8rem', color: '#AAA', margin: '10px 0' }}>
                       By {blog.author} | {new Date(blog.createdAt).toLocaleDateString()}
                     </div>
+
+                    {blog.category && (
+                      <div style={{ marginBottom: '10px' }}>
+                        <small style={{ color: '#fbbf24', fontWeight: 'bold' }}>
+                          📁 {blog.category}
+                        </small>
+                      </div>
+                    )}
 
                     {blog.focusKeywords.length > 0 && (
                       <div style={{ marginBottom: '10px' }}>

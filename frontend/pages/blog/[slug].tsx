@@ -23,6 +23,8 @@ interface Blog {
   excerpt: string;
   createdAt: string;
   publishedAt?: string;
+  isTrending?: boolean;
+  category?: string;
 }
 
 const BlogDetail: React.FC = () => {
@@ -379,10 +381,31 @@ const BlogDetail: React.FC = () => {
             fontWeight: 'bold',
             fontFamily: 'Jameel Noori Nastaleeq',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
-            zIndex: 10
+            zIndex: 10,
+            direction: 'rtl',
+            fontSize: 'clamp(10px, 2vw, 14px)'
           }}>
-            Khosusi Report
+            {blog?.category || 'خصوصی رپورٹ'}
           </div>
+
+          {/* Trending Badge */}
+          {blog?.isTrending && (
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: '40px',
+              transform: 'translateY(-50%)',
+              backgroundColor: '#fbbf24',
+              color: '#000',
+              padding: '8px 24px',
+              fontWeight: 'bold',
+              fontSize: 'clamp(10px, 2vw, 14px)',
+              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+              zIndex: 10
+            }}>
+              🔥 Trending
+            </div>
+          )}
 
           <h1 style={{
             fontSize: 'clamp(1.5rem, 5vw, 2.875rem)',
