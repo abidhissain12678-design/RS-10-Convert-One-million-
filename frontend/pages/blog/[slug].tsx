@@ -146,7 +146,7 @@ const BlogDetail: React.FC = () => {
         .article-content p { 
           line-height: 2.3; 
           margin-bottom: 1.8rem; 
-          font-size: 1.4rem; 
+          font-size: clamp(0.95rem, 2.5vw, 1.4rem); 
           text-align: justify;
           color: #1a202c;
         }
@@ -154,6 +154,8 @@ const BlogDetail: React.FC = () => {
           border-radius: 15px; 
           margin: 30px 0; 
           width: 100%; 
+          max-height: 500px;
+          object-fit: cover;
           box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
         .article-content blockquote {
@@ -161,7 +163,7 @@ const BlogDetail: React.FC = () => {
           background: #fff5f5;
           padding: 25px;
           margin: 40px 0;
-          font-size: 1.6rem;
+          font-size: clamp(1rem, 2.5vw, 1.6rem);
           font-weight: bold;
           box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
         }
@@ -171,12 +173,51 @@ const BlogDetail: React.FC = () => {
           margin-bottom: 15px;
           font-weight: 700;
         }
+        .article-content h1 {
+          font-size: clamp(1.3rem, 4vw, 1.8rem);
+        }
+        .article-content h2 {
+          font-size: clamp(1.1rem, 3.5vw, 1.5rem);
+        }
+        .article-content h3 {
+          font-size: clamp(1rem, 3vw, 1.2rem);
+        }
         .article-content a {
           color: #dc2626;
           text-decoration: underline;
         }
         .article-content ul, .article-content ol {
           margin: 20px 0 20px 30px;
+          font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+        }
+        .article-content li {
+          margin-bottom: 12px;
+          line-height: 1.8;
+        }
+        .article-content code {
+          font-size: clamp(0.75rem, 2vw, 0.9rem);
+        }
+        .article-content table {
+          font-size: clamp(0.85rem, 2vw, 1rem);
+        }
+        
+        @media (max-width: 768px) {
+          .article-content {
+            line-height: 2;
+          }
+          .urdu-font {
+            word-spacing: 0.1em;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .article-content p {
+            text-align: left;
+          }
+          .article-content blockquote {
+            padding: 15px;
+            margin: 20px 0;
+          }
         }
       `}} />
 
@@ -184,38 +225,40 @@ const BlogDetail: React.FC = () => {
       <div style={{
         backgroundColor: '#000',
         color: '#fff',
-        padding: '10px 24px',
-        fontSize: '0.75rem',
+        padding: 'clamp(8px, 2vw, 10px) clamp(12px, 4vw, 24px)',
+        fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         position: 'sticky',
         top: 0,
         zIndex: 60,
-        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        flexWrap: 'wrap',
+        gap: '8px'
       }}>
-        <div style={{ display: 'flex', gap: '20px', fontFamily: 'Jameel Noori Nastaleeq' }}>
+        <div style={{ display: 'flex', gap: 'clamp(12px, 3vw, 20px)', fontFamily: 'Jameel Noori Nastaleeq' }}>
           <span>Mangal, 14 April 2026</span>
-          <span style={{ color: '#ef4444', fontWeight: 'bold' }}>LIVE UPDATE</span>
+          <span style={{ color: '#ef4444', fontWeight: 'bold', display: 'none' }} className="hidden-mobile">LIVE UPDATE</span>
         </div>
-        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-          <a href="#" style={{ color: '#fff', textDecoration: 'none' }}>Facebook</a>
-          <span style={{ color: '#4b5563' }}>|</span>
-          <a href="#" style={{ color: '#fff', textDecoration: 'none', fontWeight: 'bold' }}>WhatsApp Group</a>
+        <div style={{ display: 'flex', gap: 'clamp(12px, 3vw, 24px)', alignItems: 'center' }}>
+          <a href="#" style={{ color: '#fff', textDecoration: 'none', fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)' }}>Facebook</a>
+          <span style={{ color: '#4b5563', display: 'none' }} className="hidden-mobile">|</span>
+          <a href="#" style={{ color: '#fff', textDecoration: 'none', fontWeight: 'bold', fontSize: 'clamp(0.65rem, 1.5vw, 0.75rem)' }}>WhatsApp</a>
         </div>
       </div>
 
       {/* Professional News Header */}
       <header style={{
         backgroundColor: '#fff',
-        padding: '48px 0',
+        padding: 'clamp(20px, 5vw, 48px) 0',
         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
         borderBottom: '1px solid #e5e7eb'
       }}>
         <div style={{
           maxWidth: '1440px',
           margin: '0 auto',
-          padding: '0 16px',
+          padding: '0 clamp(12px, 4vw, 16px)',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
@@ -224,8 +267,8 @@ const BlogDetail: React.FC = () => {
           <div style={{
             backgroundColor: '#dc2626',
             color: '#fff',
-            padding: '6px 16px',
-            fontSize: '10px',
+            padding: '6px clamp(12px, 3vw, 16px)',
+            fontSize: 'clamp(8px, 2vw, 10px)',
             fontWeight: 900,
             letterSpacing: '4px',
             marginBottom: '16px'
@@ -233,7 +276,7 @@ const BlogDetail: React.FC = () => {
             EXCLUSIVE
           </div>
           <h1 style={{
-            fontSize: 'clamp(2rem, 8vw, 3.75rem)',
+            fontSize: 'clamp(1.5rem, 8vw, 3.75rem)',
             fontWeight: 900,
             color: '#111',
             marginBottom: '12px',
@@ -246,7 +289,7 @@ const BlogDetail: React.FC = () => {
             fontWeight: 'bold',
             letterSpacing: '8px',
             textTransform: 'uppercase',
-            fontSize: '10px'
+            fontSize: 'clamp(8px, 2vw, 10px)'
           }}>
             Digital Revolution of Pakistan
           </p>
@@ -269,15 +312,16 @@ const BlogDetail: React.FC = () => {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          overflowX: 'auto'
+          overflowX: 'auto',
+          flexWrap: 'wrap'
         }}>
           <a href="/" style={{
-            padding: '20px 32px',
+            padding: 'clamp(12px, 3vw, 20px) clamp(16px, 4vw, 32px)',
             fontWeight: 900,
             color: '#dc2626',
             borderBottom: '4px solid #dc2626',
             fontFamily: 'Jameel Noori Nastaleeq',
-            fontSize: '1.25rem',
+            fontSize: 'clamp(0.9rem, 2vw, 1.25rem)',
             letterSpacing: 'wide',
             textDecoration: 'none',
             whiteSpace: 'nowrap'
@@ -286,11 +330,11 @@ const BlogDetail: React.FC = () => {
           </a>
           {['Karobar', 'Kamyabiyan', 'Digital Skills'].map((item) => (
             <a key={item} href="#" style={{
-              padding: '20px 32px',
+              padding: 'clamp(12px, 3vw, 20px) clamp(16px, 4vw, 32px)',
               fontWeight: 'bold',
               color: '#1f2937',
               fontFamily: 'Jameel Noori Nastaleeq',
-              fontSize: '1.25rem',
+              fontSize: 'clamp(0.9rem, 2vw, 1.25rem)',
               textDecoration: 'none',
               whiteSpace: 'nowrap',
               transition: 'color 0.3s'
@@ -301,17 +345,6 @@ const BlogDetail: React.FC = () => {
               {item}
             </a>
           ))}
-          <a href="/admin" style={{
-            padding: '20px 32px',
-            fontWeight: 'bold',
-            color: '#d1d5db',
-            fontFamily: 'Jameel Noori Nastaleeq',
-            fontSize: '1.25rem',
-            textDecoration: 'none',
-            whiteSpace: 'nowrap'
-          }}>
-            Admin
-          </a>
         </div>
       </nav>
 
@@ -319,19 +352,20 @@ const BlogDetail: React.FC = () => {
       <main style={{
         maxWidth: '1440px',
         margin: '0 auto',
-        padding: '56px 16px',
+        padding: 'clamp(20px, 5vw, 56px) clamp(12px, 4vw, 16px)',
         display: 'grid',
-        gridTemplateColumns: '1fr 300px',
-        gap: '56px'
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        gap: 'clamp(20px, 5vw, 56px)'
       }}>
         {/* Main Article Section */}
         <article style={{
           backgroundColor: '#fff',
-          padding: '56px',
+          padding: 'clamp(20px, 5vw, 56px)',
           borderRadius: '12px',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
           border: '1px solid #f3f4f6',
-          position: 'relative'
+          position: 'relative',
+          order: 1
         }}>
           {/* Floating Category Tag */}
           <div style={{
@@ -351,12 +385,12 @@ const BlogDetail: React.FC = () => {
           </div>
 
           <h1 style={{
-            fontSize: 'clamp(2rem, 6vw, 2.875rem)',
+            fontSize: 'clamp(1.5rem, 5vw, 2.875rem)',
             fontWeight: 900,
             color: '#111',
             lineHeight: 1.15,
             fontFamily: 'Jameel Noori Nastaleeq',
-            marginBottom: '48px',
+            marginBottom: 'clamp(24px, 5vw, 48px)',
             marginTop: '16px'
           }}>
             {data.title}
@@ -367,13 +401,13 @@ const BlogDetail: React.FC = () => {
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
-            gap: '24px',
+            gap: 'clamp(12px, 3vw, 24px)',
             borderTop: '1px solid #f3f4f6',
             borderBottom: '1px solid #f3f4f6',
-            padding: '32px 0',
-            marginBottom: '48px'
+            padding: 'clamp(16px, 4vw, 32px) 0',
+            marginBottom: 'clamp(24px, 5vw, 48px)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, minWidth: '200px' }}>
               <div style={{
                 width: '64px',
                 height: '64px',
@@ -386,7 +420,7 @@ const BlogDetail: React.FC = () => {
                 color: '#fff',
                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
                 border: '4px solid #fff',
-                fontSize: '24px',
+                fontSize: 'clamp(18px, 3vw, 24px)',
                 flexShrink: 0
               }}>
                 MH
@@ -396,13 +430,13 @@ const BlogDetail: React.FC = () => {
                   fontWeight: 900,
                   color: '#111',
                   fontFamily: 'Jameel Noori Nastaleeq',
-                  fontSize: '1.25rem',
+                  fontSize: 'clamp(0.95rem, 2vw, 1.25rem)',
                   margin: 0
                 }}>
                   {data.author || 'Editor Million Hub'}
                 </p>
                 <p style={{
-                  fontSize: '11px',
+                  fontSize: 'clamp(9px, 1.5vw, 11px)',
                   color: '#dc2626',
                   fontWeight: 'bold',
                   textTransform: 'uppercase',
@@ -417,14 +451,15 @@ const BlogDetail: React.FC = () => {
               <button style={{
                 backgroundColor: '#25D366',
                 color: '#fff',
-                padding: '12px 32px',
+                padding: 'clamp(8px, 2vw, 12px) clamp(16px, 4vw, 32px)',
                 borderRadius: '9999px',
-                fontSize: '12px',
+                fontSize: 'clamp(9px, 1.5vw, 12px)',
                 fontWeight: 900,
                 border: 'none',
                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                 cursor: 'pointer',
-                transition: 'all 0.3s'
+                transition: 'all 0.3s',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = '#128C7E';
@@ -443,10 +478,10 @@ const BlogDetail: React.FC = () => {
             <div style={{
               width: '100%',
               borderRadius: '16px',
-              marginBottom: '56px',
+              marginBottom: 'clamp(24px, 5vw, 56px)',
               overflow: 'hidden',
               boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
-              border: '10px solid #fff',
+              border: 'clamp(4px, 2vw, 10px) solid #fff',
               boxSizing: 'border-box'
             }}>
               <img
@@ -456,7 +491,8 @@ const BlogDetail: React.FC = () => {
                   width: '100%',
                   height: 'auto',
                   objectFit: 'cover',
-                  transition: 'transform 500ms'
+                  transition: 'transform 500ms',
+                  maxHeight: '500px'
                 }}
               />
             </div>
@@ -471,11 +507,11 @@ const BlogDetail: React.FC = () => {
 
           {/* Call to Action Box */}
           <div style={{
-            marginTop: '80px',
+            marginTop: 'clamp(40px, 5vw, 80px)',
             background: 'linear-gradient(to right, #fef2f2 0%, #fff 100%)',
-            padding: '40px',
+            padding: 'clamp(20px, 5vw, 40px)',
             borderRadius: '24px',
-            borderRight: '12px solid #dc2626',
+            borderRight: 'clamp(6px, 2vw, 12px) solid #dc2626',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             position: 'relative',
             overflow: 'hidden'
@@ -485,7 +521,7 @@ const BlogDetail: React.FC = () => {
               top: 0,
               left: 0,
               opacity: 0.1,
-              fontSize: '144px',
+              fontSize: 'clamp(72px, 15vw, 144px)',
               fontWeight: 900,
               color: '#dc2626',
               transform: 'translate(-40px, 40px)'
@@ -494,7 +530,7 @@ const BlogDetail: React.FC = () => {
             </div>
             <h3 style={{
               fontWeight: 900,
-              fontSize: '24px',
+              fontSize: 'clamp(18px, 4vw, 24px)',
               marginBottom: '20px',
               color: '#b91c1c',
               fontFamily: 'Jameel Noori Nastaleeq',
@@ -505,11 +541,12 @@ const BlogDetail: React.FC = () => {
             </h3>
             <p style={{
               fontFamily: 'Jameel Noori Nastaleeq',
-              fontSize: '20px',
+              fontSize: 'clamp(14px, 3vw, 20px)',
               color: '#7f1d1d',
               lineHeight: 1.8,
               position: 'relative',
-              zIndex: 10
+              zIndex: 10,
+              margin: 0
             }}>
               Agar aap bhi 10 rupaye se apna safar shuru karna chahte hain, to abhi register karein aur is khabar ko apne doston tak pohanchayein.
             </p>
@@ -517,14 +554,14 @@ const BlogDetail: React.FC = () => {
         </article>
 
         {/* Sidebar Widgets */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(20px, 5vw, 48px)', order: 2, minWidth: '300px' }}>
           {/* Popular Posts Widget */}
           <div style={{
             backgroundColor: '#fff',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             borderRadius: '16px',
             border: '1px solid #f3f4f6',
-            padding: '40px',
+            padding: 'clamp(20px, 4vw, 40px)',
             position: 'relative',
             overflow: 'hidden',
             textAlign: 'right'
@@ -538,12 +575,13 @@ const BlogDetail: React.FC = () => {
               backgroundColor: '#dc2626'
             }}></div>
             <h3 style={{
-              fontSize: '24px',
+              fontSize: 'clamp(18px, 3vw, 24px)',
               fontWeight: 900,
               borderBottom: '2px solid #f3f4f6',
               paddingBottom: '20px',
-              marginBottom: '40px',
-              fontFamily: 'Jameel Noori Nastaleeq'
+              marginBottom: 'clamp(20px, 4vw, 40px)',
+              fontFamily: 'Jameel Noori Nastaleeq',
+              margin: 0
             }}>
               Taza Khabrein
             </h3>
@@ -556,25 +594,25 @@ const BlogDetail: React.FC = () => {
                     href={`/blog/${item.slug}`}
                     style={{
                       display: 'flex',
-                      gap: '20px',
+                      gap: 'clamp(12px, 3vw, 20px)',
                       cursor: 'pointer',
                       borderBottom: i < trendingBlogs.length - 1 ? '1px solid #f3f4f6' : 'none',
-                      paddingBottom: '32px',
-                      marginBottom: '32px',
+                      paddingBottom: 'clamp(16px, 3vw, 32px)',
+                      marginBottom: 'clamp(16px, 3vw, 32px)',
                       textDecoration: 'none',
                       color: 'inherit'
                     }}
                   >
                     <div style={{
-                      width: '96px',
-                      height: '96px',
+                      width: 'clamp(70px, 15vw, 96px)',
+                      minWidth: 'clamp(70px, 15vw, 96px)',
+                      height: 'clamp(70px, 15vw, 96px)',
                       backgroundColor: '#f3f4f6',
                       borderRadius: '8px',
-                      flexShrink: 0,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '24px',
+                      fontSize: 'clamp(16px, 3vw, 24px)',
                       fontWeight: 900,
                       color: '#111',
                       transition: 'background-color 0.3s'
@@ -587,16 +625,17 @@ const BlogDetail: React.FC = () => {
                     <div style={{ textAlign: 'right', flex: 1 }}>
                       <h4 style={{
                         fontWeight: 'bold',
-                        fontSize: '16px',
+                        fontSize: 'clamp(13px, 2vw, 16px)',
                         fontFamily: 'Jameel Noori Nastaleeq',
                         lineHeight: 1.3,
                         color: '#1f2937',
-                        marginBottom: '8px'
+                        marginBottom: '8px',
+                        margin: '0 0 8px 0'
                       }}>
                         {item.title}
                       </h4>
                       <span style={{
-                        fontSize: '10px',
+                        fontSize: 'clamp(8px, 1.5vw, 10px)',
                         color: '#dc2626',
                         fontWeight: 'bold',
                         textTransform: 'uppercase',
@@ -617,14 +656,14 @@ const BlogDetail: React.FC = () => {
           {/* Newsletter Box */}
           <div style={{
             backgroundColor: '#111',
-            padding: '48px',
+            padding: 'clamp(24px, 5vw, 48px)',
             borderRadius: '32px',
             color: '#fff',
             textAlign: 'center',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
             position: 'relative',
             overflow: 'hidden',
-            borderBottom: '8px solid #dc2626'
+            borderBottom: 'clamp(4px, 2vw, 8px) solid #dc2626'
           }}>
             <div style={{
               position: 'absolute',
@@ -637,22 +676,22 @@ const BlogDetail: React.FC = () => {
               filter: 'blur(48px)'
             }}></div>
             <h3 style={{
-              fontSize: '32px',
+              fontSize: 'clamp(24px, 4vw, 32px)',
               fontWeight: 900,
               marginBottom: '24px',
               fontFamily: 'Jameel Noori Nastaleeq',
-              letterSpacing: '-0.02em'
+              letterSpacing: '-0.02em',
+              margin: '0 0 24px 0'
             }}>
               Newsletter
             </h3>
             <p style={{
               color: '#9ca3af',
-              fontSize: '14px',
-              marginBottom: '40px',
+              fontSize: 'clamp(12px, 2vw, 14px)',
+              marginBottom: '24px',
               fontFamily: 'Jameel Noori Nastaleeq',
               lineHeight: 1.8,
-              paddingLeft: '16px',
-              paddingRight: '16px'
+              margin: '0 0 24px 0'
             }}>
               Har nayi khabar aur update apne mobile par hasil karne ke liye register karein.
             </p>
@@ -661,7 +700,7 @@ const BlogDetail: React.FC = () => {
               placeholder="Email Address..."
               style={{
                 width: '100%',
-                padding: '20px',
+                padding: 'clamp(12px, 3vw, 20px)',
                 borderRadius: '16px',
                 color: '#000',
                 marginBottom: '20px',
@@ -670,7 +709,8 @@ const BlogDetail: React.FC = () => {
                 boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
                 border: 'none',
                 boxSizing: 'border-box',
-                textAlign: 'right'
+                textAlign: 'right',
+                fontSize: 'clamp(12px, 2vw, 16px)'
               }}
             />
             <button
@@ -678,12 +718,12 @@ const BlogDetail: React.FC = () => {
                 width: '100%',
                 backgroundColor: '#dc2626',
                 color: '#fff',
-                padding: '20px',
+                padding: 'clamp(12px, 3vw, 20px)',
                 fontWeight: 900,
                 borderRadius: '16px',
                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                 textTransform: 'uppercase',
-                fontSize: '12px',
+                fontSize: 'clamp(10px, 1.5vw, 12px)',
                 letterSpacing: '4px',
                 border: 'none',
                 cursor: 'pointer',
@@ -722,28 +762,30 @@ const BlogDetail: React.FC = () => {
       <footer style={{
         backgroundColor: '#000',
         color: '#fff',
-        paddingTop: '96px',
-        paddingBottom: '96px',
-        borderTopWidth: '15px',
+        paddingTop: 'clamp(40px, 5vw, 96px)',
+        paddingBottom: 'clamp(40px, 5vw, 96px)',
+        borderTopWidth: 'clamp(8px, 2vw, 15px)',
         borderTopColor: '#dc2626'
       }}>
         <div style={{
           maxWidth: '1440px',
           margin: '0 auto',
-          padding: '0 24px',
+          padding: '0 clamp(12px, 4vw, 24px)',
           display: 'grid',
-          gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '80px',
-          textAlign: 'right'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: 'clamp(30px, 5vw, 80px)',
+          textAlign: 'right',
+          marginBottom: 'clamp(30px, 5vw, 80px)'
         }}>
           <div>
             <h2 style={{
-              fontSize: '48px',
+              fontSize: 'clamp(32px, 6vw, 48px)',
               fontWeight: 900,
               color: '#dc2626',
-              marginBottom: '40px',
+              marginBottom: 'clamp(20px, 4vw, 40px)',
               letterSpacing: '-0.05em',
-              fontStyle: 'italic'
+              fontStyle: 'italic',
+              margin: '0 0 clamp(20px, 4vw, 40px) 0'
             }}>
               MH
             </h2>
@@ -751,7 +793,8 @@ const BlogDetail: React.FC = () => {
               color: '#6b7280',
               fontFamily: 'Jameel Noori Nastaleeq',
               lineHeight: 2.4,
-              fontSize: '20px'
+              fontSize: 'clamp(14px, 2vw, 20px)',
+              margin: 0
             }}>
               Million Hub Pakistan ka wo wahid digital idaara hai jo har shehri ko maashi tor par azad dekhna chahta hai. Hamare sath judiye aur apna kal badliiye.
             </p>
@@ -759,11 +802,12 @@ const BlogDetail: React.FC = () => {
           <div style={{ fontFamily: 'Jameel Noori Nastaleeq' }}>
             <h3 style={{
               fontWeight: 900,
-              fontSize: '18px',
-              marginBottom: '40px',
+              fontSize: 'clamp(16px, 3vw, 18px)',
+              marginBottom: 'clamp(20px, 4vw, 40px)',
               color: '#fff',
               borderRight: '4px solid #dc2626',
-              paddingRight: '16px'
+              paddingRight: '16px',
+              margin: '0 0 clamp(20px, 4vw, 40px) 0'
             }}>
               Quick Links
             </h3>
@@ -773,9 +817,9 @@ const BlogDetail: React.FC = () => {
               margin: 0,
               display: 'flex',
               flexDirection: 'column',
-              gap: '20px',
+              gap: 'clamp(12px, 2vw, 20px)',
               color: '#6b7280',
-              fontSize: '18px',
+              fontSize: 'clamp(13px, 2vw, 18px)',
               fontWeight: 500
             }}>
               {['Main Page', 'All Categories', 'Success Stories', 'Contact Us'].map((link) => (
@@ -795,31 +839,32 @@ const BlogDetail: React.FC = () => {
           <div>
             <h3 style={{
               fontWeight: 900,
-              fontSize: '18px',
-              marginBottom: '40px',
+              fontSize: 'clamp(16px, 3vw, 18px)',
+              marginBottom: 'clamp(20px, 4vw, 40px)',
               color: '#fff',
               borderRight: '4px solid #dc2626',
               paddingRight: '16px',
-              fontFamily: 'Jameel Noori Nastaleeq'
+              fontFamily: 'Jameel Noori Nastaleeq',
+              margin: '0 0 clamp(20px, 4vw, 40px) 0'
             }}>
               Follow Us
             </h3>
             <div style={{
               display: 'flex',
               justifyContent: 'flex-end',
-              gap: '24px',
-              marginBottom: '40px'
+              gap: 'clamp(12px, 3vw, 24px)',
+              marginBottom: '24px'
             }}>
               <div style={{
-                width: '56px',
-                height: '56px',
+                width: 'clamp(40px, 8vw, 56px)',
+                height: 'clamp(40px, 8vw, 56px)',
                 backgroundColor: '#1f2937',
                 borderRadius: '16px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 900,
-                fontSize: '14px',
+                fontSize: 'clamp(11px, 2vw, 14px)',
                 border: '1px solid #374151',
                 cursor: 'pointer',
                 transition: 'background-color 0.3s'
@@ -830,15 +875,15 @@ const BlogDetail: React.FC = () => {
                 FB
               </div>
               <div style={{
-                width: '56px',
-                height: '56px',
+                width: 'clamp(40px, 8vw, 56px)',
+                height: 'clamp(40px, 8vw, 56px)',
                 backgroundColor: '#1f2937',
                 borderRadius: '16px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 900,
-                fontSize: '14px',
+                fontSize: 'clamp(11px, 2vw, 14px)',
                 border: '1px solid #374151',
                 cursor: 'pointer',
                 transition: 'background-color 0.3s'
@@ -851,9 +896,10 @@ const BlogDetail: React.FC = () => {
             </div>
             <p style={{
               color: '#4b5563',
-              fontSize: '11px',
+              fontSize: 'clamp(9px, 1.5vw, 11px)',
               letterSpacing: 'widest',
-              fontWeight: 'bold'
+              fontWeight: 'bold',
+              margin: 0
             }}>
               CONTACT: INFO@MILLIONHUB.PK
             </p>
@@ -861,11 +907,10 @@ const BlogDetail: React.FC = () => {
         </div>
         <div style={{
           textAlign: 'center',
-          marginTop: '96px',
-          paddingTop: '48px',
+          paddingTop: 'clamp(20px, 4vw, 48px)',
           borderTop: '1px solid #1f2937',
           color: '#4b5563',
-          fontSize: '11px',
+          fontSize: 'clamp(8px, 1.5vw, 11px)',
           textTransform: 'uppercase',
           letterSpacing: '10px',
           fontWeight: 900
