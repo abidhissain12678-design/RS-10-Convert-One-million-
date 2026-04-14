@@ -108,6 +108,8 @@ interface Blog {
   excerpt: string;
   createdAt: string;
   publishedAt?: string;
+  isTrending?: boolean;
+  category?: string;
 }
 
 // Quill modules configuration
@@ -288,6 +290,9 @@ const ManageBlogs: React.FC = () => {
   const [readingTime, setReadingTime] = useState(0);
   const [htmlViewActive, setHtmlViewActive] = useState(false);
   const [activeTab, setActiveTab] = useState<'blogs' | 'newsletter'>('blogs');
+  const [isTrending, setIsTrending] = useState(false);
+  const [category, setCategory] = useState('Digital Skills');
+  const [showLivePreview, setShowLivePreview] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [modules] = useState(createModules());
 
@@ -374,6 +379,8 @@ const ManageBlogs: React.FC = () => {
     setThumbnailPreview(blog.thumbnail);
     setThumbnail(null);
     setMessage('');
+    setIsTrending(blog.isTrending || false);
+    setCategory(blog.category || 'Digital Skills');
   };
 
   const handleCancelEdit = () => {
@@ -389,6 +396,8 @@ const ManageBlogs: React.FC = () => {
     setFocusKeywords('');
     setMessage('');
     setHtmlViewActive(false);
+    setIsTrending(false);
+    setCategory('Digital Skills');
   };
 
   const showMessage = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -436,6 +445,8 @@ const ManageBlogs: React.FC = () => {
       formData.append('status', status);
       formData.append('metaDescription', metaDescription);
       formData.append('focusKeywords', focusKeywords);
+      formData.append('isTrending', String(isTrending));
+      formData.append('category', category);
       if (slug.trim()) {
         formData.append('slug', slug);
       }
@@ -593,23 +604,48 @@ const ManageBlogs: React.FC = () => {
 
         {activeTab === 'blogs' && (
         <>
-        {/* Form Section */}
+        {/* Form Section with Live Preview */}
         <div style={{
-          background: 'rgba(255, 215, 0, 0.05)',
-          border: '2px solid rgba(255, 215, 0, 0.3)',
-          borderRadius: '16px',
-          padding: '30px',
+          display: 'grid',
+          gridTemplateColumns: showLivePreview ? '1fr 400px' : '1fr',
+          gap: '30px',
           marginBottom: '40px'
         }}>
-          <h2 style={{
-            fontSize: '1.5rem',
-            color: '#FFD700',
-            marginBottom: '20px'
+          {/* Form Container */}
+          <div style={{
+            background: 'rgba(255, 215, 0, 0.05)',
+            border: '2px solid rgba(255, 215, 0, 0.3)',
+            borderRadius: '16px',
+            padding: '30px'
           }}>
-            {editingBlog ? '✏️ Edit Blog' : '➕ Create New Blog'}
-          </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                color: '#FFD700',
+                margin: 0
+              }}>
+                {editingBlog ? '✏️ Edit Blog' : '➕ Create New Blog'}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowLivePreview(!showLivePreview)}
+                style={{
+                  padding: '8px 16px',
+                  background: showLivePreview ? '#FFD700' : 'rgba(255, 215, 0, 0.2)',
+                  color: showLivePreview ? '#000' : '#FFD700',
+                  border: `2px solid ${showLivePreview ? '#FFD700' : 'rgba(255, 215, 0, 0.5)'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  fontSize: '0.9rem',
+                  transition: 'all 0.3s'
+                }}
+              >
+                📱 {showLivePreview ? 'Hide' : 'Show'} Preview
+              </button>
+            </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             {/* Title Input */}
             <div>
               <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
@@ -857,6 +893,86 @@ const ManageBlogs: React.FC = () => {
               </div>
             </div>
 
+            {/* Category Selector */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Main Category
+              </label>
+              <select 
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                style={{
+                  width: '100%',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  borderRadius: '8px',
+                  padding: '12px',
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  cursor: 'pointer',
+                  color: '#FFD700',
+                  fontSize: '1rem'
+                }}
+              >
+                <option value="Digital Skills">💻 Digital Skills</option>
+                <option value="Kamyabiyan">🏆 Kamyabiyan</option>
+                <option value="Karobar">📈 Karobar</option>
+                <option value="Safha Awal">📰 Safha Awal</option>
+              </select>
+            </div>
+
+            {/* Trending Now Switch */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Trending Settings
+              </label>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'rgba(255, 255, 255, 0.05)',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid rgba(255, 215, 0, 0.3)',
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => {e.currentTarget.style.borderColor = '#ef4444'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';}}
+              onMouseLeave={(e) => {e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.3)'; e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';}}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: '#ef4444', fontSize: '1.2rem' }}>🔥</span>
+                  <span style={{ color: '#FFF', fontSize: '0.9rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Trending Now</span>
+                </div>
+                <button 
+                  type="button"
+                  onClick={() => setIsTrending(!isTrending)}
+                  style={{
+                    width: '48px',
+                    height: '24px',
+                    borderRadius: '12px',
+                    border: 'none',
+                    background: isTrending ? '#dc2626' : '#4b5563',
+                    cursor: 'pointer',
+                    position: 'relative',
+                    transition: 'all 0.3s',
+                    boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+                  }}
+                >
+                  <div style={{
+                    position: 'absolute',
+                    top: '2px',
+                    width: '16px',
+                    height: '16px',
+                    background: '#FFF',
+                    borderRadius: '50%',
+                    transition: 'all 0.3s',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
+                    left: isTrending ? '28px' : '4px'
+                  }}></div>
+                </button>
+              </div>
+            </div>
+
             {/* Message Display */}
             {message && (
               <div style={{
@@ -912,6 +1028,160 @@ const ManageBlogs: React.FC = () => {
               )}
             </div>
           </form>
+          </div>
+
+          {/* --- Live Mobile Preview Section --- */}
+          {showLivePreview && (
+            <div style={{
+              position: 'sticky',
+              top: '20px',
+              height: 'fit-content',
+              background: '#fff',
+              borderRadius: '40px',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+              border: '8px solid #1f2937',
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column'
+            }}>
+              {/* Mobile Speaker/Camera Notch Detail */}
+              <div style={{
+                width: '100%',
+                height: '32px',
+                background: '#1f2937',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: '64px',
+                  height: '4px',
+                  background: '#111827',
+                  borderRadius: '9999px'
+                }}></div>
+              </div>
+
+              {/* Preview Content Area */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                background: '#fff',
+                padding: '16px',
+                height: '700px'
+              }}>
+                {/* Category Label */}
+                <div style={{ marginBottom: '8px' }}>
+                  <span style={{
+                    color: '#fbbf24',
+                    fontWeight: 900,
+                    fontSize: '8px',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.12em',
+                    background: '#000',
+                    padding: '4px 8px',
+                    borderRadius: '4px',
+                    display: 'inline-block'
+                  }}>
+                    {category || 'Category'}
+                  </span>
+                </div>
+
+                {/* Blog Title */}
+                <h1 style={{
+                  fontSize: '1.25rem',
+                  fontWeight: 900,
+                  color: '#000',
+                  marginBottom: '16px',
+                  lineHeight: 1.2,
+                  fontFamily: 'Arial, sans-serif'
+                }}>
+                  {title || 'Yahan aapka blog title dikhay ga...'}
+                </h1>
+
+                {/* Author & Date Info */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  marginBottom: '16px',
+                  borderBottom: '1px solid #e2e8f0',
+                  paddingBottom: '12px'
+                }}>
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#e0e7ff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    color: '#9ca3af'
+                  }}>
+                    MH
+                  </div>
+                  <div style={{ fontSize: '10px' }}>
+                    <p style={{ fontWeight: 700, color: '#000', margin: 0 }}>{author || 'Million Hub'}</p>
+                    <p style={{ color: '#9ca3af', margin: '4px 0 0 0' }}>Published • {new Date().toLocaleDateString()}</p>
+                  </div>
+                </div>
+
+                {/* Featured Image Preview */}
+                {thumbnailPreview ? (
+                  <div style={{
+                    width: '100%',
+                    aspectRatio: '16 / 9',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    marginBottom: '16px',
+                    boxShadow: '0 10px 15px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <img src={thumbnailPreview} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Blog Preview" />
+                  </div>
+                ) : (
+                  <div style={{
+                    width: '100%',
+                    aspectRatio: '16 / 9',
+                    background: '#f3f4f6',
+                    borderRadius: '12px',
+                    marginBottom: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: '2px dashed #e5e7eb'
+                  }}>
+                    <span style={{ fontSize: '10px', color: '#9ca3af', fontWeight: 700, textTransform: 'uppercase' }}>No Image Uploaded</span>
+                  </div>
+                )}
+
+                {/* Real-time Content Rendering */}
+                <div style={{
+                  fontSize: '14px',
+                  lineHeight: 2,
+                  color: '#475569',
+                  direction: 'rtl'
+                }} dangerouslySetInnerHTML={{ __html: content || '<p style="color: #d1d5db;">Apna content likhna shuru karein...</p>' }} />
+              </div>
+
+              {/* Mobile Home Indicator */}
+              <div style={{
+                width: '100%',
+                height: '24px',
+                background: '#fff',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center'
+              }}>
+                <div style={{
+                  width: '80px',
+                  height: '4px',
+                  background: '#e5e7eb',
+                  borderRadius: '9999px'
+                }}></div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Blogs List Section */}
