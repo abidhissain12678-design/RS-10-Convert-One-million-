@@ -357,7 +357,9 @@ const BlogDetail: React.FC = () => {
         padding: 'clamp(20px, 5vw, 56px) clamp(12px, 4vw, 16px)',
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-        gap: 'clamp(20px, 5vw, 56px)'
+        gap: 'clamp(20px, 5vw, 56px)',
+        direction: 'ltr',
+        textAlign: 'left'
       }}>
         {/* Main Article Section */}
         <article style={{
@@ -367,7 +369,9 @@ const BlogDetail: React.FC = () => {
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
           border: '1px solid #f3f4f6',
           position: 'relative',
-          order: 1
+          order: 1,
+          direction: 'ltr',
+          textAlign: 'left'
         }}>
           {/* Floating Category Tag */}
           <div style={{
@@ -423,12 +427,14 @@ const BlogDetail: React.FC = () => {
           <div style={{
             display: 'flex',
             flexWrap: 'wrap',
-            alignItems: 'left',
+            alignItems: 'center',
             gap: 'clamp(12px, 3vw, 24px)',
             borderTop: '1px solid #f3f4f6',
             borderBottom: '1px solid #f3f4f6',
             padding: 'clamp(16px, 4vw, 32px) 0',
-            marginBottom: 'clamp(24px, 5vw, 48px)'
+            marginBottom: 'clamp(24px, 5vw, 48px)',
+            direction: 'ltr',
+            textAlign: 'left'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1, minWidth: '200px' }}>
               <div style={{
@@ -448,11 +454,11 @@ const BlogDetail: React.FC = () => {
               }}>
                 MH
               </div>
-              <div style={{ textAlign: 'left' }}>
+              <div style={{ textAlign: 'left', direction: 'ltr' }}>
                 <p style={{
                   fontWeight: 900,
                   color: '#111',
-                  fontFamily: 'Poppins',
+                  fontFamily: "'Poppins', -apple-system, sans-serif",
                   fontSize: 'clamp(0.95rem, 2vw, 1.25rem)',
                   margin: 0
                 }}>
@@ -464,7 +470,8 @@ const BlogDetail: React.FC = () => {
                   fontWeight: 'bold',
                   textTransform: 'uppercase',
                   letterSpacing: '3px',
-                  margin: '4px 0 0 0'
+                  margin: '4px 0 0 0',
+                  fontFamily: "'Poppins', sans-serif"
                 }}>
                   Verified News Source
                 </p>
@@ -538,20 +545,22 @@ const BlogDetail: React.FC = () => {
             background: 'linear-gradient(to right, #fef2f2 0%, #fff 100%)',
             padding: 'clamp(20px, 5vw, 40px)',
             borderRadius: '24px',
-            borderRight: 'clamp(6px, 2vw, 12px) solid #dc2626',
+            borderLeft: 'clamp(6px, 2vw, 12px) solid #dc2626',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            direction: 'ltr',
+            textAlign: 'left'
           }}>
             <div style={{
               position: 'absolute',
               top: 0,
-              left: 0,
+              right: 0,
               opacity: 0.1,
               fontSize: 'clamp(72px, 15vw, 144px)',
               fontWeight: 900,
               color: '#dc2626',
-              transform: 'translate(-40px, 40px)'
+              transform: 'translate(40px, 40px)'
             }}>
               MH
             </div>
@@ -560,20 +569,22 @@ const BlogDetail: React.FC = () => {
               fontSize: 'clamp(18px, 4vw, 24px)',
               marginBottom: '20px',
               color: '#b91c1c',
-              fontFamily: 'Poppins',
+              fontFamily: "'Poppins', sans-serif",
               position: 'relative',
               zIndex: 10
             }}>
               Zaroori Maloomat:
             </h3>
             <p style={{
-              fontFamily: 'Poppins',
+              fontFamily: "'Jameel Noori Nastaleeq', serif",
               fontSize: 'clamp(14px, 3vw, 20px)',
               color: '#7f1d1d',
               lineHeight: 1.8,
               position: 'relative',
               zIndex: 10,
-              margin: 0
+              margin: 0,
+              direction: 'rtl',
+              textAlign: 'right'
             }}>
               Agar aap bhi 10 rupaye se apna safar shuru karna chahte hain, to abhi register karein aur is khabar ko apne doston tak pohanchayein.
             </p>
@@ -581,7 +592,7 @@ const BlogDetail: React.FC = () => {
         </article>
 
         {/* Sidebar Widgets */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(20px, 5vw, 48px)', order: 2, minWidth: '300px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'clamp(20px, 5vw, 48px)', order: 2, minWidth: '300px', direction: 'ltr', textAlign: 'left' }}>
           {/* Popular Posts Widget */}
           <div style={{
             backgroundColor: '#fff',
@@ -591,12 +602,13 @@ const BlogDetail: React.FC = () => {
             padding: 'clamp(20px, 4vw, 40px)',
             position: 'relative',
             overflow: 'hidden',
-            textAlign: 'left'
+            textAlign: 'left',
+            direction: 'ltr'
           }}>
             <div style={{
               position: 'absolute',
               top: 0,
-              right: 0,
+              left: 0,
               width: '8px',
               height: '100%',
               backgroundColor: '#dc2626'
@@ -607,8 +619,9 @@ const BlogDetail: React.FC = () => {
               borderBottom: '2px solid #f3f4f6',
               paddingBottom: '20px',
               marginBottom: 'clamp(20px, 4vw, 40px)',
-              fontFamily: 'Poppins',
-              margin: 0
+              fontFamily: "'Poppins', -apple-system, sans-serif",
+              margin: 0,
+              direction: 'ltr'
             }}>
               NEW ARTICLES
             </h3>
@@ -627,7 +640,9 @@ const BlogDetail: React.FC = () => {
                       paddingBottom: 'clamp(16px, 3vw, 32px)',
                       marginBottom: 'clamp(16px, 3vw, 32px)',
                       textDecoration: 'none',
-                      color: 'inherit'
+                      color: 'inherit',
+                      direction: 'ltr',
+                      textAlign: 'left'
                     }}
                   >
                     <div style={{
@@ -642,22 +657,25 @@ const BlogDetail: React.FC = () => {
                       fontSize: 'clamp(16px, 3vw, 24px)',
                       fontWeight: 900,
                       color: '#111',
-                      transition: 'background-color 0.3s'
+                      transition: 'background-color 0.3s',
+                      flexShrink: 0
                     }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
                     >
                       {i + 1}
                     </div>
-                    <div style={{ textAlign: 'left', flex: 1 }}>
+                    <div style={{ textAlign: 'left', flex: 1, direction: 'ltr' }}>
                       <h4 style={{
                         fontWeight: 'bold',
                         fontSize: 'clamp(13px, 2vw, 16px)',
-                        fontFamily: 'Poppins',
+                        fontFamily: "'Jameel Noori Nastaleeq', serif",
                         lineHeight: 1.3,
                         color: '#1f2937',
                         marginBottom: '8px',
-                        margin: '0 0 8px 0'
+                        margin: '0 0 8px 0',
+                        direction: 'rtl',
+                        textAlign: 'right'
                       }}>
                         {item.title}
                       </h4>
@@ -667,7 +685,10 @@ const BlogDetail: React.FC = () => {
                         fontWeight: 'bold',
                         textTransform: 'uppercase',
                         letterSpacing: 'wider',
-                        display: 'block'
+                        display: 'block',
+                        fontFamily: "'Poppins', sans-serif",
+                        direction: 'ltr',
+                        textAlign: 'left'
                       }}>
                         {item.readingTime} min read
                       </span>
@@ -686,11 +707,12 @@ const BlogDetail: React.FC = () => {
             padding: 'clamp(24px, 5vw, 48px)',
             borderRadius: '32px',
             color: '#fff',
-            textAlign: 'center',
+            textAlign: 'left',
             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
             position: 'relative',
             overflow: 'hidden',
-            borderBottom: 'clamp(4px, 2vw, 8px) solid #dc2626'
+            borderTop: 'clamp(4px, 2vw, 8px) solid #dc2626',
+            direction: 'ltr'
           }}>
             <div style={{
               position: 'absolute',
@@ -706,7 +728,7 @@ const BlogDetail: React.FC = () => {
               fontSize: 'clamp(24px, 4vw, 32px)',
               fontWeight: 900,
               marginBottom: '24px',
-              fontFamily: 'Poppins',
+              fontFamily: "'Poppins', -apple-system, sans-serif",
               letterSpacing: '-0.02em',
               margin: '0 0 24px 0'
             }}>
@@ -716,9 +738,11 @@ const BlogDetail: React.FC = () => {
               color: '#9ca3af',
               fontSize: 'clamp(12px, 2vw, 14px)',
               marginBottom: '24px',
-              fontFamily: 'Poppins',
+              fontFamily: "'Jameel Noori Nastaleeq', serif",
               lineHeight: 1.8,
-              margin: '0 0 24px 0'
+              margin: '0 0 24px 0',
+              direction: 'rtl',
+              textAlign: 'right'
             }}>
               Har nayi khabar aur update apne mobile par hasil karne ke liye register karein.
             </p>
@@ -737,7 +761,8 @@ const BlogDetail: React.FC = () => {
                 border: 'none',
                 boxSizing: 'border-box',
                 textAlign: 'left',
-                fontSize: 'clamp(12px, 2vw, 16px)'
+                fontSize: 'clamp(12px, 2vw, 16px)',
+                fontFamily: "'Poppins', sans-serif"
               }}
             />
             <button
@@ -754,7 +779,8 @@ const BlogDetail: React.FC = () => {
                 letterSpacing: '4px',
                 border: 'none',
                 cursor: 'pointer',
-                transition: 'background-color 0.3s'
+                transition: 'background-color 0.3s',
+                fontFamily: "'Poppins', sans-serif"
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
@@ -792,7 +818,9 @@ const BlogDetail: React.FC = () => {
         paddingTop: 'clamp(40px, 5vw, 96px)',
         paddingBottom: 'clamp(40px, 5vw, 96px)',
         borderTopWidth: 'clamp(8px, 2vw, 15px)',
-        borderTopColor: '#dc2626'
+        borderTopColor: '#dc2626',
+        direction: 'ltr',
+        textAlign: 'left'
       }}>
         <div style={{
           maxWidth: '1440px',
@@ -802,7 +830,8 @@ const BlogDetail: React.FC = () => {
           gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
           gap: 'clamp(30px, 5vw, 80px)',
           textAlign: 'left',
-          marginBottom: 'clamp(30px, 5vw, 80px)'
+          marginBottom: 'clamp(30px, 5vw, 80px)',
+          direction: 'ltr'
         }}>
           <div>
             <h2 style={{
@@ -812,29 +841,33 @@ const BlogDetail: React.FC = () => {
               marginBottom: 'clamp(20px, 4vw, 40px)',
               letterSpacing: '-0.05em',
               fontStyle: 'italic',
-              margin: '0 0 clamp(20px, 4vw, 40px) 0'
+              margin: '0 0 clamp(20px, 4vw, 40px) 0',
+              fontFamily: "'Poppins', -apple-system, sans-serif"
             }}>
               MH
             </h2>
             <p style={{
               color: '#6b7280',
-              fontFamily: 'Poppins',
+              fontFamily: "'Jameel Noori Nastaleeq', serif",
               lineHeight: 2.4,
               fontSize: 'clamp(14px, 2vw, 20px)',
-              margin: 0
+              margin: 0,
+              direction: 'rtl',
+              textAlign: 'right'
             }}>
               Million Hub Pakistan ka wo wahid digital idaara hai jo har shehri ko maashi tor par azad dekhna chahta hai. Hamare sath judiye aur apna kal badliiye.
             </p>
           </div>
-          <div style={{ fontFamily: 'Poppins' }}>
+          <div style={{ direction: 'ltr', textAlign: 'left' }}>
             <h3 style={{
               fontWeight: 900,
               fontSize: 'clamp(16px, 3vw, 18px)',
               marginBottom: 'clamp(20px, 4vw, 40px)',
               color: '#fff',
-              borderRight: '4px solid #dc2626',
-              paddingRight: '16px',
-              margin: '0 0 clamp(20px, 4vw, 40px) 0'
+              borderLeft: '4px solid #dc2626',
+              paddingLeft: '16px',
+              margin: '0 0 clamp(20px, 4vw, 40px) 0',
+              fontFamily: "'Poppins', -apple-system, sans-serif"
             }}>
               Quick Links
             </h3>
@@ -847,7 +880,8 @@ const BlogDetail: React.FC = () => {
               gap: 'clamp(12px, 2vw, 20px)',
               color: '#6b7280',
               fontSize: 'clamp(13px, 2vw, 18px)',
-              fontWeight: 500
+              fontWeight: 500,
+              fontFamily: "'Poppins', sans-serif"
             }}>
               {['Main Page', 'All Categories', 'Success Stories', 'Contact Us'].map((link) => (
                 <li key={link}
@@ -863,22 +897,22 @@ const BlogDetail: React.FC = () => {
               ))}
             </ul>
           </div>
-          <div>
+          <div style={{ direction: 'ltr', textAlign: 'left' }}>
             <h3 style={{
               fontWeight: 900,
               fontSize: 'clamp(16px, 3vw, 18px)',
               marginBottom: 'clamp(20px, 4vw, 40px)',
               color: '#fff',
-              borderRight: '4px solid #dc2626',
-              paddingRight: '16px',
-              fontFamily: 'Poppins',
+              borderLeft: '4px solid #dc2626',
+              paddingLeft: '16px',
+              fontFamily: "'Poppins', -apple-system, sans-serif",
               margin: '0 0 clamp(20px, 4vw, 40px) 0'
             }}>
               Follow Us
             </h3>
             <div style={{
               display: 'flex',
-              justifyContent: 'flex-end',
+              justifyContent: 'flex-start',
               gap: 'clamp(12px, 3vw, 24px)',
               marginBottom: '24px'
             }}>
@@ -894,7 +928,8 @@ const BlogDetail: React.FC = () => {
                 fontSize: 'clamp(11px, 2vw, 14px)',
                 border: '1px solid #374151',
                 cursor: 'pointer',
-                transition: 'background-color 0.3s'
+                transition: 'background-color 0.3s',
+                fontFamily: "'Poppins', sans-serif"
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1f2937'}
@@ -913,7 +948,8 @@ const BlogDetail: React.FC = () => {
                 fontSize: 'clamp(11px, 2vw, 14px)',
                 border: '1px solid #455165',
                 cursor: 'pointer',
-                transition: 'background-color 0.3s'
+                transition: 'background-color 0.3s',
+                fontFamily: "'Poppins', sans-serif"
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1f2937'}
@@ -926,7 +962,8 @@ const BlogDetail: React.FC = () => {
               fontSize: 'clamp(9px, 1.5vw, 11px)',
               letterSpacing: 'widest',
               fontWeight: 'bold',
-              margin: 0
+              margin: 0,
+              fontFamily: "'Poppins', sans-serif"
             }}>
               CONTACT: INFO@MILLIONHUB.PK
             </p>
@@ -936,11 +973,12 @@ const BlogDetail: React.FC = () => {
           textAlign: 'center',
           paddingTop: 'clamp(20px, 4vw, 48px)',
           borderTop: '1px solid #1f2937',
-          color: '#f6f8fb',
+          color: '#4b5563',
           fontSize: 'clamp(8px, 1.5vw, 11px)',
           textTransform: 'uppercase',
           letterSpacing: '10px',
-          fontWeight: 900
+          fontWeight: 900,
+          fontFamily: "'Poppins', sans-serif"
         }}>
           © 2026 MILLION HUB DIGITAL | THE FUTURE IS HERE
         </div>
