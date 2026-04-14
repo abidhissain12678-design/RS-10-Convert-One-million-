@@ -25,7 +25,7 @@ const BlogDetailPage: React.FC = () => {
   const router = useRouter();
   const { slug } = router.query;
   const [blog, setBlog] = useState<Blog | null>(null);
-  const [relatedBlogs, setRelatedBlogs] = useState<Blog[]>([]);
+  const [trendingBlogs, setTrendingBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,17 +49,17 @@ const BlogDetailPage: React.FC = () => {
         // Handle both formats: { blog } and direct blog object
         setBlog(data.blog || data);
 
-        // Fetch related blogs (same keywords)
+        // Fetch trending blogs
         const allBlogsResponse = await fetch(`${baseUrl}/api/blogs`, {
           cache: 'no-cache'
         });
 
         if (allBlogsResponse.ok) {
           const allBlogsData = await allBlogsResponse.json();
-          const related = allBlogsData.blogs
+          const trending = allBlogsData.blogs
             .filter((b: Blog) => b.slug !== slug)
-            .slice(0, 3);
-          setRelatedBlogs(related);
+            .slice(0, 5);
+          setTrendingBlogs(trending);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load blog');
@@ -76,11 +76,11 @@ const BlogDetailPage: React.FC = () => {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0f1419 0%, #1a1f26 50%, #0a0e12 100%)',
+        background: '#f5f5f5',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#FFD700',
+        color: '#d32f2f',
         fontSize: '1.2rem'
       }}>
         ⏳ Loading article...
@@ -92,24 +92,24 @@ const BlogDetailPage: React.FC = () => {
     return (
       <div style={{
         minHeight: '100vh',
-        background: 'linear-gradient(135deg, #0f1419 0%, #1a1f26 50%, #0a0e12 100%)',
+        background: '#f5f5f5',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'column',
         gap: '20px'
       }}>
-        <div style={{ color: '#F44336', fontSize: '1.2rem' }}>
+        <div style={{ color: '#d32f2f', fontSize: '1.2rem' }}>
           ❌ {error || 'Blog not found'}
         </div>
         <Link href="/" style={{ textDecoration: 'none' }}>
           <button
             style={{
-              backgroundColor: '#FFD700',
-              color: '#000',
+              backgroundColor: '#d32f2f',
+              color: '#fff',
               border: 'none',
               padding: '12px 30px',
-              borderRadius: '8px',
+              borderRadius: '4px',
               cursor: 'pointer',
               fontWeight: '600',
               fontSize: '1rem'
@@ -126,331 +126,381 @@ const BlogDetailPage: React.FC = () => {
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, #0f1419 0%, #1a1f26 50%, #0a0e12 100%)',
-      color: '#F8D94A',
+      background: '#f5f5f5',
+      color: '#333',
       minHeight: '100vh',
-      fontFamily: 'Inter, system-ui, sans-serif'
+      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
     }}>
-      {/* Header Navigation */}
+      {/* Red and White Header */}
       <header style={{
-        padding: '15px 20px',
-        borderBottom: '1px solid rgba(255, 215, 0, 0.1)',
+        background: 'linear-gradient(135deg, #d32f2f 0%, #c62828 100%)',
+        color: '#fff',
+        padding: '20px 0',
         position: 'sticky',
         top: 0,
         zIndex: 50,
-        background: 'rgba(15, 20, 25, 0.95)',
-        backdropFilter: 'blur(10px)'
+        boxShadow: '0 4px 12px rgba(211, 47, 47, 0.15)'
       }}>
         <div style={{
-          maxWidth: '1000px',
+          maxWidth: '1200px',
           margin: '0 auto',
+          padding: '0 20px',
           display: 'flex',
-          gap: '15px',
+          justifyContent: 'space-between',
           alignItems: 'center'
         }}>
           <Link href="/" style={{ textDecoration: 'none' }}>
+            <div style={{
+              fontSize: '1.8rem',
+              fontWeight: '700',
+              color: '#fff',
+              cursor: 'pointer',
+              letterSpacing: '1px'
+            }}>
+              📰 MILLION HUB
+            </div>
+          </Link>
+          <Link href="/" style={{ textDecoration: 'none' }}>
             <button
               style={{
-                background: 'rgba(255, 215, 0, 0.1)',
-                color: '#FFD700',
-                border: '1px solid rgba(255, 215, 0, 0.3)',
-                padding: '8px 16px',
-                borderRadius: '6px',
+                backgroundColor: '#fff',
+                color: '#d32f2f',
+                border: 'none',
+                padding: '10px 20px',
+                borderRadius: '4px',
                 cursor: 'pointer',
-                fontSize: '0.9rem',
+                fontSize: '0.95rem',
                 fontWeight: '600',
                 transition: 'all 0.3s'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 215, 0, 0.2)';
+                e.currentTarget.style.backgroundColor = '#f5f5f5';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 215, 0, 0.1)';
+                e.currentTarget.style.backgroundColor = '#fff';
               }}
             >
-              ← Back
+              ← Back to News
             </button>
           </Link>
-          <div style={{ fontSize: '0.8rem', color: '#AAA' }}>
-            MILLION HUB BLOG
-          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <article style={{
-        maxWidth: '800px',
+      {/* Main Content - 2 Column Layout */}
+      <div style={{
+        maxWidth: '1200px',
         margin: '0 auto',
-        padding: '60px 20px 80px',
-        backgroundColor: 'rgba(26, 26, 46, 0.8)',
-        borderRadius: '20px',
-        border: '1px solid rgba(255, 215, 0, 0.1)',
-        backdropFilter: 'blur(10px)',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-        paddingLeft: '30px',
-        paddingRight: '30px'
+        padding: '40px 20px',
+        display: 'grid',
+        gridTemplateColumns: '1fr 300px',
+        gap: '40px'
       }}>
-        {/* Hero Section with Thumbnail */}
-        <div style={{
-          marginBottom: '50px',
-          borderRadius: '16px',
-          overflow: 'hidden',
-          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
-          backgroundColor: '#1a1a2e'
+        {/* Left Column - Article Content */}
+        <article style={{
+          backgroundColor: '#fff',
+          borderRadius: '4px',
+          padding: '40px',
+          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
         }}>
-          <img
-            src={blog.thumbnail}
-            alt={blog.title}
-            style={{
-              width: '100%',
-              height: 'auto',
-              maxHeight: '500px',
-              objectFit: 'contain',
-              display: 'block',
-              aspectRatio: '16/9'
-            }}
-          />
-        </div>
-
-        {/* Article Meta Info */}
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '20px',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '30px',
-          paddingBottom: '20px',
-          borderBottom: '2px solid rgba(255, 215, 0, 0.15)',
-          fontSize: '0.95rem',
-          color: '#CCC'
-        }}>
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              👤 <strong>{blog.author}</strong>
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              📅 {new Date(blog.createdAt).toLocaleDateString('en-US', {
-                weekday: 'long',
-                month: 'long',
-                day: 'numeric',
-                year: 'numeric'
-              })}
-            </span>
-          </div>
-          <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              📝 {blog.wordCount} words
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              ⏱️ {blog.readingTime} min read
-            </span>
-          </div>
-        </div>
-
-        {/* Article Title */}
-        <h1 style={{
-          fontSize: 'clamp(2rem, 5vw, 3rem)',
-          color: '#FFD700',
-          marginBottom: '15px',
-          fontWeight: '800',
-          lineHeight: 1.3,
-          background: 'linear-gradient(135deg, #FFD700, #FFA500)',
-          backgroundClip: 'text',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent'
-        }}>
-          {blog.title}
-        </h1>
-
-        {/* Meta Description / Excerpt */}
-        <p style={{
-          fontSize: '1.15rem',
-          color: '#DDD',
-          marginBottom: '40px',
-          lineHeight: 1.8,
-          fontStyle: 'italic',
-          borderLeft: '4px solid rgba(255, 215, 0, 0.4)',
-          paddingLeft: '20px'
-        }}>
-          {blog.metaDescription || blog.excerpt}
-        </p>
-
-        {/* Focus Keywords */}
-        {blog.focusKeywords.length > 0 && (
+          {/* Hero Image */}
           <div style={{
-            marginBottom: '40px',
-            display: 'flex',
-            gap: '10px',
-            flexWrap: 'wrap'
+            marginBottom: '30px',
+            borderRadius: '4px',
+            overflow: 'hidden',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+            backgroundColor: '#e0e0e0'
           }}>
-            {blog.focusKeywords.map((keyword, idx) => (
-              <span
-                key={idx}
-                style={{
-                  backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                  border: '1px solid rgba(255, 215, 0, 0.3)',
-                  color: '#FFD700',
-                  padding: '6px 14px',
-                  borderRadius: '20px',
-                  fontSize: '0.85rem',
-                  fontWeight: '600'
-                }}
-              >
-                🔖 {keyword}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* Article Content - Rich HTML */}
-        <div
-          style={{
-            fontSize: '1.05rem',
-            lineHeight: 2,
-            color: '#EEE',
-            marginBottom: '60px',
-            wordBreak: 'break-word',
-            fontFamily: '"Jameel Noori Nastaleeq", "Segoe UI", Tahoma, san-serif'
-          }}
-          dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-          className="blog-content"
-        />
-
-        {/* Author Bio Section - Glassmorphism */}
-        <div
-          style={{
-            backgroundColor: 'rgba(255, 215, 0, 0.08)',
-            border: '2px solid rgba(255, 215, 0, 0.25)',
-            borderRadius: '16px',
-            padding: '35px',
-            marginBottom: '60px',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            boxShadow: '0 8px 32px rgba(255, 215, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.1)',
-            borderLeft: '5px solid rgba(255, 215, 0, 0.6)'
-          }}
-        >
-          <h3 style={{
-            color: '#FFD700',
-            marginBottom: '15px',
-            fontSize: '1.3rem',
-            fontWeight: '700',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            ✍️ About the Author
-          </h3>
-          <p style={{
-            color: '#DDD',
-            lineHeight: 1.8,
-            margin: '0',
-            fontSize: '1rem'
-          }}>
-            <strong style={{ color: '#FFD700', fontWeight: '700' }}>{blog.author}</strong> is a contributor at Million Hub, sharing insights and expertise on earning
-            opportunities, financial freedom, and personal growth strategies. With a passion for helping others succeed, we provide actionable advice and proven methods.
-          </p>
-        </div>
-
-        {/* Divider */}
-        <div
-          style={{
-            height: '1px',
-            background: 'linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent)',
-            margin: '60px 0'
-          }}
-        />
-
-        {/* Related Articles */}
-        {relatedBlogs.length > 0 && (
-          <div style={{ marginTop: '60px' }}>
-            <h2 style={{
-              color: '#FFD700',
-              fontSize: '1.8rem',
-              marginBottom: '30px',
-              fontWeight: '700'
-            }}>
-              📚 Related Articles
-            </h2>
-
-            <div
+            <img
+              src={blog.thumbnail}
+              alt={blog.title}
               style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                gap: '25px'
+                width: '100%',
+                height: '400px',
+                objectFit: 'cover',
+                display: 'block'
               }}
-            >
-              {relatedBlogs.map((relBlog) => (
-                <Link key={relBlog._id} href={`/blog/${relBlog.slug}`} style={{ textDecoration: 'none' }}>
-                  <article
+            />
+          </div>
+
+          {/* Article Header */}
+          <div style={{
+            borderTop: '3px solid #d32f2f',
+            paddingTop: '20px',
+            marginBottom: '30px'
+          }}>
+            {/* Category/Keywords */}
+            {blog.focusKeywords.length > 0 && (
+              <div style={{
+                display: 'flex',
+                gap: '8px',
+                flexWrap: 'wrap',
+                marginBottom: '12px'
+              }}>
+                {blog.focusKeywords.slice(0, 3).map((keyword, idx) => (
+                  <span
+                    key={idx}
                     style={{
-                      background: 'rgba(255, 215, 0, 0.05)',
-                      border: '1px solid rgba(255, 215, 0, 0.15)',
-                      borderRadius: '12px',
-                      overflow: 'hidden',
-                      transition: 'all 0.3s ease',
-                      cursor: 'pointer',
-                      height: '100%'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-8px)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.15)';
+                      backgroundColor: '#d32f2f',
+                      color: '#fff',
+                      padding: '4px 12px',
+                      borderRadius: '2px',
+                      fontSize: '0.75rem',
+                      fontWeight: '700',
+                      textTransform: 'uppercase'
                     }}
                   >
-                    <img
-                      src={relBlog.thumbnail}
-                      alt={relBlog.title}
-                      style={{
-                        width: '100%',
-                        height: '160px',
-                        objectFit: 'cover'
-                      }}
-                    />
-                    <div style={{ padding: '16px' }}>
-                      <h3
-                        style={{
-                          color: '#FFD700',
-                          fontSize: '1rem',
-                          margin: '0 0 10px 0',
-                          fontWeight: '600',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical'
-                        }}
-                      >
-                        {relBlog.title}
-                      </h3>
-                      <p
-                        style={{
-                          color: '#AAA',
-                          fontSize: '0.85rem',
-                          margin: '0',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical'
-                        }}
-                      >
-                        {relBlog.excerpt}
-                      </p>
-                    </div>
-                  </article>
-                </Link>
-              ))}
+                    {keyword}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Article Title */}
+            <h1 style={{
+              fontSize: '2.2rem',
+              color: '#1a1a1a',
+              margin: '0 0 15px 0',
+              fontWeight: '700',
+              lineHeight: 1.3
+            }}>
+              {blog.title}
+            </h1>
+
+            {/* Meta Info */}
+            <div style={{
+              display: 'flex',
+              gap: '20px',
+              fontSize: '0.85rem',
+              color: '#666',
+              flexWrap: 'wrap'
+            }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                ✍️ <strong>{blog.author}</strong>
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                📅 {new Date(blog.createdAt).toLocaleDateString('en-US', {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric'
+                })}
+              </span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                ⏱️ {blog.readingTime} min read
+              </span>
             </div>
           </div>
-        )}
-      </article>
 
-      {/* Global Blog Content Styles */}
+          {/* Article Excerpt */}
+          {blog.metaDescription && (
+            <p style={{
+              fontSize: '1.1rem',
+              color: '#555',
+              fontStyle: 'italic',
+              marginBottom: '30px',
+              paddingBottom: '20px',
+              borderBottom: '1px solid #e0e0e0',
+              lineHeight: 1.6
+            }}>
+              {blog.metaDescription}
+            </p>
+          )}
+
+          {/* Article Content */}
+          <div
+            style={{
+              fontSize: '1rem',
+              lineHeight: 2.2,
+              color: '#333',
+              marginBottom: '40px',
+              wordBreak: 'break-word'
+            }}
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
+            className="article-content"
+          />
+
+          {/* Author Bio */}
+          <div
+            style={{
+              backgroundColor: '#f9f9f9',
+              border: '1px solid #e0e0e0',
+              borderRadius: '4px',
+              padding: '25px',
+              marginTop: '40px',
+              borderLeft: '4px solid #d32f2f'
+            }}
+          >
+            <h3 style={{
+              color: '#d32f2f',
+              margin: '0 0 12px 0',
+              fontSize: '1.1rem',
+              fontWeight: '700'
+            }}>
+              About the Author
+            </h3>
+            <p style={{
+              color: '#666',
+              lineHeight: 1.6,
+              margin: '0',
+              fontSize: '0.95rem'
+            }}>
+              <strong style={{ color: '#1a1a1a' }}>{blog.author}</strong> is a contributor at Million Hub, sharing insights and expertise on earning opportunities, financial freedom, and personal growth strategies.
+            </p>
+          </div>
+        </article>
+
+        {/* Right Column - Trending Sidebar */}
+        <aside>
+          {/* Trending Box */}
+          <div style={{
+            backgroundColor: '#fff',
+            borderRadius: '4px',
+            overflow: 'hidden',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+            position: 'sticky',
+            top: '100px'
+          }}>
+            {/* Header */}
+            <div style={{
+              background: '#d32f2f',
+              color: '#fff',
+              padding: '15px 20px',
+              fontWeight: '700',
+              fontSize: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              🔥 TRENDING NOW
+            </div>
+
+            {/* Trending Articles */}
+            <div style={{ padding: '0' }}>
+              {trendingBlogs.length > 0 ? (
+                trendingBlogs.map((trendBlog, idx) => (
+                  <Link key={trendBlog._id} href={`/blog/${trendBlog.slug}`} style={{ textDecoration: 'none' }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '12px',
+                        padding: '15px',
+                        borderBottom: idx < trendingBlogs.length - 1 ? '1px solid #e0e0e0' : 'none',
+                        cursor: 'pointer',
+                        transition: 'background 0.3s',
+                        backgroundColor: '#fff'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f9f9f9';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#fff';
+                      }}
+                    >
+                      {/* Trending Number */}
+                      <div style={{
+                        background: '#d32f2f',
+                        color: '#fff',
+                        width: '30px',
+                        height: '30px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontWeight: '700',
+                        fontSize: '0.9rem',
+                        flexShrink: 0
+                      }}>
+                        {idx + 1}
+                      </div>
+
+                      {/* Content */}
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <h4 style={{
+                          color: '#1a1a1a',
+                          margin: '0 0 6px 0',
+                          fontSize: '0.9rem',
+                          fontWeight: '600',
+                          lineHeight: 1.3,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical'
+                        }}>
+                          {trendBlog.title}
+                        </h4>
+                        <p style={{
+                          color: '#999',
+                          fontSize: '0.75rem',
+                          margin: '0',
+                          display: 'flex',
+                          gap: '8px'
+                        }}>
+                          <span>{trendBlog.readingTime} min</span>
+                          <span>•</span>
+                          <span>{new Date(trendBlog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div style={{ padding: '20px', color: '#999', textAlign: 'center' }}>
+                  No trending articles
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Subscribe Box */}
+          <div style={{
+            backgroundColor: '#d32f2f',
+            color: '#fff',
+            padding: '20px',
+            borderRadius: '4px',
+            marginTop: '20px',
+            textAlign: 'center',
+            boxShadow: '0 2px 8px rgba(211, 47, 47, 0.15)'
+          }}>
+            <h3 style={{
+              margin: '0 0 10px 0',
+              fontSize: '1rem',
+              fontWeight: '700'
+            }}>
+              Stay Updated
+            </h3>
+            <p style={{
+              margin: '0 0 15px 0',
+              fontSize: '0.85rem',
+              lineHeight: 1.4
+            }}>
+              Get the latest news & insights
+            </p>
+            <button style={{
+              width: '100%',
+              backgroundColor: '#fff',
+              color: '#d32f2f',
+              border: 'none',
+              padding: '10px',
+              borderRadius: '4px',
+              fontWeight: '600',
+              fontSize: '0.9rem',
+              cursor: 'pointer',
+              transition: 'all 0.3s'
+            }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#f5f5f5';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#fff';
+              }}
+            >
+              Subscribe
+            </button>
+          </div>
+        </aside>
+      </div>
+
+      {/* Global Article Content Styles */}
       <style jsx global>{`
         @font-face {
           font-family: 'Jameel Noori Nastaleeq';
@@ -459,161 +509,169 @@ const BlogDetailPage: React.FC = () => {
           font-style: normal;
         }
 
-        .blog-content h1,
-        .blog-content h2,
-        .blog-content h3,
-        .blog-content h4,
-        .blog-content h5,
-        .blog-content h6 {
-          color: #FFD700;
+        .article-content {
+          font-family: '"Jameel Noori Nastaleeq", "Segoe UI", Tahoma, sans-serif';
+          line-height: 2.2;
+        }
+
+        .article-content h1,
+        .article-content h2,
+        .article-content h3,
+        .article-content h4,
+        .article-content h5,
+        .article-content h6 {
+          color: #d32f2f;
           margin-top: 30px;
           margin-bottom: 15px;
           font-weight: 700;
           line-height: 1.3;
         }
 
-        .blog-content h1 {
-          font-size: 2rem;
-          border-bottom: 2px solid rgba(255, 215, 0, 0.2);
-          padding-bottom: 15px;
+        .article-content h1 {
+          font-size: 1.8rem;
+          border-bottom: 3px solid #d32f2f;
+          padding-bottom: 10px;
         }
 
-        .blog-content h2 {
-          font-size: 1.6rem;
-          border-left: 5px solid rgba(255, 215, 0, 0.7);
-          padding-left: 20px;
-          margin-left: -20px;
-          background: linear-gradient(90deg, rgba(255, 215, 0, 0.05), transparent);
-          padding: 10px 15px 10px 20px;
-          border-radius: 0 8px 8px 0;
+        .article-content h2 {
+          font-size: 1.5rem;
+          border-left: 4px solid #d32f2f;
+          padding-left: 15px;
         }
 
-        .blog-content h3 {
-          font-size: 1.3rem;
-          border-left: 4px solid rgba(255, 215, 0, 0.6);
-          padding-left: 16px;
-          margin-left: -16px;
-          background: linear-gradient(90deg, rgba(255, 215, 0, 0.03), transparent);
-          padding: 8px 12px 8px 16px;
-          border-radius: 0 6px 6px 0;
+        .article-content h3 {
+          font-size: 1.2rem;
+          border-left: 3px solid #d32f2f;
+          padding-left: 12px;
         }
 
-        .blog-content p {
-          margin: 0 0 20px 0;
+        .article-content p {
+          margin: 0 0 15px 0;
           text-align: justify;
-          line-height: 2;
+          line-height: 2.2;
           letter-spacing: 0.3px;
+          color: #333;
         }
 
-        .blog-content a {
-          color: #FFD700;
+        .article-content a {
+          color: #d32f2f;
           text-decoration: underline;
           transition: all 0.3s ease;
         }
 
-        .blog-content a:hover {
-          color: #FFA500;
+        .article-content a:hover {
+          color: #b71c1c;
           text-decoration-thickness: 2px;
         }
 
-        .blog-content ul,
-        .blog-content ol {
+        .article-content ul,
+        .article-content ol {
           margin: 20px 0 20px 30px;
-          color: #EEE;
+          color: #333;
         }
 
-        .blog-content li {
+        .article-content li {
           margin-bottom: 12px;
-          line-height: 1.9;
+          line-height: 2;
           letter-spacing: 0.2px;
         }
 
-        .blog-content blockquote {
+        .article-content blockquote {
           margin: 25px 0;
           padding: 20px;
-          border-left: 5px solid rgba(255, 215, 0, 0.6);
-          background: rgba(255, 215, 0, 0.08);
-          border-radius: 8px;
+          border-left: 4px solid #d32f2f;
+          background: #f9f9f9;
+          border-radius: 4px;
           font-style: italic;
-          color: #DDD;
-          font-size: 1.1rem;
-          line-height: 1.9;
-          backdrop-filter: blur(10px);
+          color: #555;
+          font-size: 1rem;
+          line-height: 2;
         }
 
-        .blog-content code {
-          background: rgba(255, 215, 0, 0.1);
-          border: 1px solid rgba(255, 215, 0, 0.2);
-          color: #FFD700;
+        .article-content code {
+          background: #f5f5f5;
+          border: 1px solid #e0e0e0;
+          color: #d32f2f;
           padding: 4px 8px;
           border-radius: 4px;
           font-family: 'Courier New', monospace;
           font-size: 0.9rem;
         }
 
-        .blog-content pre {
-          background: rgba(255, 215, 0, 0.05);
-          border: 1px solid rgba(255, 215, 0, 0.2);
-          border-radius: 8px;
+        .article-content pre {
+          background: #f5f5f5;
+          border: 1px solid #e0e0e0;
+          border-radius: 4px;
           padding: 20px;
           overflow-x: auto;
           margin: 20px 0;
         }
 
-        .blog-content pre code {
+        .article-content pre code {
           background: transparent;
           border: none;
           padding: 0;
-          color: #FFD700;
+          color: #333;
         }
 
-        .blog-content img {
+        .article-content img {
           max-width: 100%;
           height: auto;
-          border-radius: 8px;
-          margin: 30px 0;
-          border: 1px solid rgba(255, 215, 0, 0.2);
+          border-radius: 4px;
+          margin: 20px 0;
+          border: 1px solid #e0e0e0;
         }
 
-        .blog-content table {
+        .article-content table {
           width: 100%;
           border-collapse: collapse;
           margin: 25px 0;
-          border: 1px solid rgba(255, 215, 0, 0.2);
+          border: 1px solid #e0e0e0;
         }
 
-        .blog-content th,
-        .blog-content td {
+        .article-content th,
+        .article-content td {
           padding: 12px;
           text-align: left;
-          border: 1px solid rgba(255, 215, 0, 0.1);
+          border: 1px solid #e0e0e0;
         }
 
-        .blog-content th {
-          background: rgba(255, 215, 0, 0.1);
-          color: #FFD700;
+        .article-content th {
+          background: #f5f5f5;
+          color: #d32f2f;
           font-weight: 700;
         }
 
-        .blog-content tr:hover {
-          background: rgba(255, 215, 0, 0.05);
+        .article-content tr:hover {
+          background: #f9f9f9;
         }
 
-        .blog-content hr {
+        .article-content hr {
           border: none;
-          height: 1px;
-          background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+          height: 2px;
+          background: linear-gradient(90deg, transparent, #d32f2f, transparent);
           margin: 40px 0;
         }
 
-        .blog-content strong {
-          color: #FFD700;
+        .article-content strong {
+          color: #d32f2f;
           font-weight: 700;
         }
 
-        .blog-content em {
-          color: #FFA500;
+        .article-content em {
+          color: #d32f2f;
           font-style: italic;
+        }
+
+        /* Responsive Layout */
+        @media (max-width: 768px) {
+          div[style*="display: grid"][style*="grid-template-columns: 1fr 300px"] {
+            grid-template-columns: 1fr !important;
+          }
+
+          .article-content {
+            line-height: 2;
+          }
         }
       `}</style>
     </div>
