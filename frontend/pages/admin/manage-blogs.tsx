@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { getApiBaseUrl } from '../../utils/api';
+
 import 'react-quill/dist/quill.snow.css';
 
 // Dynamically import React-Quill to avoid SSR issues
@@ -59,14 +60,14 @@ const registerQuillLineHeight = () => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const Quill = require('quill');
-      const Parchment = require('parchment');
+      const Parchment = Quill.import('parchment');
       
       // Create custom LineHeight class
       class LineHeightClass extends Parchment.Attributor.Style {
         constructor() {
           super('lineheight', 'line-height', {
             scope: Parchment.Scope.BLOCK,
-            whitelist: ['1.0', '1.2', '1.5', '1.8', '2.0', '2.5']
+            whitelist: ['1.0', '1.5', '1.8', '2.0']
           });
         }
       }
@@ -139,7 +140,7 @@ const createModules = () => ({
         ]}
       ],
       [{ 'size': ['small', 'normal', 'large', 'huge'] }],
-      [{ 'lineheight': ['1.0', '1.2', '1.5', '1.8', '2.0', '2.5'] }],
+      [{ 'lineheight': ['1.0', '1.5', '1.8', '2.0'] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'color': [] }, { 'background': [] }],
       [{ 'script': 'sub'}, { 'script': 'super' }],
