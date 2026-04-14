@@ -1,4 +1,97 @@
 import React, { useState, useEffect, useRef } from 'react';
+import dynamic from 'next/dynamic';
+import { getApiBaseUrl } from '../../utils/api';
+
+import 'react-quill/dist/quill.snow.css';
+
+// Dynamically import React-Quill to avoid SSR issues
+const ReactQuill = dynamic(
+  async () => {
+    const { default: RQ } = await import('react-quill');
+    return RQ;
+  },
+  { 
+    ssr: false,
+    loading: () => <div style={{ color: '#AAA', padding: '20px' }}>Loading editor...</div>
+  }
+);
+
+// Register custom fonts after client-side mount
+const registerQuillFonts = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const Quill = require('quill');
+      const Font = Quill.import('formats/font');
+      
+      if (Font) {
+        // Set whitelist of available fonts
+        Font.whitelist = [
+          'sans-serif',
+          'serif',
+          'monospace',
+          'Roboto',
+          'Poppins',
+          'Nastaliq',
+          'Arial',
+          'Georgia',
+          'Times',
+          'Courier',
+          'Trebuchet',
+          'Verdana'
+        ];
+        
+        // Register the Font format with whitelist
+        Quill.register(Font, true);
+        
+        // Map font display names to CSS values
+        const fontFormat = Quill.import('formats/font');
+        fontFormat.whitelist = Font.whitelist;
+      }
+    } catch (error) {
+      console.warn('Could not register Quill fonts:', error);
+    }
+  }
+};
+
+// Register custom line-height Parchment attribute
+const registerQuillLineHeight = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const Quill = require('quill');
+      const Parchment = Quill.import('parchment');
+      
+      // Create custom LineHeight class
+      class LineHeightClass extends Parchment.Attributor.Style {
+        constructor() {
+          super('lineheight', 'line-height', {
+            scope: Parchment.Scope.BLOCK,
+            whitelist: ['1.0', '1.5', '1.8', '2.0']
+          });
+        }
+      }
+      
+      // Register the custom line-height attribute
+      Quill.register(new LineHeightClass(), true);
+    } catch (error) {
+      console.warn('Could not register Quill line-height:', error);
+    }
+  }
+};
+
+// Detect if text contains Urdu/Arabic characters
+const isUrduText = (text: string): boolean => {
+  const urduArabicRegex = /[\u0600-\u06FF]/g;
+  return urduArabicRegex.test(text);
+};
+
+// Get default line-height based on content language
+const getDefaultLineHeight = (content: string): string => {
+  // Strip HTML tags to check content
+  const plainText = content.replace(/<[^>]*>/g, '');
+  return isUrduText(plainText) ? '1.8' : '1.5';
+};
 
 interface Blog {
   _id: string;
@@ -14,182 +107,1038 @@ interface Blog {
   readingTime: number;
   excerpt: string;
   createdAt: string;
-  isTrending?: boolean;
   publishedAt?: string;
 }
 
+// Quill modules configuration
+const createModules = () => ({
+  clipboard: {
+    matchVisibility: true,
+  },
+  history: {
+    delay: 1000,
+    maxStack: 50,
+    userOnly: true
+  },
+  toolbar: {
+    container: [
+      [{ 'header': [1, 2, 3, false] }],
+      [
+        { 'font': [
+          'sans-serif',
+          'serif',
+          'monospace',
+          'Roboto',
+          'Poppins',
+          'Nastaliq',
+          'Arial',
+          'Georgia',
+          'Times',
+          'Courier',
+          'Trebuchet',
+          'Verdana'
+        ]}
+      ],
+      [{ 'size': ['small', 'normal', 'large', 'huge'] }],
+      [{ 'lineheight': ['1.0', '1.5', '1.8', '2.0'] }],
+      ['bold', 'italic', 'underline', 'strike'],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      ['blockquote', 'code-block'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'align': ['', 'center', 'right', 'justify'] }],
+      [{ 'direction': 'rtl' }],
+      ['link', 'image'],
+      ['clean']
+    ]
+  }
+});
+
+const formats = [
+  'header',
+  'font', 'size', 'lineheight',
+  'bold', 'italic', 'underline', 'strike',
+  'color', 'background',
+  'script',
+  'blockquote', 'code-block',
+  'list', 'bullet',
+  'align', 'direction',
+  'link', 'image'
+];
+
 const ManageBlogs: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'create' | 'list' | 'newsletter'>('create');
-  const [showLivePreview, setShowLivePreview] = useState(false);
   const [title, setTitle] = useState('');
+  const [slug, setSlug] = useState('');
   const [content, setContent] = useState('');
   const [author, setAuthor] = useState('Million Hub');
+  const [thumbnail, setThumbnail] = useState<File | null>(null);
   const [thumbnailPreview, setThumbnailPreview] = useState('');
   const [status, setStatus] = useState<'draft' | 'published'>('draft');
   const [metaDescription, setMetaDescription] = useState('');
   const [focusKeywords, setFocusKeywords] = useState('');
-  const [isTrending, setIsTrending] = useState(false);
   const [message, setMessage] = useState('');
+  const [messageType, setMessageType] = useState<'success' | 'error'>('success');
   const [loading, setLoading] = useState(false);
+  const [blogsLoading, setBlogsLoading] = useState(true);
+  const [blogsError, setBlogsError] = useState<string | null>(null);
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [wordCount, setWordCount] = useState(0);
   const [readingTime, setReadingTime] = useState(0);
-  const [tickerText, setTickerText] = useState('Welcome to Million Hub');
-  const [category, setCategory] = useState('Digital Skills');
-
+  const [htmlViewActive, setHtmlViewActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const editorRef = useRef<any>(null);
+  const [modules] = useState(createModules());
 
   useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://cdn.tiny.cloud/1/eskh1g5djqxo76mh9st4nk22t3q2pfiu726ar1d2dhkj1i4p/tinymce/6/tinymce.min.js';
-    script.referrerPolicy = 'origin';
-    script.onload = () => {
-      (window as any).tinymce.init({
-        selector: '#tiny-editor',
-        height: 500,
-        menubar: true,
-        plugins: [
-          'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-          'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-          'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'directionality',
-          'paste', 'powerpaste', 'insertdatetime', 'autoresize'
-        ],
-        toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | ltr rtl | code | removeformat | help',
-        content_style: 'body { font-family: "Jameel Noori Nastaleeq", serif; font-size: 16px; background: #0f172a; color: #cbd5e1; direction: rtl; text-align: right; line-height: 1.8; }',
-        skin: 'oxide-dark',
-        content_css: 'dark',
-        directionality: 'rtl',
-        relative_urls: false,
-        remove_script_host: false,
-        branding: false,
-        statusbar: true,
-        paste_as_text: false,
-        powerpaste_word_import: 'clean',
-        powerpaste_html_import: 'clean',
-        autoresize_bottom_margin: 50,
-        setup: (editor: any) => {
-          editorRef.current = editor;
-          editor.on('change', () => setContent(editor.getContent()));
-          editor.on('keyup', () => setContent(editor.getContent()));
-        }
-      });
-    };
-    document.head.appendChild(script);
-    return () => {
-      if ((window as any).tinymce) (window as any).tinymce.remove();
-    };
+    registerQuillFonts();
+    registerQuillLineHeight();
+    loadBlogs();
   }, []);
 
+  // Calculate word count and reading time when content changes
   useEffect(() => {
-    const plainText = content.replace(/<[^>]*>/g, '').trim();
-    const words = plainText ? plainText.split(/\s+/).length : 0;
+    const stripHtml = (html: string) => html.replace(/<[^>]*>/g, '');
+    const plainText = stripHtml(content);
+    const words = plainText.trim().split(/\s+/).filter(w => w.length > 0).length;
     setWordCount(words);
     setReadingTime(Math.max(1, Math.ceil(words / 200)));
   }, [content]);
 
+  // Apply default line-height for Urdu content
+  useEffect(() => {
+    if (content && isUrduText(content)) {
+      // Only apply if no line-height is already set in the content
+      if (!content.includes('line-height')) {
+        // The line-height will be applied when users select text and apply formatting from the toolbar
+        console.log('Urdu content detected - recommended line-height: 1.8 or 2.0 for better readability');
+      }
+    }
+  }, [content]);
+
+  const loadBlogs = async () => {
+    setBlogsLoading(true);
+    setBlogsError(null);
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setBlogsError('Admin authentication required');
+      setBlogsLoading(false);
+      return;
+    }
+
+    try {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/blogs/admin/all`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBlogs(data.blogs || []);
+      } else {
+        setBlogsError('Failed to load blogs');
+      }
+    } catch (error) {
+      console.error('Failed to load blogs:', error);
+      setBlogsError('Failed to load blogs');
+    } finally {
+      setBlogsLoading(false);
+    }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setThumbnail(file);
       const reader = new FileReader();
-      reader.onloadend = () => setThumbnailPreview(reader.result as string);
+      reader.onloadend = () => {
+        setThumbnailPreview(reader.result as string);
+      };
       reader.readAsDataURL(file);
     }
   };
 
+  const handleEditBlog = (blog: Blog) => {
+    setEditingBlog(blog);
+    setTitle(blog.title);
+    setSlug(blog.slug);
+    setContent(blog.content);
+    setAuthor(blog.author);
+    setStatus(blog.status);
+    setMetaDescription(blog.metaDescription);
+    setFocusKeywords(blog.focusKeywords.join(', '));
+    setThumbnailPreview(blog.thumbnail);
+    setThumbnail(null);
+    setMessage('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingBlog(null);
+    setTitle('');
+    setSlug('');
+    setContent('');
+    setAuthor('Million Hub');
+    setThumbnail(null);
+    setThumbnailPreview('');
+    setStatus('draft');
+    setMetaDescription('');
+    setFocusKeywords('');
+    setMessage('');
+    setHtmlViewActive(false);
+  };
+
+  const showMessage = (msg: string, type: 'success' | 'error' = 'success') => {
+    setMessage(msg);
+    setMessageType(type);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!title.trim()) {
-      setMessage('Title required!');
+      showMessage('Blog title is required', 'error');
       return;
     }
+    
+    if (!content.trim()) {
+      showMessage('Blog content is required', 'error');
+      return;
+    }
+
+    if (!editingBlog && !thumbnail) {
+      showMessage('Thumbnail is required for new blogs', 'error');
+      return;
+    }
+
+    if (metaDescription.length > 160) {
+      showMessage('Meta description must be 160 characters or less', 'error');
+      return;
+    }
+
     setLoading(true);
-    setTimeout(() => {
-      setMessage('Saved successfully!');
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        showMessage('Authentication required', 'error');
+        return;
+      }
+
+      const baseUrl = getApiBaseUrl();
+      const formData = new FormData();
+      formData.append('title', title);
+      formData.append('content', content);
+      formData.append('author', author);
+      formData.append('status', status);
+      formData.append('metaDescription', metaDescription);
+      formData.append('focusKeywords', focusKeywords);
+      if (slug.trim()) {
+        formData.append('slug', slug);
+      }
+      if (thumbnail) {
+        formData.append('thumbnail', thumbnail);
+      }
+
+      const endpoint = editingBlog
+        ? `${baseUrl}/api/blogs/${editingBlog._id}`
+        : `${baseUrl}/api/blogs/create`;
+
+      const method = editingBlog ? 'PUT' : 'POST';
+
+      const response = await fetch(endpoint, {
+        method,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showMessage(editingBlog ? '✅ Blog updated successfully!' : '✅ Blog created successfully!', 'success');
+        handleCancelEdit();
+        loadBlogs();
+      } else {
+        showMessage(data.error || 'Failed to save blog', 'error');
+      }
+    } catch (error) {
+      console.error('Error saving blog:', error);
+      showMessage('Error saving blog', 'error');
+    } finally {
       setLoading(false);
-      setTimeout(() => setMessage(''), 3000);
-    }, 1000);
+    }
+  };
+
+  const handleDeleteBlog = async (blogId: string) => {
+    if (!confirm('Are you sure you want to delete this blog?')) return;
+
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/blogs/${blogId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        showMessage('✅ Blog deleted successfully!', 'success');
+        loadBlogs();
+      } else {
+        const data = await response.json();
+        showMessage(data.error || 'Failed to delete blog', 'error');
+      }
+    } catch (error) {
+      console.error('Error deleting blog:', error);
+      showMessage('Error deleting blog', 'error');
+    }
+  };
+
+  const handleTogglePublish = async (blog: Blog) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/blogs/${blog._id}/toggle-publish`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ publish: blog.status === 'draft' })
+      });
+
+      if (response.ok) {
+        showMessage(`✅ Blog ${blog.status === 'draft' ? 'published' : 'unpublished'} successfully!`, 'success');
+        loadBlogs();
+      } else {
+        const data = await response.json();
+        showMessage(data.error || 'Failed to toggle publish status', 'error');
+      }
+    } catch (error) {
+      console.error('Error toggling publish:', error);
+      showMessage('Error toggling publish status', 'error');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-slate-200 p-8">
-      <div className="max-w-7xl mx-auto">
-        <header className="bg-[#1e293b] p-6 rounded-2xl border border-slate-800 mb-8">
-          <h1 className="text-2xl font-black text-white uppercase">Million Hub Admin</h1>
-        </header>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+      padding: '40px 20px',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+        <h1 style={{
+          fontSize: 'clamp(2rem, 5vw, 3rem)',
+          color: '#FFD700',
+          marginBottom: '30px',
+          textAlign: 'center'
+        }}>
+          📝 WordPress-Style Blog Management
+        </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6">
+        {/* Form Section */}
+        <div style={{
+          background: 'rgba(255, 215, 0, 0.05)',
+          border: '2px solid rgba(255, 215, 0, 0.3)',
+          borderRadius: '16px',
+          padding: '30px',
+          marginBottom: '40px'
+        }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            color: '#FFD700',
+            marginBottom: '20px'
+          }}>
+            {editingBlog ? '✏️ Edit Blog' : '➕ Create New Blog'}
+          </h2>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            {/* Title Input */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Blog Title *
+              </label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Article Title..."
-                className="w-full bg-transparent text-3xl font-black outline-none border-b border-slate-800 pb-4 focus:border-[#fbbf24] text-[#fbbf24] placeholder:text-slate-700 mb-4"
+                placeholder="Enter blog title"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#FFF',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
               />
-              <textarea id="tiny-editor"></textarea>
             </div>
 
-            <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6">
-              <h3 className="text-sm font-bold text-[#fbbf24] mb-4 uppercase">SEO Settings</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  value={focusKeywords}
-                  onChange={(e) => setFocusKeywords(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm outline-none focus:border-[#fbbf24]"
-                  placeholder="Keywords"
-                />
+            {/* Slug Input (Optional) */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                URL Slug (Optional - Required for Urdu titles)
+              </label>
+              <input
+                type="text"
+                value={slug}
+                onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, ''))}
+                placeholder="e.g., my-blog-post (auto-generated if left empty)"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#FFF',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+              <small style={{ color: '#AAA', marginTop: '5px', display: 'block' }}>
+                💡 Tip: For Urdu titles, enter a custom English slug here (lowercase, hyphens only). It will be auto-generated if you leave this empty.
+              </small>
+            </div>
+
+            {/* Author Input */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Author Name
+              </label>
+              <input
+                type="text"
+                value={author}
+                onChange={(e) => setAuthor(e.target.value)}
+                placeholder="Enter author name"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#FFF',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Rich Text Editor */}
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <label style={{ color: '#FFD700', fontWeight: '600' }}>
+                  Blog Content * (Rich Text Editor)
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setHtmlViewActive(!htmlViewActive)}
+                  style={{
+                    padding: '6px 12px',
+                    backgroundColor: htmlViewActive ? 'rgba(100, 200, 255, 0.2)' : 'rgba(255, 215, 0, 0.2)',
+                    color: htmlViewActive ? '#64C8FF' : '#FFD700',
+                    border: `1px solid ${htmlViewActive ? '#64C8FF' : '#FFD700'}`,
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem',
+                    fontWeight: '600'
+                  }}
+                >
+                  {htmlViewActive ? '</> HTML' : '<> Rich Text'}
+                </button>
+              </div>
+
+              {htmlViewActive ? (
                 <textarea
-                  value={metaDescription}
-                  onChange={(e) => setMetaDescription(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-sm outline-none focus:border-[#fbbf24]"
-                  placeholder="Meta description"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="Enter raw HTML code here"
+                  style={{
+                    width: '100%',
+                    minHeight: '300px',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255, 215, 0, 0.3)',
+                    backgroundColor: '#1a1a1a',
+                    color: '#FFD700',
+                    fontFamily: '"Courier New", monospace',
+                    fontSize: '0.9rem',
+                    boxSizing: 'border-box',
+                    resize: 'vertical',
+                    lineHeight: '1.5'
+                  }}
                 />
+              ) : (
+                <div style={{
+                  backgroundColor: '#FFF',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  overflow: 'hidden'
+                }}>
+                  {typeof window !== 'undefined' && (
+                    <ReactQuill
+                      theme="snow"
+                      value={content}
+                      onChange={setContent}
+                      modules={modules}
+                      formats={formats}
+                    />
+                  )}
+                </div>
+              )}
+              <small style={{ color: '#AAA', marginTop: '8px', display: 'block' }}>
+                📊 Word Count: {wordCount} | ⏱️ Reading Time: {readingTime} min{readingTime !== 1 ? 's' : ''}
+              </small>
+            </div>
+
+            {/* Meta Description */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                SEO Meta Description (Max 160 characters)
+              </label>
+              <textarea
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value.substring(0, 160))}
+                placeholder="Write a compelling meta description for search engines"
+                style={{
+                  width: '100%',
+                  minHeight: '80px',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#FFF',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box',
+                  resize: 'vertical',
+                  fontFamily: 'Arial, sans-serif'
+                }}
+              />
+              <small style={{ color: '#AAA', marginTop: '5px', display: 'block' }}>
+                {metaDescription.length}/160 characters
+              </small>
+            </div>
+
+            {/* Focus Keywords */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Focus Keywords (comma-separated)
+              </label>
+              <input
+                type="text"
+                value={focusKeywords}
+                onChange={(e) => setFocusKeywords(e.target.value)}
+                placeholder="e.g., million hub, earning online, financial freedom"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(255, 215, 0, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: '#FFF',
+                  fontSize: '1rem',
+                  boxSizing: 'border-box'
+                }}
+              />
+            </div>
+
+            {/* Thumbnail Upload */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Blog Thumbnail {!editingBlog && '*'}
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                style={{
+                  display: 'block',
+                  marginBottom: '10px',
+                  color: '#FFF'
+                }}
+              />
+              {thumbnailPreview && (
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <img
+                    src={thumbnailPreview}
+                    alt="Thumbnail preview"
+                    style={{
+                      maxWidth: '300px',
+                      maxHeight: '200px',
+                      borderRadius: '8px',
+                      marginTop: '10px',
+                      border: '2px solid rgba(255, 215, 0, 0.5)'
+                    }}
+                  />
+                  <small style={{ color: '#AAA', display: 'block', marginTop: '5px' }}>
+                    Preview - Image will be optimized by Cloudinary
+                  </small>
+                </div>
+              )}
+            </div>
+
+            {/* Status Toggle */}
+            <div>
+              <label style={{ display: 'block', color: '#FFD700', marginBottom: '8px', fontWeight: '600' }}>
+                Publication Status
+              </label>
+              <div style={{ display: 'flex', gap: '15px' }}>
+                {(['draft', 'published'] as const).map((s) => (
+                  <label key={s} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', color: '#FFF' }}>
+                    <input
+                      type="radio"
+                      name="status"
+                      value={s}
+                      checked={status === s}
+                      onChange={(e) => setStatus(e.target.value as 'draft' | 'published')}
+                    />
+                    {s === 'draft' ? '📋 Save as Draft' : '📈 Publish Now'}
+                  </label>
+                ))}
               </div>
             </div>
-          </div>
 
-          <div className="space-y-6">
-            <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6">
+            {/* Message Display */}
+            {message && (
+              <div style={{
+                padding: '12px',
+                borderRadius: '8px',
+                backgroundColor: messageType === 'success' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)',
+                color: messageType === 'success' ? '#4CAF50' : '#F44336',
+                border: `1px solid ${messageType === 'success' ? '#4CAF50' : '#F44336'}`
+              }}>
+                {message}
+              </div>
+            )}
+
+            {/* Submit Buttons */}
+            <div style={{ display: 'flex', gap: '10px' }}>
               <button
-                onClick={handleSubmit}
+                type="submit"
                 disabled={loading}
-                className="w-full bg-[#fbbf24] text-black font-black py-3 rounded-lg hover:shadow-lg transition-all"
+                style={{
+                  flex: 1,
+                  padding: '12px 20px',
+                  backgroundColor: loading ? '#888' : '#FFD700',
+                  color: '#000',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  cursor: loading ? 'not-allowed' : 'pointer',
+                  transition: 'background-color 0.3s'
+                }}
               >
-                {loading ? 'Processing...' : 'Publish'}
+                {loading ? '⏳ Saving...' : editingBlog ? '💾 Update Blog' : '✅ Create Blog'}
               </button>
-              {message && <p className="text-center text-sm text-[#fbbf24] mt-2">{message}</p>}
+              {editingBlog && (
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  style={{
+                    flex: 1,
+                    padding: '12px 20px',
+                    backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                    color: '#FFD700',
+                    border: '2px solid #FFD700',
+                    borderRadius: '8px',
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  ❌ Cancel Edit
+                </button>
+              )}
             </div>
+          </form>
+        </div>
 
-            <div className="bg-[#1e293b] rounded-2xl border border-slate-800 p-6">
-              <h3 className="text-xs font-black text-slate-400 mb-4 uppercase">Thumbnail</h3>
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="aspect-video bg-slate-950 border-2 border-dashed border-slate-800 rounded-xl flex items-center justify-center cursor-pointer hover:border-[#fbbf24]"
-              >
-                {thumbnailPreview ? <img src={thumbnailPreview} className="w-full h-full object-cover" /> : <span>📷 Upload</span>}
-              </div>
-              <input type="file" ref={fileInputRef} hidden onChange={handleImageChange} accept="image/*" />
-            </div>
+        {/* Blogs List Section */}
+        <div>
+          <h2 style={{
+            fontSize: '1.5rem',
+            color: '#FFD700',
+            marginBottom: '20px'
+          }}>
+            📚 All Blogs ({blogs.length})
+          </h2>
 
-            <div className="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex justify-between">
-              <div>
-                <p className="text-xs text-slate-500">Words</p>
-                <p className="text-lg font-black">{wordCount}</p>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500">Read Time</p>
-                <p className="text-lg font-black text-[#fbbf24]">{readingTime}m</p>
-              </div>
+          {blogsLoading ? (
+            <div style={{ textAlign: 'center', color: '#CCC', padding: '40px 20px' }}>
+              ⏳ Loading blogs...
             </div>
-          </div>
+          ) : blogsError ? (
+            <div style={{
+              backgroundColor: 'rgba(244, 67, 54, 0.2)',
+              color: '#F44336',
+              padding: '20px',
+              borderRadius: '8px',
+              border: '1px solid #F44336',
+              textAlign: 'center'
+            }}>
+              {blogsError}
+            </div>
+          ) : blogs.length === 0 ? (
+            <div style={{ textAlign: 'center', color: '#CCC', padding: '40px 20px' }}>
+              No blogs yet. Create your first blog above!
+            </div>
+          ) : (
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+              gap: '20px'
+            }}>
+              {blogs.map((blog) => (
+                <article key={blog._id} style={{
+                  background: 'rgba(255, 215, 0, 0.05)',
+                  border: `2px solid ${blog.status === 'published' ? '#4CAF50' : '#FFA500'}`,
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  transition: 'all 0.3s'
+                }}>
+                  {/* Blog Thumbnail */}
+                  <div style={{ position: 'relative' }}>
+                    <img
+                      src={blog.thumbnail}
+                      alt={blog.title}
+                      style={{
+                        width: '100%',
+                        height: '200px',
+                        objectFit: 'cover'
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      top: '10px',
+                      right: '10px',
+                      padding: '6px 12px',
+                      borderRadius: '20px',
+                      backgroundColor: blog.status === 'published' ? '#4CAF50' : '#FFA500',
+                      color: '#FFF',
+                      fontSize: '0.8rem',
+                      fontWeight: 'bold'
+                    }}>
+                      {blog.status === 'published' ? '✅ Published' : '📋 Draft'}
+                    </div>
+                  </div>
+
+                  {/* Blog Info */}
+                  <div style={{ padding: '15px' }}>
+                    <h3 style={{
+                      color: '#FFD700',
+                      fontSize: '1.1rem',
+                      margin: '0 0 8px 0',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
+                    }}>
+                      {blog.title}
+                    </h3>
+
+                    <div style={{
+                      display: 'flex',
+                      gap: '10px',
+                      marginBottom: '10px',
+                      fontSize: '0.85rem',
+                      color: '#AAA'
+                    }}>
+                      <span>📝 {blog.wordCount} words</span>
+                      <span>⏱️ {blog.readingTime} min read</span>
+                    </div>
+
+                    <p style={{
+                      color: '#CCC',
+                      fontSize: '0.85rem',
+                      margin: '5px 0 10px 0',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      minHeight: '40px'
+                    }}>
+                      {blog.excerpt || 'No excerpt available'}
+                    </p>
+
+                    <div style={{ fontSize: '0.8rem', color: '#AAA', margin: '10px 0' }}>
+                      By {blog.author} | {new Date(blog.createdAt).toLocaleDateString()}
+                    </div>
+
+                    {blog.focusKeywords.length > 0 && (
+                      <div style={{ marginBottom: '10px' }}>
+                        <small style={{ color: '#5BC0EB' }}>
+                          🔍 Keywords: {blog.focusKeywords.join(', ')}
+                        </small>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '15px' }}>
+                      <button
+                        onClick={() => handleTogglePublish(blog)}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          backgroundColor: blog.status === 'draft' ? 'rgba(76, 175, 80, 0.2)' : 'rgba(255, 152, 0, 0.2)',
+                          color: blog.status === 'draft' ? '#4CAF50' : '#FF9800',
+                          border: `1px solid ${blog.status === 'draft' ? '#4CAF50' : '#FF9800'}`,
+                          borderRadius: '6px',
+                          cursor: 'pointer',
+                          fontSize: '0.9rem',
+                          fontWeight: '600'
+                        }}
+                      >
+                        {blog.status === 'draft' ? '📤 Publish' : '📋 Unpublish'}
+                      </button>
+
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          onClick={() => handleEditBlog(blog)}
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            backgroundColor: 'rgba(255, 215, 0, 0.2)',
+                            color: '#FFD700',
+                            border: '1px solid #FFD700',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem'
+                          }}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBlog(blog._id)}
+                          style={{
+                            flex: 1,
+                            padding: '8px 12px',
+                            backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                            color: '#F44336',
+                            border: '1px solid #F44336',
+                            borderRadius: '6px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem'
+                          }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      <style>{`
-        .urdu-text { font-family: 'Jameel Noori Nastaleeq', serif; }
-        .tox-tinymce { border-radius: 12px !important; border: 1px solid #334155 !important; }
+      <style jsx>{`
+        :global(.ql-container) {
+          font-size: 1rem !important;
+          font-family: Arial, sans-serif !important;
+        }
+        :global(.ql-editor) {
+          min-height: 300px !important;
+          color: #333 !important;
+          padding-bottom: 100px !important;
+        }
+        :global(.ql-editor.ql-blank::before) {
+          color: #999 !important;
+        }
+        :global(.ql-toolbar) {
+          border-top: 1px solid #DDD !important;
+          border-bottom: 1px solid #DDD !important;
+          background: #FAFAFA !important;
+        }
+        :global(.ql-snow .ql-stroke) {
+          stroke: #444 !important;
+        }
+        :global(.ql-snow .ql-fill) {
+          fill: #444 !important;
+        }
+        :global(.ql-snow .ql-picker-label) {
+          color: #444 !important;
+        }
+        :global(.ql-editor) {
+          direction: ltr;
+        }
+        :global(.ql-editor[style*="direction: rtl"]) {
+          direction: rtl;
+          text-align: right;
+        }
+        :global(.ql-snow .ql-direction-rtl) {
+          direction: rtl;
+        }
+        :global(.ql-tooltip) {
+          position: absolute !important;
+          background: #FFF !important;
+          border: 1px solid #CCC !important;
+          z-index: 9999 !important;
+        }
+        :global(.ql-tooltip.ql-flip) {
+          position: absolute !important;
+          top: auto !important;
+        }
+        /* Line Height Styles */
+        :global(.ql-editor[style*="line-height: 1.0"]) {
+          line-height: 1.0 !important;
+        }
+        :global(.ql-editor[style*="line-height: 1.2"]) {
+          line-height: 1.2 !important;
+        }
+        :global(.ql-editor[style*="line-height: 1.5"]) {
+          line-height: 1.5 !important;
+        }
+        :global(.ql-editor[style*="line-height: 1.8"]) {
+          line-height: 1.8 !important;
+        }
+        :global(.ql-editor[style*="line-height: 2.0"]) {
+          line-height: 2.0 !important;
+        }
+        :global(.ql-editor[style*="line-height: 2.5"]) {
+          line-height: 2.5 !important;
+        }
+        :global(p[style*="line-height: 1.0"]) {
+          line-height: 1.0 !important;
+        }
+        :global(p[style*="line-height: 1.2"]) {
+          line-height: 1.2 !important;
+        }
+        :global(p[style*="line-height: 1.5"]) {
+          line-height: 1.5 !important;
+        }
+        :global(p[style*="line-height: 1.8"]) {
+          line-height: 1.8 !important;
+        }
+        :global(p[style*="line-height: 2.0"]) {
+          line-height: 2.0 !important;
+        }
+        :global(p[style*="line-height: 2.5"]) {
+          line-height: 2.5 !important;
+        }
+        :global(div[style*="line-height: 1.0"]) {
+          line-height: 1.0 !important;
+        }
+        :global(div[style*="line-height: 1.2"]) {
+          line-height: 1.2 !important;
+        }
+        :global(div[style*="line-height: 1.5"]) {
+          line-height: 1.5 !important;
+        }
+        :global(div[style*="line-height: 1.8"]) {
+          line-height: 1.8 !important;
+        }
+        :global(div[style*="line-height: 2.0"]) {
+          line-height: 2.0 !important;
+        }
+        :global(div[style*="line-height: 2.5"]) {
+          line-height: 2.5 !important;
+        }
+        /* Urdu-specific line-height defaults */
+        :global(.ql-editor.ql-nastaliq) {
+          line-height: 1.8 !important;
+        }
+        :global(.ql-editor.is-urdu) {
+          line-height: 1.8 !important;
+        }
+        @font-face {
+          font-family: 'Roboto';
+          font-display: swap;
+          src: local('Roboto'), local('Roboto-Regular'),
+               url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap') format('truetype');
+          font-weight: 400;
+          font-style: normal;
+        }
+        @font-face {
+          font-family: 'Poppins';
+          font-display: swap;
+          src: local('Poppins'), local('Poppins-Regular'),
+               url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap') format('truetype');
+          font-weight: 400;
+          font-style: normal;
+        }
+        /* Nastaliq Font - Regular */
+        @font-face {
+          font-family: 'Nastaliq';
+          font-display: swap;
+          src: local('Noto Nastaliq Urdu'), local('NotoNastaliqUrdu'),
+               url('/fonts/static/NotoNastaliqUrdu-Regular.ttf') format('truetype');
+          font-weight: 400;
+          font-style: normal;
+          font-stretch: normal;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        /* Nastaliq Font - Medium */
+        @font-face {
+          font-family: 'Nastaliq';
+          font-display: swap;
+          src: local('Noto Nastaliq Urdu Medium'), local('NotoNastaliqUrdu-Medium'),
+               url('/fonts/static/NotoNastaliqUrdu-Medium.ttf') format('truetype');
+          font-weight: 500;
+          font-style: normal;
+          font-stretch: normal;
+        }
+        /* Nastaliq Font - SemiBold */
+        @font-face {
+          font-family: 'Nastaliq';
+          font-display: swap;
+          src: local('Noto Nastaliq Urdu SemiBold'), local('NotoNastaliqUrdu-SemiBold'),
+               url('/fonts/static/NotoNastaliqUrdu-SemiBold.ttf') format('truetype');
+          font-weight: 600;
+          font-style: normal;
+          font-stretch: normal;
+        }
+        /* Nastaliq Font - Bold */
+        @font-face {
+          font-family: 'Nastaliq';
+          font-display: swap;
+          src: local('Noto Nastaliq Urdu Bold'), local('NotoNastaliqUrdu-Bold'),
+               url('/fonts/static/NotoNastaliqUrdu-Bold.ttf') format('truetype');
+          font-weight: 700;
+          font-style: normal;
+          font-stretch: normal;
+        }
+        :global(.ql-font-Roboto) {
+          font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        }
+        :global(.ql-font-Poppins) {
+          font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        }
+        :global(.ql-font-Nastaliq) {
+          font-family: 'Nastaliq', 'Urdu Typesetting', 'Jameel Noori Nastaleeq', 'Arial', serif !important;
+          font-weight: 400;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+        }
+        /* Mobile-specific font adjustments */
+        @media (max-width: 768px) {
+          :global(.ql-font-Nastaliq) {
+            font-size: 1.05em;
+            line-height: 1.6;
+            letter-spacing: 0.02em;
+          }
+        }
+        :global(.ql-toolbar .ql-formats button[value="undo"]:before) {
+          content: '↶';
+        }
+        :global(.ql-toolbar .ql-formats button[value="redo"]:before) {
+          content: '↷';
+        }
       `}</style>
     </div>
   );
