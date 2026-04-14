@@ -2480,6 +2480,7 @@ const BlogSection: React.FC = () => {
             </button>
           </div>
         )}
+         © 2026 MILLION HUB DIGITAL | THE FUTURE IS HERE
       </article>
     </section>
   );
