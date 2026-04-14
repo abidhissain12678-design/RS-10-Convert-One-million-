@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/router';
-import Link from 'next/link';
 import DOMPurify from 'isomorphic-dompurify';
 import { getApiBaseUrl } from '../../utils/api';
+
+/**
+ * Million Hub News Portal - Final Production Version (Fixed)
+ * Features: Dynamic Data Handling, Urdu Font Optimization, Preview Compatible
+ */
 
 interface Blog {
   _id: string;
@@ -21,15 +25,15 @@ interface Blog {
   publishedAt?: string;
 }
 
-const BlogDetailPage: React.FC = () => {
+const BlogDetail: React.FC = () => {
   const router = useRouter();
   const { slug } = router.query;
-  const [blog, setBlog] = useState<Blog | null>(null);
-  const [trendingBlogs, setTrendingBlogs] = useState<Blog[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [blog, setBlog] = React.useState<Blog | null>(null);
+  const [trendingBlogs, setTrendingBlogs] = React.useState<Blog[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!slug) return;
 
     const fetchBlog = async () => {
@@ -46,7 +50,6 @@ const BlogDetailPage: React.FC = () => {
         }
 
         const data = await response.json();
-        // Handle both formats: { blog } and direct blog object
         setBlog(data.blog || data);
 
         // Fetch trending blogs
@@ -58,7 +61,7 @@ const BlogDetailPage: React.FC = () => {
           const allBlogsData = await allBlogsResponse.json();
           const trending = allBlogsData.blogs
             .filter((b: Blog) => b.slug !== slug)
-            .slice(0, 5);
+            .slice(0, 3);
           setTrendingBlogs(trending);
         }
       } catch (err) {
@@ -72,610 +75,806 @@ const BlogDetailPage: React.FC = () => {
     fetchBlog();
   }, [slug]);
 
+  // Default data for fallback
+  const defaultData = {
+    title: "Million Hub: Pakistan Ka Naya Digital Inqilab",
+    content: `
+      <p>Million Hub Pakistan ka wo wahid platform ban gaya hai jahan naujawan nasal apni salahiyaton ko broye kar la kar mali tor par azad ho rahi hai.</p>
+      <p>Sirf 10 rupaye ki membership fees se aap Million Hub ka hissa ban sakte hain. Ye raqam ek chai ke cup se bhi kam hai, lekin ye aapke liye kamyabi ke hazaron darwaze khol sakti hai.</p>
+    `,
+    thumbnail: "https://images.unsplash.com/photo-1553729459-efe14ef6055d?auto=format&fit=crop&w=1200&q=80",
+    author: "Editor Million Hub"
+  };
+
+  const data = blog || defaultData;
+  const sanitizedContent = blog ? DOMPurify.sanitize(blog.content) : data.content;
+
   if (loading) {
     return (
       <div style={{
         minHeight: '100vh',
-        background: '#f5f5f5',
+        background: '#f9fafb',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        color: '#d32f2f',
-        fontSize: '1.2rem'
+        fontSize: '1.2rem',
+        color: '#dc2626'
       }}>
         ⏳ Loading article...
       </div>
     );
   }
 
-  if (error || !blog) {
+  if (error) {
     return (
       <div style={{
         minHeight: '100vh',
-        background: '#f5f5f5',
+        background: '#f9fafb',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'column',
         gap: '20px'
       }}>
-        <div style={{ color: '#d32f2f', fontSize: '1.2rem' }}>
-          ❌ {error || 'Blog not found'}
+        <div style={{ color: '#dc2626', fontSize: '1.2rem' }}>
+          ❌ {error}
         </div>
-        <Link href="/" style={{ textDecoration: 'none' }}>
-          <button
-            style={{
-              backgroundColor: '#d32f2f',
-              color: '#fff',
-              border: 'none',
-              padding: '12px 30px',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: '600',
-              fontSize: '1rem'
-            }}
-          >
-            ← Back to Home
-          </button>
-        </Link>
+        <button
+          onClick={() => router.push('/')}
+          style={{
+            backgroundColor: '#dc2626',
+            color: '#fff',
+            border: 'none',
+            padding: '12px 30px',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            fontSize: '1rem'
+          }}
+        >
+          ← Back to Home
+        </button>
       </div>
     );
   }
 
-  const sanitizedContent = DOMPurify.sanitize(blog.content);
-
   return (
-    <div style={{
-      background: '#f5f5f5',
-      color: '#333',
-      minHeight: '100vh',
-      fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
-    }}>
-      {/* Red and White Header */}
-      <header style={{
-        background: 'linear-gradient(135deg, #d32f2f 0%, #c62828 100%)',
+    <div style={{ background: '#f9fafb', textAlign: 'right', direction: 'rtl', minHeight: '100vh' }}>
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.cdnfonts.com/css/jameel-noori-nastaleeq');
+        .urdu-font { font-family: 'Jameel Noori Nastaleeq', serif !important; }
+        .article-content p { 
+          line-height: 2.3; 
+          margin-bottom: 1.8rem; 
+          font-size: 1.4rem; 
+          text-align: justify;
+          color: #1a202c;
+        }
+        .article-content img { 
+          border-radius: 15px; 
+          margin: 30px 0; 
+          width: 100%; 
+          box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .article-content blockquote {
+          border-right: 10px solid #dc2626;
+          background: #fff5f5;
+          padding: 25px;
+          margin: 40px 0;
+          font-size: 1.6rem;
+          font-weight: bold;
+          box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+        }
+        .article-content h1, .article-content h2, .article-content h3 {
+          color: #1a202c;
+          margin-top: 30px;
+          margin-bottom: 15px;
+          font-weight: 700;
+        }
+        .article-content a {
+          color: #dc2626;
+          text-decoration: underline;
+        }
+        .article-content ul, .article-content ol {
+          margin: 20px 0 20px 30px;
+        }
+      `}} />
+
+      {/* Top Black Bar */}
+      <div style={{
+        backgroundColor: '#000',
         color: '#fff',
-        padding: '20px 0',
+        padding: '10px 24px',
+        fontSize: '0.75rem',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         position: 'sticky',
         top: 0,
-        zIndex: 50,
-        boxShadow: '0 4px 12px rgba(211, 47, 47, 0.15)'
+        zIndex: 60,
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+      }}>
+        <div style={{ display: 'flex', gap: '20px', fontFamily: 'Jameel Noori Nastaleeq' }}>
+          <span>Mangal, 14 April 2026</span>
+          <span style={{ color: '#ef4444', fontWeight: 'bold' }}>LIVE UPDATE</span>
+        </div>
+        <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+          <a href="#" style={{ color: '#fff', textDecoration: 'none' }}>Facebook</a>
+          <span style={{ color: '#4b5563' }}>|</span>
+          <a href="#" style={{ color: '#fff', textDecoration: 'none', fontWeight: 'bold' }}>WhatsApp Group</a>
+        </div>
+      </div>
+
+      {/* Professional News Header */}
+      <header style={{
+        backgroundColor: '#fff',
+        padding: '48px 0',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        borderBottom: '1px solid #e5e7eb'
       }}>
         <div style={{
-          maxWidth: '1200px',
+          maxWidth: '1440px',
           margin: '0 auto',
-          padding: '0 20px',
+          padding: '0 16px',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center'
         }}>
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <div style={{
-              fontSize: '1.8rem',
-              fontWeight: '700',
-              color: '#fff',
-              cursor: 'pointer',
-              letterSpacing: '1px'
-            }}>
-              📰 MILLION HUB
-            </div>
-          </Link>
-          <Link href="/" style={{ textDecoration: 'none' }}>
-            <button
-              style={{
-                backgroundColor: '#fff',
-                color: '#d32f2f',
-                border: 'none',
-                padding: '10px 20px',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                fontWeight: '600',
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f5f5f5';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#fff';
-              }}
-            >
-              ← Back to News
-            </button>
-          </Link>
+          <div style={{
+            backgroundColor: '#dc2626',
+            color: '#fff',
+            padding: '6px 16px',
+            fontSize: '10px',
+            fontWeight: 900,
+            letterSpacing: '4px',
+            marginBottom: '16px'
+          }}>
+            EXCLUSIVE
+          </div>
+          <h1 style={{
+            fontSize: 'clamp(2rem, 8vw, 3.75rem)',
+            fontWeight: 900,
+            color: '#111',
+            marginBottom: '12px',
+            letterSpacing: '-0.05em'
+          }}>
+            MILLION<span style={{ color: '#dc2626' }}>HUB</span>
+          </h1>
+          <p style={{
+            color: '#9ca3af',
+            fontWeight: 'bold',
+            letterSpacing: '8px',
+            textTransform: 'uppercase',
+            fontSize: '10px'
+          }}>
+            Digital Revolution of Pakistan
+          </p>
         </div>
       </header>
 
-      {/* Main Content - 2 Column Layout */}
-      <div style={{
-        maxWidth: '1200px',
+      {/* Main Navigation Bar */}
+      <nav style={{
+        backgroundColor: '#fff',
+        borderBottom: '4px solid #dc2626',
+        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+        position: 'sticky',
+        top: '45px',
+        zIndex: 50
+      }}>
+        <div style={{
+          maxWidth: '1440px',
+          margin: '0 auto',
+          padding: '0 16px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          overflowX: 'auto'
+        }}>
+          <a href="/" style={{
+            padding: '20px 32px',
+            fontWeight: 900,
+            color: '#dc2626',
+            borderBottom: '4px solid #dc2626',
+            fontFamily: 'Jameel Noori Nastaleeq',
+            fontSize: '1.25rem',
+            letterSpacing: 'wide',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap'
+          }}>
+            Safha Awal
+          </a>
+          {['Karobar', 'Kamyabiyan', 'Digital Skills'].map((item) => (
+            <a key={item} href="#" style={{
+              padding: '20px 32px',
+              fontWeight: 'bold',
+              color: '#1f2937',
+              fontFamily: 'Jameel Noori Nastaleeq',
+              fontSize: '1.25rem',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+              transition: 'color 0.3s'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#dc2626'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#1f2937'}
+            >
+              {item}
+            </a>
+          ))}
+          <a href="/admin" style={{
+            padding: '20px 32px',
+            fontWeight: 'bold',
+            color: '#d1d5db',
+            fontFamily: 'Jameel Noori Nastaleeq',
+            fontSize: '1.25rem',
+            textDecoration: 'none',
+            whiteSpace: 'nowrap'
+          }}>
+            Admin
+          </a>
+        </div>
+      </nav>
+
+      {/* Main Layout Grid */}
+      <main style={{
+        maxWidth: '1440px',
         margin: '0 auto',
-        padding: '40px 20px',
+        padding: '56px 16px',
         display: 'grid',
         gridTemplateColumns: '1fr 300px',
-        gap: '40px'
+        gap: '56px'
       }}>
-        {/* Left Column - Article Content */}
+        {/* Main Article Section */}
         <article style={{
           backgroundColor: '#fff',
-          borderRadius: '4px',
-          padding: '40px',
-          boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+          padding: '56px',
+          borderRadius: '12px',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #f3f4f6',
+          position: 'relative'
         }}>
-          {/* Hero Image */}
+          {/* Floating Category Tag */}
           <div style={{
-            marginBottom: '30px',
-            borderRadius: '4px',
-            overflow: 'hidden',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-            backgroundColor: '#e0e0e0'
+            position: 'absolute',
+            top: 0,
+            right: '40px',
+            transform: 'translateY(-50%)',
+            backgroundColor: '#dc2626',
+            color: '#fff',
+            padding: '8px 24px',
+            fontWeight: 'bold',
+            fontFamily: 'Jameel Noori Nastaleeq',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+            zIndex: 10
           }}>
-            <img
-              src={blog.thumbnail}
-              alt={blog.title}
-              style={{
-                width: '100%',
-                height: '400px',
-                objectFit: 'cover',
-                display: 'block'
-              }}
-            />
+            Khosusi Report
           </div>
 
-          {/* Article Header */}
-          <div style={{
-            borderTop: '3px solid #d32f2f',
-            paddingTop: '20px',
-            marginBottom: '30px'
+          <h1 style={{
+            fontSize: 'clamp(2rem, 6vw, 2.875rem)',
+            fontWeight: 900,
+            color: '#111',
+            lineHeight: 1.15,
+            fontFamily: 'Jameel Noori Nastaleeq',
+            marginBottom: '48px',
+            marginTop: '16px'
           }}>
-            {/* Category/Keywords */}
-            {blog.focusKeywords.length > 0 && (
+            {data.title}
+          </h1>
+
+          {/* Author & Meta Info */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            gap: '24px',
+            borderTop: '1px solid #f3f4f6',
+            borderBottom: '1px solid #f3f4f6',
+            padding: '32px 0',
+            marginBottom: '48px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
               <div style={{
+                width: '64px',
+                height: '64px',
+                background: 'linear-gradient(135deg, #dc2626 0%, #991b1b 100%)',
+                borderRadius: '50%',
                 display: 'flex',
-                gap: '8px',
-                flexWrap: 'wrap',
-                marginBottom: '12px'
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                color: '#fff',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.2)',
+                border: '4px solid #fff',
+                fontSize: '24px',
+                flexShrink: 0
               }}>
-                {blog.focusKeywords.slice(0, 3).map((keyword, idx) => (
-                  <span
-                    key={idx}
-                    style={{
-                      backgroundColor: '#d32f2f',
-                      color: '#fff',
-                      padding: '4px 12px',
-                      borderRadius: '2px',
-                      fontSize: '0.75rem',
-                      fontWeight: '700',
-                      textTransform: 'uppercase'
-                    }}
-                  >
-                    {keyword}
-                  </span>
-                ))}
+                MH
               </div>
-            )}
-
-            {/* Article Title */}
-            <h1 style={{
-              fontSize: '2.2rem',
-              color: '#1a1a1a',
-              margin: '0 0 15px 0',
-              fontWeight: '700',
-              lineHeight: 1.3
-            }}>
-              {blog.title}
-            </h1>
-
-            {/* Meta Info */}
-            <div style={{
-              display: 'flex',
-              gap: '20px',
-              fontSize: '0.85rem',
-              color: '#666',
-              flexWrap: 'wrap'
-            }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                ✍️ <strong>{blog.author}</strong>
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                📅 {new Date(blog.createdAt).toLocaleDateString('en-US', {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                ⏱️ {blog.readingTime} min read
-              </span>
+              <div style={{ textAlign: 'right' }}>
+                <p style={{
+                  fontWeight: 900,
+                  color: '#111',
+                  fontFamily: 'Jameel Noori Nastaleeq',
+                  fontSize: '1.25rem',
+                  margin: 0
+                }}>
+                  {data.author || 'Editor Million Hub'}
+                </p>
+                <p style={{
+                  fontSize: '11px',
+                  color: '#dc2626',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase',
+                  letterSpacing: '3px',
+                  margin: '4px 0 0 0'
+                }}>
+                  Verified News Source
+                </p>
+              </div>
+            </div>
+            <div>
+              <button style={{
+                backgroundColor: '#25D366',
+                color: '#fff',
+                padding: '12px 32px',
+                borderRadius: '9999px',
+                fontSize: '12px',
+                fontWeight: 900,
+                border: 'none',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                cursor: 'pointer',
+                transition: 'all 0.3s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = '#128C7E';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = '#25D366';
+              }}
+              >
+                WHATSAPP SHARE
+              </button>
             </div>
           </div>
 
-          {/* Article Excerpt */}
-          {blog.metaDescription && (
-            <p style={{
-              fontSize: '1.1rem',
-              color: '#555',
-              fontStyle: 'italic',
-              marginBottom: '30px',
-              paddingBottom: '20px',
-              borderBottom: '1px solid #e0e0e0',
-              lineHeight: 1.6
+          {/* Main Banner Image */}
+          {data.thumbnail && (
+            <div style={{
+              width: '100%',
+              borderRadius: '16px',
+              marginBottom: '56px',
+              overflow: 'hidden',
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              border: '10px solid #fff',
+              boxSizing: 'border-box'
             }}>
-              {blog.metaDescription}
-            </p>
+              <img
+                src={data.thumbnail}
+                alt={data.title}
+                style={{
+                  width: '100%',
+                  height: 'auto',
+                  objectFit: 'cover',
+                  transition: 'transform 500ms'
+                }}
+              />
+            </div>
           )}
 
-          {/* Article Content */}
+          {/* Blog Body Content */}
           <div
-            style={{
-              fontSize: '1rem',
-              lineHeight: 2.2,
-              color: '#333',
-              marginBottom: '40px',
-              wordBreak: 'break-word'
-            }}
+            className="article-content urdu-font"
             dangerouslySetInnerHTML={{ __html: sanitizedContent }}
-            className="article-content"
+            style={{ fontFamily: 'Jameel Noori Nastaleeq' }}
           />
 
-          {/* Author Bio */}
-          <div
-            style={{
-              backgroundColor: '#f9f9f9',
-              border: '1px solid #e0e0e0',
-              borderRadius: '4px',
-              padding: '25px',
-              marginTop: '40px',
-              borderLeft: '4px solid #d32f2f'
-            }}
-          >
-            <h3 style={{
-              color: '#d32f2f',
-              margin: '0 0 12px 0',
-              fontSize: '1.1rem',
-              fontWeight: '700'
+          {/* Call to Action Box */}
+          <div style={{
+            marginTop: '80px',
+            background: 'linear-gradient(to right, #fef2f2 0%, #fff 100%)',
+            padding: '40px',
+            borderRadius: '24px',
+            borderRight: '12px solid #dc2626',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              opacity: 0.1,
+              fontSize: '144px',
+              fontWeight: 900,
+              color: '#dc2626',
+              transform: 'translate(-40px, 40px)'
             }}>
-              About the Author
+              MH
+            </div>
+            <h3 style={{
+              fontWeight: 900,
+              fontSize: '24px',
+              marginBottom: '20px',
+              color: '#b91c1c',
+              fontFamily: 'Jameel Noori Nastaleeq',
+              position: 'relative',
+              zIndex: 10
+            }}>
+              Zaroori Maloomat:
             </h3>
             <p style={{
-              color: '#666',
-              lineHeight: 1.6,
-              margin: '0',
-              fontSize: '0.95rem'
+              fontFamily: 'Jameel Noori Nastaleeq',
+              fontSize: '20px',
+              color: '#7f1d1d',
+              lineHeight: 1.8,
+              position: 'relative',
+              zIndex: 10
             }}>
-              <strong style={{ color: '#1a1a1a' }}>{blog.author}</strong> is a contributor at Million Hub, sharing insights and expertise on earning opportunities, financial freedom, and personal growth strategies.
+              Agar aap bhi 10 rupaye se apna safar shuru karna chahte hain, to abhi register karein aur is khabar ko apne doston tak pohanchayein.
             </p>
           </div>
         </article>
 
-        {/* Right Column - Trending Sidebar */}
-        <aside>
-          {/* Trending Box */}
+        {/* Sidebar Widgets */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}>
+          {/* Popular Posts Widget */}
           <div style={{
             backgroundColor: '#fff',
-            borderRadius: '4px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+            borderRadius: '16px',
+            border: '1px solid #f3f4f6',
+            padding: '40px',
+            position: 'relative',
             overflow: 'hidden',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-            position: 'sticky',
-            top: '100px'
+            textAlign: 'right'
           }}>
-            {/* Header */}
             <div style={{
-              background: '#d32f2f',
-              color: '#fff',
-              padding: '15px 20px',
-              fontWeight: '700',
-              fontSize: '1rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: '8px',
+              height: '100%',
+              backgroundColor: '#dc2626'
+            }}></div>
+            <h3 style={{
+              fontSize: '24px',
+              fontWeight: 900,
+              borderBottom: '2px solid #f3f4f6',
+              paddingBottom: '20px',
+              marginBottom: '40px',
+              fontFamily: 'Jameel Noori Nastaleeq'
             }}>
-              🔥 TRENDING NOW
-            </div>
+              Taza Khabrein
+            </h3>
 
-            {/* Trending Articles */}
-            <div style={{ padding: '0' }}>
+            <div>
               {trendingBlogs.length > 0 ? (
-                trendingBlogs.map((trendBlog, idx) => (
-                  <Link key={trendBlog._id} href={`/blog/${trendBlog.slug}`} style={{ textDecoration: 'none' }}>
-                    <div
-                      style={{
-                        display: 'flex',
-                        gap: '12px',
-                        padding: '15px',
-                        borderBottom: idx < trendingBlogs.length - 1 ? '1px solid #e0e0e0' : 'none',
-                        cursor: 'pointer',
-                        transition: 'background 0.3s',
-                        backgroundColor: '#fff'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#f9f9f9';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#fff';
-                      }}
+                trendingBlogs.map((item, i) => (
+                  <a
+                    key={item._id}
+                    href={`/blog/${item.slug}`}
+                    style={{
+                      display: 'flex',
+                      gap: '20px',
+                      cursor: 'pointer',
+                      borderBottom: i < trendingBlogs.length - 1 ? '1px solid #f3f4f6' : 'none',
+                      paddingBottom: '32px',
+                      marginBottom: '32px',
+                      textDecoration: 'none',
+                      color: 'inherit'
+                    }}
+                  >
+                    <div style={{
+                      width: '96px',
+                      height: '96px',
+                      backgroundColor: '#f3f4f6',
+                      borderRadius: '8px',
+                      flexShrink: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '24px',
+                      fontWeight: 900,
+                      color: '#111',
+                      transition: 'background-color 0.3s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
                     >
-                      {/* Trending Number */}
-                      <div style={{
-                        background: '#d32f2f',
-                        color: '#fff',
-                        width: '30px',
-                        height: '30px',
-                        borderRadius: '50%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: '700',
-                        fontSize: '0.9rem',
-                        flexShrink: 0
-                      }}>
-                        {idx + 1}
-                      </div>
-
-                      {/* Content */}
-                      <div style={{ minWidth: 0, flex: 1 }}>
-                        <h4 style={{
-                          color: '#1a1a1a',
-                          margin: '0 0 6px 0',
-                          fontSize: '0.9rem',
-                          fontWeight: '600',
-                          lineHeight: 1.3,
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          display: '-webkit-box',
-                          WebkitLineClamp: 2,
-                          WebkitBoxOrient: 'vertical'
-                        }}>
-                          {trendBlog.title}
-                        </h4>
-                        <p style={{
-                          color: '#999',
-                          fontSize: '0.75rem',
-                          margin: '0',
-                          display: 'flex',
-                          gap: '8px'
-                        }}>
-                          <span>{trendBlog.readingTime} min</span>
-                          <span>•</span>
-                          <span>{new Date(trendBlog.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                        </p>
-                      </div>
+                      {i + 1}
                     </div>
-                  </Link>
+                    <div style={{ textAlign: 'right', flex: 1 }}>
+                      <h4 style={{
+                        fontWeight: 'bold',
+                        fontSize: '16px',
+                        fontFamily: 'Jameel Noori Nastaleeq',
+                        lineHeight: 1.3,
+                        color: '#1f2937',
+                        marginBottom: '8px'
+                      }}>
+                        {item.title}
+                      </h4>
+                      <span style={{
+                        fontSize: '10px',
+                        color: '#dc2626',
+                        fontWeight: 'bold',
+                        textTransform: 'uppercase',
+                        letterSpacing: 'wider',
+                        display: 'block'
+                      }}>
+                        {item.readingTime} min read
+                      </span>
+                    </div>
+                  </a>
                 ))
               ) : (
-                <div style={{ padding: '20px', color: '#999', textAlign: 'center' }}>
-                  No trending articles
-                </div>
+                <p style={{ color: '#9ca3af' }}>No trending articles</p>
               )}
             </div>
           </div>
 
-          {/* Subscribe Box */}
+          {/* Newsletter Box */}
           <div style={{
-            backgroundColor: '#d32f2f',
+            backgroundColor: '#111',
+            padding: '48px',
+            borderRadius: '32px',
             color: '#fff',
-            padding: '20px',
-            borderRadius: '4px',
-            marginTop: '20px',
             textAlign: 'center',
-            boxShadow: '0 2px 8px rgba(211, 47, 47, 0.15)'
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+            position: 'relative',
+            overflow: 'hidden',
+            borderBottom: '8px solid #dc2626'
           }}>
+            <div style={{
+              position: 'absolute',
+              bottom: '-40px',
+              left: '-40px',
+              width: '160px',
+              height: '160px',
+              backgroundColor: 'rgba(220, 38, 38, 0.2)',
+              borderRadius: '50%',
+              filter: 'blur(48px)'
+            }}></div>
             <h3 style={{
-              margin: '0 0 10px 0',
-              fontSize: '1rem',
-              fontWeight: '700'
+              fontSize: '32px',
+              fontWeight: 900,
+              marginBottom: '24px',
+              fontFamily: 'Jameel Noori Nastaleeq',
+              letterSpacing: '-0.02em'
             }}>
-              Stay Updated
+              Newsletter
             </h3>
             <p style={{
-              margin: '0 0 15px 0',
-              fontSize: '0.85rem',
-              lineHeight: 1.4
+              color: '#9ca3af',
+              fontSize: '14px',
+              marginBottom: '40px',
+              fontFamily: 'Jameel Noori Nastaleeq',
+              lineHeight: 1.8,
+              paddingLeft: '16px',
+              paddingRight: '16px'
             }}>
-              Get the latest news & insights
+              Har nayi khabar aur update apne mobile par hasil karne ke liye register karein.
             </p>
-            <button style={{
-              width: '100%',
-              backgroundColor: '#fff',
-              color: '#d32f2f',
-              border: 'none',
-              padding: '10px',
-              borderRadius: '4px',
-              fontWeight: '600',
-              fontSize: '0.9rem',
-              cursor: 'pointer',
-              transition: 'all 0.3s'
-            }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f5f5f5';
+            <input
+              type="email"
+              placeholder="Email Address..."
+              style={{
+                width: '100%',
+                padding: '20px',
+                borderRadius: '16px',
+                color: '#000',
+                marginBottom: '20px',
+                outline: 'none',
+                fontWeight: 'bold',
+                boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+                border: 'none',
+                boxSizing: 'border-box',
+                textAlign: 'right'
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#fff';
+            />
+            <button
+              style={{
+                width: '100%',
+                backgroundColor: '#dc2626',
+                color: '#fff',
+                padding: '20px',
+                fontWeight: 900,
+                borderRadius: '16px',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                textTransform: 'uppercase',
+                fontSize: '12px',
+                letterSpacing: '4px',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
             >
-              Subscribe
+              Join the Hub
             </button>
           </div>
-        </aside>
-      </div>
 
-      {/* Global Article Content Styles */}
-      <style jsx global>{`
-        @font-face {
-          font-family: 'Jameel Noori Nastaleeq';
-          src: url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
-          font-weight: 400;
-          font-style: normal;
-        }
+          {/* Advertisement Space */}
+          <div style={{
+            backgroundColor: '#f9fafb',
+            border: '4px dashed #d1d5db',
+            paddingTop: '128px',
+            paddingBottom: '128px',
+            borderRadius: '32px',
+            textAlign: 'center'
+          }}>
+            <span style={{
+              color: '#d1d5db',
+              fontWeight: 900,
+              fontSize: '10px',
+              letterSpacing: '10px',
+              textTransform: 'uppercase'
+            }}>
+              Advertisement
+            </span>
+          </div>
+        </div>
+      </main>
 
-        .article-content {
-          font-family: '"Jameel Noori Nastaleeq", "Segoe UI", Tahoma, sans-serif';
-          line-height: 2.2;
-        }
-
-        .article-content h1,
-        .article-content h2,
-        .article-content h3,
-        .article-content h4,
-        .article-content h5,
-        .article-content h6 {
-          color: #d32f2f;
-          margin-top: 30px;
-          margin-bottom: 15px;
-          font-weight: 700;
-          line-height: 1.3;
-        }
-
-        .article-content h1 {
-          font-size: 1.8rem;
-          border-bottom: 3px solid #d32f2f;
-          padding-bottom: 10px;
-        }
-
-        .article-content h2 {
-          font-size: 1.5rem;
-          border-left: 4px solid #d32f2f;
-          padding-left: 15px;
-        }
-
-        .article-content h3 {
-          font-size: 1.2rem;
-          border-left: 3px solid #d32f2f;
-          padding-left: 12px;
-        }
-
-        .article-content p {
-          margin: 0 0 15px 0;
-          text-align: justify;
-          line-height: 2.2;
-          letter-spacing: 0.3px;
-          color: #333;
-        }
-
-        .article-content a {
-          color: #d32f2f;
-          text-decoration: underline;
-          transition: all 0.3s ease;
-        }
-
-        .article-content a:hover {
-          color: #b71c1c;
-          text-decoration-thickness: 2px;
-        }
-
-        .article-content ul,
-        .article-content ol {
-          margin: 20px 0 20px 30px;
-          color: #333;
-        }
-
-        .article-content li {
-          margin-bottom: 12px;
-          line-height: 2;
-          letter-spacing: 0.2px;
-        }
-
-        .article-content blockquote {
-          margin: 25px 0;
-          padding: 20px;
-          border-left: 4px solid #d32f2f;
-          background: #f9f9f9;
-          border-radius: 4px;
-          font-style: italic;
-          color: #555;
-          font-size: 1rem;
-          line-height: 2;
-        }
-
-        .article-content code {
-          background: #f5f5f5;
-          border: 1px solid #e0e0e0;
-          color: #d32f2f;
-          padding: 4px 8px;
-          border-radius: 4px;
-          font-family: 'Courier New', monospace;
-          font-size: 0.9rem;
-        }
-
-        .article-content pre {
-          background: #f5f5f5;
-          border: 1px solid #e0e0e0;
-          border-radius: 4px;
-          padding: 20px;
-          overflow-x: auto;
-          margin: 20px 0;
-        }
-
-        .article-content pre code {
-          background: transparent;
-          border: none;
-          padding: 0;
-          color: #333;
-        }
-
-        .article-content img {
-          max-width: 100%;
-          height: auto;
-          border-radius: 4px;
-          margin: 20px 0;
-          border: 1px solid #e0e0e0;
-        }
-
-        .article-content table {
-          width: 100%;
-          border-collapse: collapse;
-          margin: 25px 0;
-          border: 1px solid #e0e0e0;
-        }
-
-        .article-content th,
-        .article-content td {
-          padding: 12px;
-          text-align: left;
-          border: 1px solid #e0e0e0;
-        }
-
-        .article-content th {
-          background: #f5f5f5;
-          color: #d32f2f;
-          font-weight: 700;
-        }
-
-        .article-content tr:hover {
-          background: #f9f9f9;
-        }
-
-        .article-content hr {
-          border: none;
-          height: 2px;
-          background: linear-gradient(90deg, transparent, #d32f2f, transparent);
-          margin: 40px 0;
-        }
-
-        .article-content strong {
-          color: #d32f2f;
-          font-weight: 700;
-        }
-
-        .article-content em {
-          color: #d32f2f;
-          font-style: italic;
-        }
-
-        /* Responsive Layout */
-        @media (max-width: 768px) {
-          div[style*="display: grid"][style*="grid-template-columns: 1fr 300px"] {
-            grid-template-columns: 1fr !important;
-          }
-
-          .article-content {
-            line-height: 2;
-          }
-        }
-      `}</style>
+      {/* Modern Black Footer */}
+      <footer style={{
+        backgroundColor: '#000',
+        color: '#fff',
+        paddingTop: '96px',
+        paddingBottom: '96px',
+        borderTopWidth: '15px',
+        borderTopColor: '#dc2626'
+      }}>
+        <div style={{
+          maxWidth: '1440px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gap: '80px',
+          textAlign: 'right'
+        }}>
+          <div>
+            <h2 style={{
+              fontSize: '48px',
+              fontWeight: 900,
+              color: '#dc2626',
+              marginBottom: '40px',
+              letterSpacing: '-0.05em',
+              fontStyle: 'italic'
+            }}>
+              MH
+            </h2>
+            <p style={{
+              color: '#6b7280',
+              fontFamily: 'Jameel Noori Nastaleeq',
+              lineHeight: 2.4,
+              fontSize: '20px'
+            }}>
+              Million Hub Pakistan ka wo wahid digital idaara hai jo har shehri ko maashi tor par azad dekhna chahta hai. Hamare sath judiye aur apna kal badliiye.
+            </p>
+          </div>
+          <div style={{ fontFamily: 'Jameel Noori Nastaleeq' }}>
+            <h3 style={{
+              fontWeight: 900,
+              fontSize: '18px',
+              marginBottom: '40px',
+              color: '#fff',
+              borderRight: '4px solid #dc2626',
+              paddingRight: '16px'
+            }}>
+              Quick Links
+            </h3>
+            <ul style={{
+              listStyle: 'none',
+              padding: 0,
+              margin: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px',
+              color: '#6b7280',
+              fontSize: '18px',
+              fontWeight: 500
+            }}>
+              {['Main Page', 'All Categories', 'Success Stories', 'Contact Us'].map((link) => (
+                <li key={link}
+                  style={{
+                    cursor: 'pointer',
+                    transition: 'color 0.3s'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#dc2626'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#6b7280'}
+                >
+                  {link}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3 style={{
+              fontWeight: 900,
+              fontSize: '18px',
+              marginBottom: '40px',
+              color: '#fff',
+              borderRight: '4px solid #dc2626',
+              paddingRight: '16px',
+              fontFamily: 'Jameel Noori Nastaleeq'
+            }}>
+              Follow Us
+            </h3>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              gap: '24px',
+              marginBottom: '40px'
+            }}>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                backgroundColor: '#1f2937',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 900,
+                fontSize: '14px',
+                border: '1px solid #374151',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1f2937'}
+              >
+                FB
+              </div>
+              <div style={{
+                width: '56px',
+                height: '56px',
+                backgroundColor: '#1f2937',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 900,
+                fontSize: '14px',
+                border: '1px solid #374151',
+                cursor: 'pointer',
+                transition: 'background-color 0.3s'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1f2937'}
+              >
+                WA
+              </div>
+            </div>
+            <p style={{
+              color: '#4b5563',
+              fontSize: '11px',
+              letterSpacing: 'widest',
+              fontWeight: 'bold'
+            }}>
+              CONTACT: INFO@MILLIONHUB.PK
+            </p>
+          </div>
+        </div>
+        <div style={{
+          textAlign: 'center',
+          marginTop: '96px',
+          paddingTop: '48px',
+          borderTop: '1px solid #1f2937',
+          color: '#4b5563',
+          fontSize: '11px',
+          textTransform: 'uppercase',
+          letterSpacing: '10px',
+          fontWeight: 900
+        }}>
+          © 2026 MILLION HUB DIGITAL | THE FUTURE IS HERE
+        </div>
+      </footer>
     </div>
   );
 };
 
-export default BlogDetailPage;
+export default BlogDetail;
