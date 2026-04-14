@@ -53,6 +53,45 @@ const registerQuillFonts = () => {
   }
 };
 
+// Register custom line-height Parchment attribute
+const registerQuillLineHeight = () => {
+  if (typeof window !== 'undefined') {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const Quill = require('quill');
+      const Parchment = require('parchment');
+      
+      // Create custom LineHeight class
+      class LineHeightClass extends Parchment.Attributor.Style {
+        constructor() {
+          super('lineheight', 'line-height', {
+            scope: Parchment.Scope.BLOCK,
+            whitelist: ['1.0', '1.2', '1.5', '1.8', '2.0', '2.5']
+          });
+        }
+      }
+      
+      // Register the custom line-height attribute
+      Quill.register(new LineHeightClass(), true);
+    } catch (error) {
+      console.warn('Could not register Quill line-height:', error);
+    }
+  }
+};
+
+// Detect if text contains Urdu/Arabic characters
+const isUrduText = (text: string): boolean => {
+  const urduArabicRegex = /[\u0600-\u06FF]/g;
+  return urduArabicRegex.test(text);
+};
+
+// Get default line-height based on content language
+const getDefaultLineHeight = (content: string): string => {
+  // Strip HTML tags to check content
+  const plainText = content.replace(/<[^>]*>/g, '');
+  return isUrduText(plainText) ? '1.8' : '1.5';
+};
+
 interface Blog {
   _id: string;
   title: string;
@@ -100,6 +139,7 @@ const createModules = () => ({
         ]}
       ],
       [{ 'size': ['small', 'normal', 'large', 'huge'] }],
+      [{ 'lineheight': ['1.0', '1.2', '1.5', '1.8', '2.0', '2.5'] }],
       ['bold', 'italic', 'underline', 'strike'],
       [{ 'color': [] }, { 'background': [] }],
       [{ 'script': 'sub'}, { 'script': 'super' }],
@@ -115,7 +155,7 @@ const createModules = () => ({
 
 const formats = [
   'header',
-  'font', 'size',
+  'font', 'size', 'lineheight',
   'bold', 'italic', 'underline', 'strike',
   'color', 'background',
   'script',
@@ -150,6 +190,7 @@ const ManageBlogs: React.FC = () => {
 
   useEffect(() => {
     registerQuillFonts();
+    registerQuillLineHeight();
     loadBlogs();
   }, []);
 
@@ -160,6 +201,17 @@ const ManageBlogs: React.FC = () => {
     const words = plainText.trim().split(/\s+/).filter(w => w.length > 0).length;
     setWordCount(words);
     setReadingTime(Math.max(1, Math.ceil(words / 200)));
+  }, [content]);
+
+  // Apply default line-height for Urdu content
+  useEffect(() => {
+    if (content && isUrduText(content)) {
+      // Only apply if no line-height is already set in the content
+      if (!content.includes('line-height')) {
+        // The line-height will be applied when users select text and apply formatting from the toolbar
+        console.log('Urdu content detected - recommended line-height: 1.8 or 2.0 for better readability');
+      }
+    }
   }, [content]);
 
   const loadBlogs = async () => {
@@ -938,6 +990,68 @@ const ManageBlogs: React.FC = () => {
         :global(.ql-tooltip.ql-flip) {
           position: absolute !important;
           top: auto !important;
+        }
+        /* Line Height Styles */
+        :global(.ql-editor[style*="line-height: 1.0"]) {
+          line-height: 1.0 !important;
+        }
+        :global(.ql-editor[style*="line-height: 1.2"]) {
+          line-height: 1.2 !important;
+        }
+        :global(.ql-editor[style*="line-height: 1.5"]) {
+          line-height: 1.5 !important;
+        }
+        :global(.ql-editor[style*="line-height: 1.8"]) {
+          line-height: 1.8 !important;
+        }
+        :global(.ql-editor[style*="line-height: 2.0"]) {
+          line-height: 2.0 !important;
+        }
+        :global(.ql-editor[style*="line-height: 2.5"]) {
+          line-height: 2.5 !important;
+        }
+        :global(p[style*="line-height: 1.0"]) {
+          line-height: 1.0 !important;
+        }
+        :global(p[style*="line-height: 1.2"]) {
+          line-height: 1.2 !important;
+        }
+        :global(p[style*="line-height: 1.5"]) {
+          line-height: 1.5 !important;
+        }
+        :global(p[style*="line-height: 1.8"]) {
+          line-height: 1.8 !important;
+        }
+        :global(p[style*="line-height: 2.0"]) {
+          line-height: 2.0 !important;
+        }
+        :global(p[style*="line-height: 2.5"]) {
+          line-height: 2.5 !important;
+        }
+        :global(div[style*="line-height: 1.0"]) {
+          line-height: 1.0 !important;
+        }
+        :global(div[style*="line-height: 1.2"]) {
+          line-height: 1.2 !important;
+        }
+        :global(div[style*="line-height: 1.5"]) {
+          line-height: 1.5 !important;
+        }
+        :global(div[style*="line-height: 1.8"]) {
+          line-height: 1.8 !important;
+        }
+        :global(div[style*="line-height: 2.0"]) {
+          line-height: 2.0 !important;
+        }
+        :global(div[style*="line-height: 2.5"]) {
+          line-height: 2.5 !important;
+        }
+        /* Urdu-specific line-height defaults */
+        :global(.ql-editor.ql-nastaliq) {
+          line-height: 1.8 !important;
+        }
+        :global(.ql-editor.is-urdu) {
+          line-height: 1.8 !important;
         }
         @font-face {
           font-family: 'Roboto';
