@@ -979,7 +979,7 @@ useEffect(() => {
                 </div>
                 <input type="text" placeholder="Enter Transaction ID (TID)" style={styles.tidInput} id="activationTid" />
                 <input type="file" accept="image/*" style={{marginBottom: '10px'}} id="activationScreenshot" />
-                <p style={{fontSize: '11px', color: '#888'}}>Amount Required: RS. 10</p>
+                <p style={{fontSize: '14px', color: '#888'}}>Amount Required: RS. 10</p>
                 <button 
                   onClick={() => {
                     const tid = (document.getElementById('activationTid') as HTMLInputElement).value;
