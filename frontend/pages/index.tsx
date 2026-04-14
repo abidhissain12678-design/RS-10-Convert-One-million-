@@ -1,75 +1,4 @@
-import React, { useState } from 'react';
-
-const MillionHubFAQ = () => {
-  const [activeIndex, setActiveIndex] = useState<number | null>(null);
-
-  const faqs = [
-    { q: "Million Hub kya hai?", a: "Million Hub ek digital platform hai jo online earning aur skills ke liye banaya gaya hai." },
-    { q: "How to join the Digital Revolution Panel?", a: "Register on our website and choose your preferred skill track to start." },
-    { q: "Kya ye services free hain?", a: "Hamari basic guidance aur news updates bilkul muft hain." },
-    { q: "How can I earn 100k monthly?", a: "By mastering high-ticket digital skills like AI development or Digital Marketing." },
-    { q: "Account verify kaise karein?", a: "Profile settings mein ja kar apna CNIC ya email verify karwayein." },
-    { q: "Is Million Hub available globally?", a: "Yes, our platform is accessible from anywhere in the world." },
-    { q: "Karobar section mein kya shamil hai?", a: "Yahan naye business ideas aur startup growth ki tips di jati hain." },
-    { q: "How to contact support?", a: "You can email us at info@millionhub.pk for any queries." }
-  ];
-
-  // Logic to detect if the question is English or Urdu for alignment
-  const isEnglish = (text: string) => /^[A-Za-z0-9\s?]+$/.test(text);
-
-  return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-8 bg-[#000] rounded-[2rem] border border-slate-800 shadow-2xl my-10 font-sans">
-      <div className="text-center mb-12">
-        <h2 className="text-4xl font-black text-white italic tracking-tighter uppercase">
-          Frequently Asked <span className="text-[#fbbf24]">Questions</span>
-        </h2>
-        <p className="text-slate-500 text-[10px] font-bold mt-2 uppercase tracking-[0.3em]">
-          Aam Tor Par Pooche Janay Walay Sawalat
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4">
-        {faqs.map((faq, index) => {
-          const eng = isEnglish(faq.q);
-          return (
-            <div 
-              key={index} 
-              className={`group border border-slate-800 rounded-2xl overflow-hidden bg-slate-900/20 transition-all ${activeIndex === index ? 'border-[#fbbf24]/50' : 'hover:border-slate-600'}`}
-            >
-              <button 
-                onClick={() => setActiveIndex(activeIndex === index ? null : index)}
-                className={`w-full flex items-center p-5 gap-4 transition-all ${eng ? 'flex-row' : 'flex-row-reverse'}`}
-                style={{ direction: eng ? 'ltr' : 'rtl' }}
-              >
-                {/* Arrow Icon */}
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center transition-transform duration-300 ${activeIndex === index ? 'rotate-180 bg-[#fbbf24] text-black' : 'text-[#fbbf24]'}`}>
-                  <span className="text-[10px]">▼</span>
-                </div>
-
-                {/* Question Text */}
-                <span className={`flex-1 text-sm font-black tracking-tight ${eng ? 'text-left font-sans' : 'text-right urdu-text'} ${activeIndex === index ? 'text-[#fbbf24]' : 'text-slate-200'}`}>
-                  {faq.q}
-                </span>
-              </button>
-              
-              {/* Answer Section */}
-              <div 
-                className={`transition-all duration-500 ease-in-out overflow-hidden ${activeIndex === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}
-              >
-                <div 
-                  className={`p-6 pt-0 text-slate-400 text-[13px] leading-relaxed border-t border-slate-800/50 mt-2 ${eng ? 'text-left' : 'text-right urdu-text'}`}
-                  style={{ direction: eng ? 'ltr' : 'rtl' }}
-                >
-                  {faq.a}
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
+import React from 'react';
 
 const Index: React.FC = () => {
   const navButton = (href: string, label: string) => (
@@ -2552,11 +2481,91 @@ const BlogSection: React.FC = () => {
             </button>
           </div>
         )}
+
+        {/* Frequently Asked Questions Section */}
+        <div style={{ marginTop: '80px', paddingTop: '60px', borderTop: '2px solid rgba(255, 215, 0, 0.2)' }}>
+          <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+              color: '#FFD700',
+              marginBottom: '15px',
+              fontWeight: '700'
+            }}>
+              ❓ Frequently Asked <span style={{ color: '#FFF' }}>Questions</span>
+            </h2>
+            <p style={{
+              fontSize: 'clamp(0.95rem, 2vw, 1.1rem)',
+              color: '#CCC',
+              maxWidth: '600px',
+              margin: '0 auto',
+              lineHeight: 1.6
+            }}>
+              عام طور پر پوچھے جانے والے سوالات - Aam Tor Par Pooche Janay Walay Sawalat
+            </p>
+          </div>
+
+          {/* FAQ Cards Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '24px'
+          }}>
+            {[
+              { q: "Million Hub kya hai?", a: "Million Hub ek digital platform hai jo online earning aur skills ke liye banaya gaya hai. Yahan aap free mein seekh sakte hain aur paise kama sakte hain." },
+              { q: "How to join Million Hub?", a: "Just sign up on our website, complete your profile, and choose your skill track. Start earning from day one with our step-by-step guides." },
+              { q: "Kya ye services free hain?", a: "Bilkul! Hamari basic services aur news updates bilkul muft hain. Premium courses aur coaching paid hain." },
+              { q: "How can I earn 100k monthly?", a: "By mastering high-ticket digital skills like AI development, Digital Marketing, or Web Development. Follow our structured courses." },
+              { q: "Account verify kaise karein?", a: "Profile settings mein ja kar apna email ya CNIC se verify karwayein. Ye 2-3 minutes mein ho jata hai." },
+              { q: "Is Million Hub available globally?", a: "Yes, hamara platform duniya ke kisi bhi hisse se accessible hai. Lekin main support Pakistan mein hai." }
+            ].map((faq, index) => (
+              <div 
+                key={index}
+                style={{
+                  background: 'rgba(255, 215, 0, 0.05)',
+                  border: '1px solid rgba(255, 215, 0, 0.2)',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                  cursor: 'default'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.boxShadow = '0 8px 25px rgba(255, 215, 0, 0.15)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+                  e.currentTarget.style.borderColor = 'rgba(255, 215, 0, 0.2)';
+                }}
+              >
+                {/* Question */}
+                <h3 style={{
+                  fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
+                  color: '#FFD700',
+                  margin: '0 0 12px 0',
+                  fontWeight: '700',
+                  lineHeight: 1.3
+                }}>
+                  {faq.q}
+                </h3>
+
+                {/* Answer */}
+                <p style={{
+                  fontSize: 'clamp(0.9rem, 1.8vw, 0.95rem)',
+                  color: '#DDD',
+                  margin: 0,
+                  lineHeight: 1.6
+                }}>
+                  {faq.a}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
          
       </article>
-
-      {/* Frequently Asked Questions Section */}
-      <MillionHubFAQ />
     </section>
   );
 };
