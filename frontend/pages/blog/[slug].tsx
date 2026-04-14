@@ -452,7 +452,7 @@ const BlogDetail: React.FC = () => {
                 <p style={{
                   fontWeight: 900,
                   color: '#111',
-                  fontFamily: 'Jameel Noori Nastaleeq',
+                  fontFamily: 'Poppins',
                   fontSize: 'clamp(0.95rem, 2vw, 1.25rem)',
                   margin: 0
                 }}>
@@ -560,14 +560,14 @@ const BlogDetail: React.FC = () => {
               fontSize: 'clamp(18px, 4vw, 24px)',
               marginBottom: '20px',
               color: '#b91c1c',
-              fontFamily: 'Jameel Noori Nastaleeq',
+              fontFamily: 'Poppins',
               position: 'relative',
               zIndex: 10
             }}>
               Zaroori Maloomat:
             </h3>
             <p style={{
-              fontFamily: 'Jameel Noori Nastaleeq',
+              fontFamily: 'Poppins',
               fontSize: 'clamp(14px, 3vw, 20px)',
               color: '#7f1d1d',
               lineHeight: 1.8,
@@ -607,10 +607,10 @@ const BlogDetail: React.FC = () => {
               borderBottom: '2px solid #f3f4f6',
               paddingBottom: '20px',
               marginBottom: 'clamp(20px, 4vw, 40px)',
-              fontFamily: 'Jameel Noori Nastaleeq',
+              fontFamily: 'Poppins',
               margin: 0
             }}>
-              Taza Khabrein
+              NEW ARTICLES
             </h3>
 
             <div>
@@ -653,7 +653,7 @@ const BlogDetail: React.FC = () => {
                       <h4 style={{
                         fontWeight: 'bold',
                         fontSize: 'clamp(13px, 2vw, 16px)',
-                        fontFamily: 'Jameel Noori Nastaleeq',
+                        fontFamily: 'Poppins',
                         lineHeight: 1.3,
                         color: '#1f2937',
                         marginBottom: '8px',
@@ -706,7 +706,7 @@ const BlogDetail: React.FC = () => {
               fontSize: 'clamp(24px, 4vw, 32px)',
               fontWeight: 900,
               marginBottom: '24px',
-              fontFamily: 'Jameel Noori Nastaleeq',
+              fontFamily: 'Poppins',
               letterSpacing: '-0.02em',
               margin: '0 0 24px 0'
             }}>
@@ -716,7 +716,7 @@ const BlogDetail: React.FC = () => {
               color: '#9ca3af',
               fontSize: 'clamp(12px, 2vw, 14px)',
               marginBottom: '24px',
-              fontFamily: 'Jameel Noori Nastaleeq',
+              fontFamily: 'Poppins',
               lineHeight: 1.8,
               margin: '0 0 24px 0'
             }}>
@@ -818,7 +818,7 @@ const BlogDetail: React.FC = () => {
             </h2>
             <p style={{
               color: '#6b7280',
-              fontFamily: 'Jameel Noori Nastaleeq',
+              fontFamily: 'Poppins',
               lineHeight: 2.4,
               fontSize: 'clamp(14px, 2vw, 20px)',
               margin: 0
@@ -826,7 +826,7 @@ const BlogDetail: React.FC = () => {
               Million Hub Pakistan ka wo wahid digital idaara hai jo har shehri ko maashi tor par azad dekhna chahta hai. Hamare sath judiye aur apna kal badliiye.
             </p>
           </div>
-          <div style={{ fontFamily: 'Jameel Noori Nastaleeq' }}>
+          <div style={{ fontFamily: 'Poppins' }}>
             <h3 style={{
               fontWeight: 900,
               fontSize: 'clamp(16px, 3vw, 18px)',
@@ -871,7 +871,7 @@ const BlogDetail: React.FC = () => {
               color: '#fff',
               borderRight: '4px solid #dc2626',
               paddingRight: '16px',
-              fontFamily: 'Jameel Noori Nastaleeq',
+              fontFamily: 'Poppins',
               margin: '0 0 clamp(20px, 4vw, 40px) 0'
             }}>
               Follow Us
@@ -911,7 +911,7 @@ const BlogDetail: React.FC = () => {
                 justifyContent: 'center',
                 fontWeight: 900,
                 fontSize: 'clamp(11px, 2vw, 14px)',
-                border: '1px solid #374151',
+                border: '1px solid #455165',
                 cursor: 'pointer',
                 transition: 'background-color 0.3s'
               }}
@@ -936,7 +936,7 @@ const BlogDetail: React.FC = () => {
           textAlign: 'center',
           paddingTop: 'clamp(20px, 4vw, 48px)',
           borderTop: '1px solid #1f2937',
-          color: '#4b5563',
+          color: '#f6f8fb',
           fontSize: 'clamp(8px, 1.5vw, 11px)',
           textTransform: 'uppercase',
           letterSpacing: '10px',
