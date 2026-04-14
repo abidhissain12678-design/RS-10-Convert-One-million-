@@ -322,7 +322,7 @@ const BlogDetail: React.FC = () => {
             fontWeight: 900,
             color: '#dc2626',
             borderBottom: '4px solid #dc2626',
-            fontFamily: 'Jameel Noori Nastaleeq',
+            fontFamily: 'Poppins',
             fontSize: 'clamp(0.9rem, 2vw, 1.25rem)',
             letterSpacing: 'wide',
             textDecoration: 'none',
@@ -423,7 +423,7 @@ const BlogDetail: React.FC = () => {
           <div style={{
             display: 'flex',
             flexWrap: 'wrap',
-            alignItems: 'center',
+            alignItems: 'left',
             gap: 'clamp(12px, 3vw, 24px)',
             borderTop: '1px solid #f3f4f6',
             borderBottom: '1px solid #f3f4f6',
