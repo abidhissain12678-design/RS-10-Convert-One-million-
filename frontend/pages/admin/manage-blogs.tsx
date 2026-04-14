@@ -41,7 +41,7 @@ const ManageBlogs: React.FC = () => {
 
   useEffect(() => {
     const script = document.createElement('script');
-    script.src = 'https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js';
+    script.src = 'https://cdn.tiny.cloud/1/eskh1g5djqxo76mh9st4nk22t3q2pfiu726ar1d2dhkj1i4p/tinymce/6/tinymce.min.js';
     script.referrerPolicy = 'origin';
     script.onload = () => {
       (window as any).tinymce.init({
@@ -51,15 +51,26 @@ const ManageBlogs: React.FC = () => {
         plugins: [
           'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
           'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-          'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'directionality'
+          'insertdatetime', 'media', 'table', 'code', 'help', 'wordcount', 'directionality',
+          'paste', 'powerpaste', 'insertdatetime', 'autoresize'
         ],
-        toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist | ltr rtl | removeformat | help',
-        content_style: 'body { font-family: "Jameel Noori Nastaleeq", serif; background: #0f172a; color: #cbd5e1; direction: rtl; text-align: right; }',
+        toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media table | ltr rtl | code | removeformat | help',
+        content_style: 'body { font-family: "Jameel Noori Nastaleeq", serif; font-size: 16px; background: #0f172a; color: #cbd5e1; direction: rtl; text-align: right; line-height: 1.8; }',
         skin: 'oxide-dark',
+        content_css: 'dark',
         directionality: 'rtl',
+        relative_urls: false,
+        remove_script_host: false,
+        branding: false,
+        statusbar: true,
+        paste_as_text: false,
+        powerpaste_word_import: 'clean',
+        powerpaste_html_import: 'clean',
+        autoresize_bottom_margin: 50,
         setup: (editor: any) => {
           editorRef.current = editor;
           editor.on('change', () => setContent(editor.getContent()));
+          editor.on('keyup', () => setContent(editor.getContent()));
         }
       });
     };
