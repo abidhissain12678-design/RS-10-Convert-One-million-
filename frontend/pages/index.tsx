@@ -7,17 +7,18 @@ const Index: React.FC = () => {
       style={{
         color: '#fff',
         textDecoration: 'none',
-        padding: '6px 10px',
+        padding: 'clamp(4px, 1.5vw, 6px) clamp(8px, 2vw, 10px)',
         border: '1px solid rgba(255,255,255,0.3)',
         borderRadius: '6px',
         display: 'inline-block',
-        margin: '0 4px',
+        margin: '0 2px',
         backdropFilter: 'blur(4px)',
         transition: 'all 0.25s ease',
         background: 'rgba(0,0,0,0.45)',
-        fontSize: '12px',
+        fontSize: 'clamp(10px, 1.5vw, 12px)',
         fontWeight: '500',
-        cursor: 'pointer'
+        cursor: 'pointer',
+        whiteSpace: 'nowrap'
       }}
     >
       {label}
@@ -51,10 +52,10 @@ const Index: React.FC = () => {
         borderBottom: '1px solid rgba(255,255,255,0.12)',
         boxShadow: '0 2px 20px rgba(0,0,0,0.3)',
         flexWrap: 'wrap',
-        gap: '8px'
+        gap: '12px'
       }}>
         <div style={{
-          fontSize: '1.1rem',
+          fontSize: 'clamp(0.9rem, 1.5vw, 1.1rem)',
           fontWeight: 800,
           color: '#FFD700',
           letterSpacing: '1px',
@@ -62,7 +63,8 @@ const Index: React.FC = () => {
         }}>
           MILLION HUB
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', flex: 1 }}>
+          {navButton('/blogs', 'Blogs')}
           {navButton('/register', 'Sign Up')}
           {navButton('/login', 'Login')}
         </div>
