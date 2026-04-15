@@ -64,7 +64,31 @@ const Index: React.FC = () => {
           MILLION HUB
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', justifyContent: 'flex-end', flex: 1 }}>
-          {navButton('/blogs', 'Blogs')}
+          <a
+            href="#"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('blog-section')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            style={{
+              color: '#fff',
+              textDecoration: 'none',
+              padding: 'clamp(4px, 1.5vw, 6px) clamp(8px, 2vw, 10px)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: '6px',
+              display: 'inline-block',
+              margin: '0 2px',
+              backdropFilter: 'blur(4px)',
+              transition: 'all 0.25s ease',
+              background: 'rgba(0,0,0,0.45)',
+              fontSize: 'clamp(10px, 1.5vw, 12px)',
+              fontWeight: '500',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            Blogs
+          </a>
           {navButton('/register', 'Sign Up')}
           {navButton('/login', 'Login')}
         </div>
@@ -2274,7 +2298,7 @@ const BlogSection: React.FC = () => {
   }, []);
 
   return (
-    <section style={{
+    <section id="blog-section" style={{
       padding: '60px 20px',
       background: 'linear-gradient(135deg, rgba(15, 20, 30, 0.95), rgba(20, 25, 40, 0.95))',
       width: '100%',
@@ -2450,7 +2474,7 @@ const BlogSection: React.FC = () => {
         )}
 
         {/* See All Blogs Link */}
-        {blogs.length > 6 && (
+        {blogs.length > 0 && (
           <div style={{
             textAlign: 'center',
             marginTop: '40px'

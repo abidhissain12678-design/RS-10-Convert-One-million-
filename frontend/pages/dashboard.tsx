@@ -777,7 +777,7 @@ useEffect(() => {
     <button onClick={() => handleTabChange('referral')} style={activeTab === 'referral' ? styles.navBtnActive : styles.navBtn}>🔗 Referral History</button>
     <button onClick={() => handleTabChange('wallet')} style={activeTab === 'wallet' ? styles.navBtnActive : styles.navBtn}>💰 Wallet</button>
     <button onClick={() => handleTabChange('news')} style={activeTab === 'news' ? styles.navBtnActive : styles.navBtn}>📰 Daily News</button>
-    <button onClick={() => { window.location.href = '/blogs'; }} style={styles.navBtn}>📚 Blogs</button>
+    <button onClick={() => { window.location.href = '/#blog-section'; }} style={styles.navBtn}>📚 Blogs</button>
     <button onClick={() => { window.location.href = '/dashboard/microtasks'; }} style={styles.navBtn}>🧩 Micro Tasks</button>
   </div>
 
