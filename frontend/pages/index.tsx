@@ -530,6 +530,151 @@ const Index: React.FC = () => {
             <div>© 2026 MILLION HUB DIGITAL | THE FUTURE IS HERE</div>
           </div>
         </section>
+
+        {/* PRIVACY POLICY SECTION */}
+        <section style={{
+          padding: '60px 20px',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          <article style={{
+            background: 'rgba(10, 20, 40, 0.6)',
+            border: '1px solid rgba(255, 215, 0, 0.2)',
+            borderRadius: '16px',
+            padding: '40px',
+            marginBottom: '20px'
+          }}>
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+              color: '#FFD700',
+              marginBottom: '20px',
+              fontWeight: '700'
+            }}>
+              Privacy Policy
+            </h2>
+            <p style={{
+              fontSize: 'clamp(0.95rem, 1.8vw, 1rem)',
+              color: '#DDD',
+              lineHeight: 1.8
+            }}>
+              At Million Hub, accessible from www.millionhub.com, one of our main priorities is the privacy of our visitors. This Privacy Policy document contains types of information that is collected and recorded by Million Hub and how we use it. We do not share your personal information with third parties. We use your data only to manage your account and provide you with our networking and microtask services. By using our website, you hereby consent to our Privacy Policy and agree to its terms.
+            </p>
+          </article>
+        </section>
+
+        {/* ABOUT SECTION */}
+        <section style={{
+          padding: '60px 20px',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          <article style={{
+            background: 'rgba(10, 20, 40, 0.6)',
+            border: '1px solid rgba(255, 215, 0, 0.2)',
+            borderRadius: '16px',
+            padding: '40px',
+            marginBottom: '20px'
+          }}>
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+              color: '#FFD700',
+              marginBottom: '20px',
+              fontWeight: '700'
+            }}>
+              About
+            </h2>
+            <p style={{
+              fontSize: 'clamp(0.95rem, 1.8vw, 1rem)',
+              color: '#DDD',
+              lineHeight: 1.8,
+              marginBottom: '15px'
+            }}>
+              Welcome to Million Hub, the ultimate digital platform designed to empower individuals through the power of networking and micro-tasks. Our mission is to provide a transparent and high-growth environment where users can achieve financial independence.
+            </p>
+            <p style={{
+              fontSize: 'clamp(0.95rem, 1.8vw, 1rem)',
+              color: '#DDD',
+              lineHeight: 1.8
+            }}>
+              Whether you are participating in our unique 11-referral sequence for the 10 Lakh PKR mega prize or earning daily through simple social media micro-jobs, we are committed to your success. Join us to experience the strength of teamwork and digital earning.
+            </p>
+          </article>
+        </section>
+
+        {/* CONTACT US SECTION */}
+        <section style={{
+          padding: '60px 20px',
+          maxWidth: '1200px',
+          margin: '0 auto'
+        }}>
+          <article style={{
+            background: 'rgba(10, 20, 40, 0.6)',
+            border: '1px solid rgba(255, 215, 0, 0.2)',
+            borderRadius: '16px',
+            padding: '40px',
+            marginBottom: '20px'
+          }}>
+            <h2 style={{
+              fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
+              color: '#FFD700',
+              marginBottom: '20px',
+              fontWeight: '700'
+            }}>
+              Contact Us
+            </h2>
+            <p style={{
+              fontSize: 'clamp(0.95rem, 1.8vw, 1rem)',
+              color: '#DDD',
+              lineHeight: 1.8,
+              marginBottom: '20px'
+            }}>
+              We love to hear from our community! If you have any questions, suggestions, or need support regarding your account or tasks, please feel free to reach out to us.
+            </p>
+            
+            <div style={{
+              background: 'rgba(255, 215, 0, 0.05)',
+              border: '1px solid rgba(255, 215, 0, 0.15)',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px'
+            }}>
+              <p style={{
+                fontSize: 'clamp(0.95rem, 1.8vw, 1rem)',
+                color: '#FFD700',
+                marginBottom: '10px',
+                fontWeight: '600'
+              }}>
+                📧 Email: <span style={{color: '#DDD'}}>support@millionhub.com</span>
+              </p>
+              <p style={{
+                fontSize: 'clamp(0.95rem, 1.8vw, 1rem)',
+                color: '#FFD700',
+                marginBottom: '10px',
+                fontWeight: '600'
+              }}>
+                🌐 Website: <span style={{color: '#DDD'}}>www.millionhub.com/contact</span>
+              </p>
+              <p style={{
+                fontSize: 'clamp(0.95rem, 1.8vw, 1rem)',
+                color: '#FFD700',
+                fontWeight: '600'
+              }}>
+                ⏱️ Response Time: <span style={{color: '#DDD'}}>We usually respond within 24-48 hours.</span>
+              </p>
+            </div>
+
+            <p style={{
+              fontSize: 'clamp(0.9rem, 1.6vw, 0.95rem)',
+              color: '#888',
+              textAlign: 'center',
+              marginTop: '30px',
+              paddingTop: '20px',
+              borderTop: '1px solid rgba(255, 215, 0, 0.1)'
+            }}>
+              © 2026 MILLION HUB DIGITAL | THE FUTURE IS HERE
+            </p>
+          </article>
+        </section>
       </main>
         </div>
       </div>
@@ -2298,6 +2443,7 @@ const BlogSection: React.FC = () => {
   }, []);
 
   return (
+    <>
     <section id="blog-section" style={{
       padding: '60px 20px',
       background: 'linear-gradient(135deg, rgba(15, 20, 30, 0.95), rgba(20, 25, 40, 0.95))',
@@ -2557,9 +2703,9 @@ const BlogSection: React.FC = () => {
             ))}
           </div>
         </div>
-         
       </article>
     </section>
+    </>
   );
 };
 
