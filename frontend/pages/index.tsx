@@ -506,32 +506,6 @@ const Index: React.FC = () => {
             </a>
           </div>
         </section>
-
-        {/* Contact Section */}
-        <section id="contact" style={{
-          padding: '50px 15px',
-          textAlign: 'center',
-          background: 'rgba(0, 0, 0, 0.8)',
-          width: '100%',
-          boxSizing: 'border-box'
-        }}>
-          <h2 style={{ color: '#FFD700', fontSize: 'clamp(1.6rem, 4vw, 2.2rem)', marginBottom: '20px' }}>Contact Us</h2>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '20px',
-            flexWrap: 'wrap',
-            color: '#CCC',
-            fontSize: 'clamp(0.9rem, 2vw, 1rem)'
-          }}>
-            <div>📧 support@millionhub.com</div>
-            <div>📱 +92 3299545214</div>
-            <div>💬 WhatsApp: +92 300 1234567</div>
-            <div>© 2026 MILLION HUB DIGITAL | THE FUTURE IS HERE</div>
-          </div>
-        </section>
-
-        {/* PRIVACY POLICY SECTION */}
         <section style={{
           padding: '60px 20px',
           maxWidth: '1200px',
