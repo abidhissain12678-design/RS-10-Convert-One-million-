@@ -1069,7 +1069,7 @@ useEffect(() => {
                   const isLocked = !ref || ref.status === 'locked';
                   const isPendingPayment = ref && ref.status === 'unlocked' && !ref.paymentApproved;
                   console.log(`Box ${pos}:`, { ref, isLocked, referralCode: ref?.referralCode, isPendingPayment });
-                  const link = `http://localhost:3000/register?ref=${user?.username || editUsername}-m${pos}`;
+                  const link = `${typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'}/register?ref=${user?.username || editUsername}-m${pos}`;
                   return (
                     <div key={i} style={isPendingPayment ? {...styles.cardOpen, borderColor: '#FFD700', opacity: 0.8} : isLocked ? styles.cardLocked : styles.cardOpen}>
                       <div style={{fontSize: '30px'}}>{isLocked ? '🔒' : isPendingPayment ? '⏳' : '👤'}</div>
