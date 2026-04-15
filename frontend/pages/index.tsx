@@ -2473,41 +2473,6 @@ const BlogSection: React.FC = () => {
           </div>
         )}
 
-        {/* See All Blogs Link */}
-        {blogs.length > 0 && (
-          <div style={{
-            textAlign: 'center',
-            marginTop: '40px'
-          }}>
-            <button
-              onClick={() => {
-                alert('Blog archive page coming soon!');
-              }}
-              style={{
-                backgroundColor: 'rgba(255, 215, 0, 0.2)',
-                color: '#FFD700',
-                border: '2px solid #FFD700',
-                padding: '12px 30px',
-                borderRadius: '50px',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: '600',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#FFD700';
-                e.currentTarget.style.color = '#000';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 215, 0, 0.2)';
-                e.currentTarget.style.color = '#FFD700';
-              }}
-            >
-              📚 View All Articles
-            </button>
-          </div>
-        )}
-
         {/* Frequently Asked Questions Section */}
         <div style={{ marginTop: '80px', paddingTop: '60px', borderTop: '2px solid rgba(255, 215, 0, 0.2)' }}>
           <div style={{ textAlign: 'center', marginBottom: '50px' }}>

@@ -130,6 +130,10 @@ const Dashboard = () => {
   // Mobile menu state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Dashboard blogs state
+  const [dashboardBlogs, setDashboardBlogs] = useState<any[]>([]);
+  const [blogsLoading, setBlogsLoading] = useState(false);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -147,6 +151,9 @@ const Dashboard = () => {
     setIsMobileMenuOpen(false); // Close mobile menu after selecting tab
     if (tab === 'referral') {
       fetchCompletedUsers();
+    }
+    if (tab === 'blogs') {
+      fetchDashboardBlogs();
     }
   };
 
@@ -615,6 +622,27 @@ useEffect(() => {
       .catch(err => console.log('Error fetching referred users:', err));
   };
 
+  // Fetch dashboard blogs
+  const fetchDashboardBlogs = () => {
+    setBlogsLoading(true);
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://rs-10-convert-one-million.onrender.com' 
+      : 'http://localhost:5000';
+    
+    fetch(`${baseUrl}/api/blogs`, {
+      cache: 'no-cache'
+    })
+      .then(res => res.json())
+      .then(data => {
+        setDashboardBlogs(data.blogs || []);
+      })
+      .catch(err => {
+        console.error('Error fetching blogs:', err);
+        setDashboardBlogs([]);
+      })
+      .finally(() => setBlogsLoading(false));
+  };
+
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -777,7 +805,7 @@ useEffect(() => {
     <button onClick={() => handleTabChange('referral')} style={activeTab === 'referral' ? styles.navBtnActive : styles.navBtn}>🔗 Referral History</button>
     <button onClick={() => handleTabChange('wallet')} style={activeTab === 'wallet' ? styles.navBtnActive : styles.navBtn}>💰 Wallet</button>
     <button onClick={() => handleTabChange('news')} style={activeTab === 'news' ? styles.navBtnActive : styles.navBtn}>📰 Daily News</button>
-    <button onClick={() => { window.location.href = '/#blog-section'; }} style={styles.navBtn}>📚 Blogs</button>
+    <button onClick={() => handleTabChange('blogs')} style={activeTab === 'blogs' ? styles.navBtnActive : styles.navBtn}>📚 Blogs</button>
     <button onClick={() => { window.location.href = '/dashboard/microtasks'; }} style={styles.navBtn}>🧩 Micro Tasks</button>
   </div>
 
@@ -1318,6 +1346,103 @@ useEffect(() => {
               </div>
             ) : (
               <p style={{color: '#888'}}>No news available</p>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'blogs' && (
+          <div style={styles.card}>
+            <h2 style={{color: 'gold', marginBottom: '20px'}}>📚 All Blogs</h2>
+            {blogsLoading ? (
+              <p style={{color: '#888'}}>⏳ Loading blogs...</p>
+            ) : dashboardBlogs.length === 0 ? (
+              <p style={{color: '#888'}}>No blogs available yet. Check back soon!</p>
+            ) : (
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px'}}>
+                {dashboardBlogs.map((blog) => (
+                  <div key={blog._id} style={{
+                    background: 'rgba(255, 215, 0, 0.05)',
+                    border: '1px solid rgba(255, 215, 0, 0.2)',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+                    el.style.transform = 'translateY(-4px)';
+                    el.style.boxShadow = '0 8px 20px rgba(255, 215, 0, 0.15)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.transform = 'translateY(0)';
+                    el.style.boxShadow = 'none';
+                  }}
+                  onClick={() => window.open(`/blog/${blog.slug}`, '_blank')}
+                  >
+                    {/* Blog Thumbnail */}
+                    {blog.thumbnail && (
+                      <img
+                        src={blog.thumbnail}
+                        alt={blog.title}
+                        style={{
+                          width: '100%',
+                          height: '160px',
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                      />
+                    )}
+                    
+                    {/* Blog Content */}
+                    <div style={{padding: '16px', display: 'flex', flexDirection: 'column', flex: 1}}>
+                      {/* Blog Title */}
+                      <h3 style={{
+                        fontSize: '1rem',
+                        color: '#FFD700',
+                        margin: '0 0 8px 0',
+                        fontWeight: '700',
+                        lineHeight: 1.3
+                      }}>
+                        {blog.title}
+                      </h3>
+
+                      {/* Blog Author & Date */}
+                      <div style={{
+                        fontSize: '0.75rem',
+                        color: '#AAA',
+                        marginBottom: '8px'
+                      }}>
+                        <span>👤 {blog.author}</span> • <span>📅 {new Date(blog.createdAt).toLocaleDateString()}</span>
+                      </div>
+
+                      {/* Blog Excerpt */}
+                      <p style={{
+                        fontSize: '0.85rem',
+                        color: '#CCC',
+                        margin: '0 0 auto 0',
+                        lineHeight: 1.4,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical'
+                      }}>
+                        {blog.excerpt || blog.content.replace(/<[^>]*>/g, '').substring(0, 100)}...
+                      </p>
+
+                      {/* Read Time */}
+                      {blog.readingTime && (
+                        <div style={{fontSize: '0.75rem', color: '#FFD700', marginTop: '8px'}}>
+                          ⏱️ {blog.readingTime} min read
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
         )}
