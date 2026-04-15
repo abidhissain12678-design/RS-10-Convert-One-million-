@@ -710,6 +710,7 @@ const AdminPanel = () => {
       {/* SIDEBAR */}
       <div style={styles.sidebar}>
         <h2 style={{color: 'gold', textAlign: 'center'}}>ADMIN</h2>
+        <button onClick={() => handleTabChange('overview')} style={activeTab === 'overview' ? styles.navBtnActive : styles.navBtn}>📊 Overview</button>
         <button onClick={() => handleTabChange('requests')} style={activeTab === 'requests' ? styles.navBtnActive : styles.navBtn}>💰 Payment Requests</button>
         <button onClick={() => handleTabChange('withdraw_approvals')} style={activeTab === 'withdraw_approvals' ? styles.navBtnActive : styles.navBtn}>💎 Mega Withdrawals</button>
         <button onClick={() => handleTabChange('txn_history')} style={activeTab === 'txn_history' ? styles.navBtnActive : styles.navBtn}>🧾 Transaction History</button>
@@ -726,6 +727,294 @@ const AdminPanel = () => {
       </div>
 
       <div style={styles.main}>
+        {/* OVERVIEW TAB */}
+        {activeTab === 'overview' && (
+          <div style={styles.card}>
+            <h2 style={{color: 'gold', marginBottom: '30px', fontSize: '28px'}}>📊 Admin Overview Dashboard</h2>
+            
+            {/* Statistics Grid */}
+            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '40px'}}>
+              
+              {/* Total Users Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                border: '2px solid #0f3460',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(15, 52, 96, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>👥</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Total Users</div>
+                <div style={{fontSize: '36px', color: '#00D9FF', fontWeight: 'bold'}}>{users.length}</div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>Registered Members</div>
+              </div>
+
+              {/* Blocked Users Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #2e1a1a 0%, #3e1616 100%)',
+                border: '2px solid #600f0f',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(96, 15, 15, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>🚫</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Blocked Users</div>
+                <div style={{fontSize: '36px', color: '#FF6B6B', fontWeight: 'bold'}}>
+                  {users.filter((u: any) => u.blocked === true).length}
+                </div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>Suspended Accounts</div>
+              </div>
+
+              {/* Locked Users Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #2e1a1a 0%, #3e1616 100%)',
+                border: '2px solid #FFD700',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(255, 215, 0, 0.2)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>🔒</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Locked Accounts</div>
+                <div style={{fontSize: '36px', color: '#FFD700', fontWeight: 'bold'}}>{lockedAccounts.length}</div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>Access Restricted</div>
+              </div>
+
+              {/* Total Payments Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #1a2e1a 0%, #163e16 100%)',
+                border: '2px solid #0f600f',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(15, 96, 15, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>💰</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Total Payments</div>
+                <div style={{fontSize: '36px', color: '#32CD32', fontWeight: 'bold'}}>
+                  RS {Array.isArray(allPayments) ? allPayments.reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0).toLocaleString() : 0}
+                </div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>All Transactions</div>
+              </div>
+
+              {/* Approved Payments (Incoming) Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+                border: '2px solid #0f3460',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(15, 52, 96, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>📥</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Approved Payments</div>
+                <div style={{fontSize: '36px', color: '#00D9FF', fontWeight: 'bold'}}>
+                  RS {Array.isArray(allPayments) ? allPayments.filter((p: any) => p.status === 'Approved').reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0).toLocaleString() : 0}
+                </div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>Accepted Requests</div>
+              </div>
+
+              {/* Pending Payments Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #2e2e1a 0%, #3e3e16 100%)',
+                border: '2px solid #606010',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(96, 96, 15, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>⏳</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Pending Payments</div>
+                <div style={{fontSize: '36px', color: '#FFD700', fontWeight: 'bold'}}>
+                  RS {Array.isArray(allPayments) ? allPayments.filter((p: any) => p.status === 'Pending').reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0).toLocaleString() : 0}
+                </div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>Under Review</div>
+              </div>
+
+              {/* Withdrawal Requests Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #2e1a2e 0%, #3e163e 100%)',
+                border: '2px solid #60306f',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(96, 48, 111, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>📤</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Total Withdrawals</div>
+                <div style={{fontSize: '36px', color: '#DA70D6', fontWeight: 'bold'}}>
+                  RS {Array.isArray(allPayments) ? allPayments.filter((p: any) => p.type === 'Task Withdraw' || p.type === 'Withdrawal').reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0).toLocaleString() : 0}
+                </div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>Outgoing</div>
+              </div>
+
+              {/* Rejected Payments Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #2e1a1a 0%, #3e1616 100%)',
+                border: '2px solid #600f0f',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(96, 15, 15, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>❌</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Rejected Payments</div>
+                <div style={{fontSize: '36px', color: '#FF6B6B', fontWeight: 'bold'}}>
+                  RS {Array.isArray(allPayments) ? allPayments.filter((p: any) => p.status === 'Rejected').reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0).toLocaleString() : 0}
+                </div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>Declined</div>
+              </div>
+
+              {/* Task Submissions Card */}
+              <div style={{
+                background: 'linear-gradient(135deg, #1a2e1a 0%, #163e16 100%)',
+                border: '2px solid #0f600f',
+                borderRadius: '15px',
+                padding: '25px',
+                boxShadow: '0 0 20px rgba(15, 96, 15, 0.3)',
+                textAlign: 'center'
+              }}>
+                <div style={{fontSize: '40px', marginBottom: '10px'}}>📋</div>
+                <div style={{fontSize: '14px', color: '#888', marginBottom: '8px'}}>Task Submissions</div>
+                <div style={{fontSize: '36px', color: '#32CD32', fontWeight: 'bold'}}>{taskSubmissions.length}</div>
+                <div style={{fontSize: '12px', color: '#666', marginTop: '10px'}}>Work Submitted</div>
+              </div>
+            </div>
+
+            {/* Weekly and Monthly Progress */}
+            <div style={{marginTop: '40px', paddingTop: '30px', borderTop: '1px solid #333'}}>
+              <h3 style={{color: '#FFD700', marginBottom: '20px', fontSize: '20px'}}>📈 Activity Timeline</h3>
+              
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px'}}>
+                {/* This Week's Stats */}
+                <div style={{
+                  background: '#0a0a0a',
+                  border: '1px solid #333',
+                  borderRadius: '12px',
+                  padding: '20px'
+                }}>
+                  <div style={{fontSize: '16px', color: '#FFD700', fontWeight: 'bold', marginBottom: '15px'}}>📅 This Week</div>
+                  {(() => {
+                    const today = new Date();
+                    const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
+                    const weekPayments = Array.isArray(allPayments) ? allPayments.filter((p: any) => {
+                      const pDate = new Date(p.createdAt);
+                      return pDate >= weekStart;
+                    }) : [];
+                    const weekAmount = weekPayments.reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0);
+                    return (
+                      <div>
+                        <div style={{marginBottom: '10px'}}>
+                          <div style={{fontSize: '12px', color: '#888'}}>Transactions</div>
+                          <div style={{fontSize: '22px', color: '#00D9FF', fontWeight: 'bold'}}>{weekPayments.length}</div>
+                        </div>
+                        <div>
+                          <div style={{fontSize: '12px', color: '#888'}}>Amount (RS)</div>
+                          <div style={{fontSize: '22px', color: '#32CD32', fontWeight: 'bold'}}>{weekAmount.toLocaleString()}</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* This Month's Stats */}
+                <div style={{
+                  background: '#0a0a0a',
+                  border: '1px solid #333',
+                  borderRadius: '12px',
+                  padding: '20px'
+                }}>
+                  <div style={{fontSize: '16px', color: '#FFD700', fontWeight: 'bold', marginBottom: '15px'}}>📆 This Month</div>
+                  {(() => {
+                    const today = new Date();
+                    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+                    const monthPayments = Array.isArray(allPayments) ? allPayments.filter((p: any) => {
+                      const pDate = new Date(p.createdAt);
+                      return pDate >= monthStart;
+                    }) : [];
+                    const monthAmount = monthPayments.reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0);
+                    return (
+                      <div>
+                        <div style={{marginBottom: '10px'}}>
+                          <div style={{fontSize: '12px', color: '#888'}}>Transactions</div>
+                          <div style={{fontSize: '22px', color: '#00D9FF', fontWeight: 'bold'}}>{monthPayments.length}</div>
+                        </div>
+                        <div>
+                          <div style={{fontSize: '12px', color: '#888'}}>Amount (RS)</div>
+                          <div style={{fontSize: '22px', color: '#32CD32', fontWeight: 'bold'}}>{monthAmount.toLocaleString()}</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* User Growth */}
+                <div style={{
+                  background: '#0a0a0a',
+                  border: '1px solid #333',
+                  borderRadius: '12px',
+                  padding: '20px'
+                }}>
+                  <div style={{fontSize: '16px', color: '#FFD700', fontWeight: 'bold', marginBottom: '15px'}}>📊 User Stats</div>
+                  {(() => {
+                    const activeUsers = users.filter((u: any) => u.blocked !== true).length;
+                    const inactiveUsers = users.filter((u: any) => u.blocked === true).length;
+                    return (
+                      <div>
+                        <div style={{marginBottom: '10px'}}>
+                          <div style={{fontSize: '12px', color: '#888'}}>Active Users</div>
+                          <div style={{fontSize: '22px', color: '#32CD32', fontWeight: 'bold'}}>{activeUsers}</div>
+                        </div>
+                        <div>
+                          <div style={{fontSize: '12px', color: '#888'}}>Inactive/Blocked</div>
+                          <div style={{fontSize: '22px', color: '#FF6B6B', fontWeight: 'bold'}}>{inactiveUsers}</div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Stats Summary */}
+            <div style={{marginTop: '40px', paddingTop: '30px', borderTop: '1px solid #333'}}>
+              <h3 style={{color: '#FFD700', marginBottom: '20px', fontSize: '20px'}}>⚡ Quick Summary</h3>
+              <div style={{
+                background: '#0a0a0a',
+                border: '1px solid #333',
+                borderRadius: '12px',
+                padding: '20px',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: '20px'
+              }}>
+                <div>
+                  <div style={{fontSize: '12px', color: '#888', marginBottom: '5px'}}>Total Revenue</div>
+                  <div style={{fontSize: '24px', color: '#FFD700', fontWeight: 'bold'}}>
+                    RS {Array.isArray(allPayments) ? allPayments.filter((p: any) => p.status === 'Approved').reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0).toLocaleString() : 0}
+                  </div>
+                </div>
+                <div>
+                  <div style={{fontSize: '12px', color: '#888', marginBottom: '5px'}}>Pending Amount</div>
+                  <div style={{fontSize: '24px', color: '#FFD700', fontWeight: 'bold'}}>
+                    RS {Array.isArray(allPayments) ? allPayments.filter((p: any) => p.status === 'Pending').reduce((sum: number, p: any) => sum + (p.amountType ? parseInt(p.amountType) : 0), 0).toLocaleString() : 0}
+                  </div>
+                </div>
+                <div>
+                  <div style={{fontSize: '12px', color: '#888', marginBottom: '5px'}}>Completion Rate</div>
+                  <div style={{fontSize: '24px', color: '#32CD32', fontWeight: 'bold'}}>
+                    {Array.isArray(paymentRequests) && paymentRequests.length > 0 ? 
+                      Math.round((paymentRequests.filter((p: any) => p.status !== 'Pending').length / paymentRequests.length) * 100) 
+                      : 0}%
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* 1. PAYMENT REQUESTS */}
         {activeTab === 'requests' && (
           <div style={styles.card}>
