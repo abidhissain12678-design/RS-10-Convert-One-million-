@@ -905,55 +905,54 @@ useEffect(() => {
         </div>
       </div>
 
-        {/* TARGET SECTION */}
-        <div style={styles.trophyBox}>
-          <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px'}}>
-            <div>
-              <h2 style={styles.trophyTitle}>🏆 RS. 1,000,000 Trophy Goal</h2>
-              <p style={styles.trophyText}>Professional network milestone: reach 1,000,000 total network strength and complete 11 approved referral payments to unlock the Elite Challenge reward.</p>
-              <div style={styles.trophyMeter}>
-                <div style={{...styles.trophyMeterFill, width: `${Math.min(100, (calculatedNetworkStrength/1000000)*100)}%`}}></div>
-              </div>
-              <p style={{fontSize: '12px', color: '#ccc', marginTop: '8px'}}>{calculatedNetworkStrength.toLocaleString()} / 1,000,000</p>
-            </div>
-            <div style={{textAlign: 'right'}}>
-              <p style={{fontSize: '12px', color: '#b0c4de', marginBottom: '8px'}}>Referral payments: {approvedPaymentsCount} / 11</p>
-              <span style={{display: 'inline-block', background: '#0a1b42', color: '#FFD700', padding: '8px 14px', borderRadius: '12px', fontWeight: 'bold'}}>{approvedPaymentsCount === 11 && calculatedNetworkStrength >= 1000000 ? 'Active' : 'In Progress'}</span>
-            </div>
-          </div>
-        </div>
-        {(() => {
-          const isNetworkMet = calculatedNetworkStrength >= 1000000;
-          const isPaymentsMet = approvedPaymentsCount === 11;
-          const isWithdrawalReady = isNetworkMet && isPaymentsMet;
-          return (
-            <div style={{...styles.alertBox, ...(isWithdrawalReady ? {} : { filter: 'grayscale(100%)', opacity: 0.5 })}}>
-              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-                <div>
-                  <h1 style={{fontSize: '40px', margin: 0, fontWeight: 'bold'}}>RS. 1,000,000</h1>
-                  <p style={{fontWeight: 'bold', color: isWithdrawalReady ? '#32CD32' : '#FFD700'}}>{isWithdrawalReady ? '✓ Ready to Withdraw' : 'Complete All Requirements'}</p>
-                </div>
-                <button onClick={() => { 
-                  if (isWithdrawalReady) {
-                    setActiveTab('wallet');
-                  } else {
-                    const missingNetwork = !isNetworkMet ? `Network: ${calculatedNetworkStrength.toLocaleString()}/1,000,000` : '';
-                    const missingPayments = !isPaymentsMet ? `Payments: ${approvedPaymentsCount}/11` : '';
-                    const message = [missingNetwork, missingPayments].filter(Boolean).join(' | ');
-                    alert('⚠️ Not Ready Yet!\n' + message);
-                  }
-                }} style={{...styles.goldBtnLarge, opacity: isWithdrawalReady ? 1 : 0.5}} disabled={!isWithdrawalReady}>Withdraw</button>
-              </div>
-              <p style={{fontSize: '14px', color: '#888', marginTop: '10px'}}>
-                Network: {calculatedNetworkStrength.toLocaleString()}/1,000,000 | Payments Approved: {approvedPaymentsCount}/11
-              </p>
-            </div>
-          );
-        })()}
-
         {/* 1. DASHBOARD TAB */}
         {activeTab === 'home' && (
           <div>
+            {/* TARGET SECTION */}
+            <div style={styles.trophyBox}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px'}}>
+                <div>
+                  <h2 style={styles.trophyTitle}>🏆 RS. 1,000,000 Trophy Goal</h2>
+                  <p style={styles.trophyText}>Professional network milestone: reach 1,000,000 total network strength and complete 11 approved referral payments to unlock the Elite Challenge reward.</p>
+                  <div style={styles.trophyMeter}>
+                    <div style={{...styles.trophyMeterFill, width: `${Math.min(100, (calculatedNetworkStrength/1000000)*100)}%`}}></div>
+                  </div>
+                  <p style={{fontSize: '12px', color: '#ccc', marginTop: '8px'}}>{calculatedNetworkStrength.toLocaleString()} / 1,000,000</p>
+                </div>
+                <div style={{textAlign: 'right'}}>
+                  <p style={{fontSize: '12px', color: '#b0c4de', marginBottom: '8px'}}>Referral payments: {approvedPaymentsCount} / 11</p>
+                  <span style={{display: 'inline-block', background: '#0a1b42', color: '#FFD700', padding: '8px 14px', borderRadius: '12px', fontWeight: 'bold'}}>{approvedPaymentsCount === 11 && calculatedNetworkStrength >= 1000000 ? 'Active' : 'In Progress'}</span>
+                </div>
+              </div>
+            </div>
+            {(() => {
+              const isNetworkMet = calculatedNetworkStrength >= 1000000;
+              const isPaymentsMet = approvedPaymentsCount === 11;
+              const isWithdrawalReady = isNetworkMet && isPaymentsMet;
+              return (
+                <div style={{...styles.alertBox, ...(isWithdrawalReady ? {} : { filter: 'grayscale(100%)', opacity: 0.5 })}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                    <div>
+                      <h1 style={{fontSize: '40px', margin: 0, fontWeight: 'bold'}}>RS. 1,000,000</h1>
+                      <p style={{fontWeight: 'bold', color: isWithdrawalReady ? '#32CD32' : '#FFD700'}}>{isWithdrawalReady ? '✓ Ready to Withdraw' : 'Complete All Requirements'}</p>
+                    </div>
+                    <button onClick={() => { 
+                      if (isWithdrawalReady) {
+                        setActiveTab('wallet');
+                      } else {
+                        const missingNetwork = !isNetworkMet ? `Network: ${calculatedNetworkStrength.toLocaleString()}/1,000,000` : '';
+                        const missingPayments = !isPaymentsMet ? `Payments: ${approvedPaymentsCount}/11` : '';
+                        const message = [missingNetwork, missingPayments].filter(Boolean).join(' | ');
+                        alert('⚠️ Not Ready Yet!\n' + message);
+                      }
+                    }} style={{...styles.goldBtnLarge, opacity: isWithdrawalReady ? 1 : 0.5}} disabled={!isWithdrawalReady}>Withdraw</button>
+                  </div>
+                  <p style={{fontSize: '14px', color: '#888', marginTop: '10px'}}>
+                    Network: {calculatedNetworkStrength.toLocaleString()}/1,000,000 | Payments Approved: {approvedPaymentsCount}/11
+                  </p>
+                </div>
+              );
+            })()}
             {(activationStatus as ActivationStatusType) === 'locked' && (
               <div style={styles.alertBox}>
                 <h2 style={{color: 'red', margin: '0 0 10px 0'}}>2 HOURS EXPIRED — CHALLENGE FAILED. ACCOUNT LOCKED.</h2>
