@@ -12,6 +12,7 @@ export interface TaskDocument extends Document {
   active: boolean;
   imageUrl: string;
   requiresProof: boolean;
+  supportedFileTypes?: string[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,7 +28,8 @@ const TaskSchema = new Schema<TaskDocument>({
   completedBy: { type: [String], default: [] },
   active: { type: Boolean, default: true },
   imageUrl: { type: String, default: '' },
-  requiresProof: { type: Boolean, default: true }
+  requiresProof: { type: Boolean, default: true },
+  supportedFileTypes: { type: [String], default: ['image'] }
 }, {
   timestamps: true
 });

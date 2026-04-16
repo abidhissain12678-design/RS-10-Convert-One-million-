@@ -5,6 +5,8 @@ export interface UserTaskDocument extends Document {
   taskId: mongoose.Types.ObjectId;
   proofSubmitted: boolean;
   proofUrls: string[];
+  fileType?: string[];
+  videoDuration?: number[];
   completed: boolean;
   status: 'Pending' | 'Approved' | 'Rejected';
   reviewedBy: string;
@@ -18,6 +20,8 @@ const UserTaskSchema = new Schema<UserTaskDocument>({
   taskId: { type: Schema.Types.ObjectId, ref: 'Task', required: true },
   proofSubmitted: { type: Boolean, default: false },
   proofUrls: [{ type: String }],
+  fileType: [{ type: String, enum: ['image', 'video'], default: 'image' }],
+  videoDuration: [{ type: Number }],
   completed: { type: Boolean, default: false },
   status: { type: String, enum: ['Pending', 'Approved', 'Rejected'], default: 'Pending' },
   reviewedBy: { type: String, default: '' },
