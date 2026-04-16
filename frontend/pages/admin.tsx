@@ -711,6 +711,7 @@ const AdminPanel = () => {
       <div style={styles.sidebar}>
         <h2 style={{color: 'gold', textAlign: 'center'}}>ADMIN</h2>
         <button onClick={() => handleTabChange('overview')} style={activeTab === 'overview' ? styles.navBtnActive : styles.navBtn}>📊 Overview</button>
+        <button onClick={() => handleTabChange('network_progress')} style={activeTab === 'network_progress' ? styles.navBtnActive : styles.navBtn}>🌐 Network Progress</button>
         <button onClick={() => handleTabChange('requests')} style={activeTab === 'requests' ? styles.navBtnActive : styles.navBtn}>💰 Payment Requests</button>
         <button onClick={() => handleTabChange('withdraw_approvals')} style={activeTab === 'withdraw_approvals' ? styles.navBtnActive : styles.navBtn}>💎 Mega Withdrawals</button>
         <button onClick={() => handleTabChange('txn_history')} style={activeTab === 'txn_history' ? styles.navBtnActive : styles.navBtn}>🧾 Transaction History</button>
@@ -1012,6 +1013,283 @@ const AdminPanel = () => {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* USER NETWORK PROGRESS TAB */}
+        {activeTab === 'network_progress' && (
+          <div style={styles.card}>
+            <h2 style={{color: 'gold', marginBottom: '30px', fontSize: '28px'}}>🌐 User Network Progress</h2>
+            
+            {isLoadingUsers ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FFD700'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>⏳</div>
+                <div>Loading user network data...</div>
+              </div>
+            ) : errorUsers ? (
+              <div style={{textAlign: 'center', padding: '40px', color: '#FF6347'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>❌</div>
+                <div>{errorUsers}</div>
+                <button onClick={retryFetchUsers} style={{...styles.goldBtn, marginTop: '15px'}}>Retry</button>
+              </div>
+            ) : (
+              <>
+                {/* Summary Stats */}
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px'}}>
+                  <div style={{background: '#0a0a0a', border: '1px solid #FFD700', borderRadius: '10px', padding: '15px', textAlign: 'center'}}>
+                    <div style={{fontSize: '12px', color: '#888', marginBottom: '5px'}}>Active Chain Users</div>
+                    <div style={{fontSize: '28px', color: '#00D9FF', fontWeight: 'bold'}}>
+                      {users.filter((u: any) => u.chainActive === true || (u as any).verifiedUsers?.length >= 1).length}
+                    </div>
+                  </div>
+                  <div style={{background: '#0a0a0a', border: '1px solid #32CD32', borderRadius: '10px', padding: '15px', textAlign: 'center'}}>
+                    <div style={{fontSize: '12px', color: '#888', marginBottom: '5px'}}>Verified 11+ Users</div>
+                    <div style={{fontSize: '28px', color: '#32CD32', fontWeight: 'bold'}}>
+                      {users.filter((u: any) => (u as any).verifiedUsers?.length >= 11).length}
+                    </div>
+                  </div>
+                  <div style={{background: '#0a0a0a', border: '1px solid #FFD700', borderRadius: '10px', padding: '15px', textAlign: 'center'}}>
+                    <div style={{fontSize: '12px', color: '#888', marginBottom: '5px'}}>Million Club (1M+)</div>
+                    <div style={{fontSize: '28px', color: '#FFD700', fontWeight: 'bold'}}>
+                      {users.filter((u: any) => (u as any).networkCount >= 1000000 || (u as any).totalNetwork >= 1000000).length}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Members List */}
+                <div style={{marginBottom: '40px'}}>
+                  <h3 style={{color: '#FFD700', marginBottom: '20px', fontSize: '20px'}}>👑 Top Network Members</h3>
+                  <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '12px'}}>
+                    {Array.isArray(users) && users.length > 0 ? (
+                      users
+                        .filter((u: any) => (u as any).verifiedUsers?.length >= 1 || u.chainActive === true)
+                        .sort((a: any, b: any) => {
+                          const aNetwork = (a as any).networkCount || (a as any).totalNetwork || 0;
+                          const bNetwork = (b as any).networkCount || (b as any).totalNetwork || 0;
+                          return bNetwork - aNetwork;
+                        })
+                        .slice(0, 20)
+                        .map((user: any, index: number) => {
+                          const networkCount = (user as any).networkCount || (user as any).totalNetwork || 0;
+                          const verifiedCount = (user as any).verifiedUsers?.length || 0;
+                          const progressPercent = Math.min((networkCount / 1000000) * 100, 100);
+                          const isMillionClub = networkCount >= 1000000;
+                          
+                          return (
+                            <div key={user._id} style={{
+                              background: isMillionClub ? 'linear-gradient(135deg, #3e3e1a 0%, #2e2e1a 100%)' : '#0a0a0a',
+                              border: isMillionClub ? '2px solid #FFD700' : '1px solid #333',
+                              borderRadius: '12px',
+                              padding: '15px',
+                              boxShadow: isMillionClub ? '0 0 20px rgba(255,215,0,0.2)' : 'none'
+                            }}>
+                              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px'}}>
+                                <div>
+                                  <div style={{fontSize: '14px', color: '#FFD700', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px'}}>
+                                    {index === 0 && '🥇'} {index === 1 && '🥈'} {index === 2 && '🥉'} {index > 2 && `#${index + 1}`}
+                                    {' '}{user.username}
+                                  </div>
+                                  <div style={{fontSize: '12px', color: '#666', marginTop: '2px'}}>{user.email}</div>
+                                </div>
+                                <div style={{textAlign: 'right'}}>
+                                  <div style={{fontSize: '12px', color: '#888', marginBottom: '3px'}}>Verified Users</div>
+                                  <div style={{fontSize: '16px', color: '#00D9FF', fontWeight: 'bold'}}>{verifiedCount}/11</div>
+                                </div>
+                              </div>
+
+                              {/* Progress Bar */}
+                              <div style={{marginBottom: '10px'}}>
+                                <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px'}}>
+                                  <div style={{fontSize: '11px', color: '#888'}}>Network Growth</div>
+                                  <div style={{fontSize: '12px', color: '#FFD700', fontWeight: 'bold'}}>
+                                    {networkCount.toLocaleString()} / 1,000,000
+                                  </div>
+                                </div>
+                                <div style={{
+                                  background: '#1a1a1a',
+                                  borderRadius: '8px',
+                                  height: '12px',
+                                  overflow: 'hidden',
+                                  border: '1px solid #333'
+                                }}>
+                                  <div style={{
+                                    background: isMillionClub ? '#FFD700' : progressPercent > 50 ? '#32CD32' : '#00D9FF',
+                                    height: '100%',
+                                    width: `${progressPercent}%`,
+                                    transition: 'width 0.3s ease',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    fontSize: '9px',
+                                    color: '#000',
+                                    fontWeight: 'bold',
+                                    paddingLeft: progressPercent > 10 ? '2px' : '0px'
+                                  }}>
+                                    {progressPercent > 5 ? `${Math.round(progressPercent)}%` : ''}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Status Badge */}
+                              <div style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
+                                {verifiedCount >= 11 && (
+                                  <span style={{
+                                    background: '#0f600f',
+                                    color: '#32CD32',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '11px',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    ✅ Verified 11+
+                                  </span>
+                                )}
+                                {isMillionClub && (
+                                  <span style={{
+                                    background: '#3e3e1a',
+                                    color: '#FFD700',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '11px',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    👑 Million Club
+                                  </span>
+                                )}
+                                {networkCount >= 500000 && networkCount < 1000000 && (
+                                  <span style={{
+                                    background: '#2e1a1a',
+                                    color: '#FF6B6B',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '11px',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    🔥 Half Million!
+                                  </span>
+                                )}
+                                {networkCount >= 100000 && networkCount < 500000 && (
+                                  <span style={{
+                                    background: '#1a2e1a',
+                                    color: '#32CD32',
+                                    padding: '4px 10px',
+                                    borderRadius: '6px',
+                                    fontSize: '11px',
+                                    fontWeight: 'bold'
+                                  }}>
+                                    📈 Growing
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Stats Grid */}
+                              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #333'}}>
+                                <div>
+                                  <div style={{fontSize: '11px', color: '#888', marginBottom: '2px'}}>Position</div>
+                                  <div style={{fontSize: '13px', color: '#00D9FF', fontWeight: 'bold'}}>{index + 1}</div>
+                                </div>
+                                <div>
+                                  <div style={{fontSize: '11px', color: '#888', marginBottom: '2px'}}>Status</div>
+                                  <div style={{fontSize: '13px', color: user.blocked ? '#FF6B6B' : '#32CD32', fontWeight: 'bold'}}>
+                                    {user.blocked ? '🚫 Blocked' : '✅ Active'}
+                                  </div>
+                                </div>
+                                <div>
+                                  <div style={{fontSize: '11px', color: '#888', marginBottom: '2px'}}>Distance</div>
+                                  <div style={{fontSize: '13px', color: '#FFD700', fontWeight: 'bold'}}>
+                                    {isMillionClub ? '✨ Done' : `${(1000000 - networkCount).toLocaleString()}`}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                    ) : (
+                      <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                        <div style={{fontSize: '30px', marginBottom: '10px'}}>🔍</div>
+                        <div>No active network users found</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Leaderboard Stats */}
+                <div style={{marginTop: '40px', paddingTop: '30px', borderTop: '1px solid #333'}}>
+                  <h3 style={{color: '#FFD700', marginBottom: '20px', fontSize: '20px'}}>📊 Network Statistics</h3>
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '15px'}}>
+                    {(() => {
+                      const activeUsers = users.filter((u: any) => u.chainActive === true || (u as any).verifiedUsers?.length >= 1);
+                      const verifiedUsers = users.filter((u: any) => (u as any).verifiedUsers?.length >= 11);
+                      const millionClubUsers = users.filter((u: any) => (u as any).networkCount >= 1000000 || (u as any).totalNetwork >= 1000000);
+                      const halfMillionUsers = users.filter((u: any) => {
+                        const network = (u as any).networkCount || (u as any).totalNetwork || 0;
+                        return network >= 500000 && network < 1000000;
+                      });
+                      const topUser = activeUsers.sort((a: any, b: any) => {
+                        const aNetwork = (a as any).networkCount || (a as any).totalNetwork || 0;
+                        const bNetwork = (b as any).networkCount || (b as any).totalNetwork || 0;
+                        return bNetwork - aNetwork;
+                      })[0];
+                      const topNetwork = topUser ? ((topUser as any).networkCount || (topUser as any).totalNetwork || 0) : 0;
+
+                      return (
+                        <>
+                          <div style={{background: '#0a0a0a', border: '1px solid #333', borderRadius: '10px', padding: '15px'}}>
+                            <div style={{fontSize: '12px', color: '#888', marginBottom: '8px'}}>Average Network</div>
+                            <div style={{fontSize: '24px', color: '#00D9FF', fontWeight: 'bold'}}>
+                              {activeUsers.length > 0 ? (
+                                Math.round(
+                                  activeUsers.reduce((sum: number, u: any) => sum + ((u as any).networkCount || (u as any).totalNetwork || 0), 0) / activeUsers.length
+                                ).toLocaleString()
+                              ) : 0}
+                            </div>
+                          </div>
+
+                          <div style={{background: '#0a0a0a', border: '1px solid #333', borderRadius: '10px', padding: '15px'}}>
+                            <div style={{fontSize: '12px', color: '#888', marginBottom: '8px'}}>Largest Network</div>
+                            <div style={{fontSize: '24px', color: '#FFD700', fontWeight: 'bold'}}>
+                              {topNetwork.toLocaleString()}
+                            </div>
+                            {topUser && <div style={{fontSize: '11px', color: '#666', marginTop: '5px'}}>by {topUser.username}</div>}
+                          </div>
+
+                          <div style={{background: '#0a0a0a', border: '1px solid #333', borderRadius: '10px', padding: '15px'}}>
+                            <div style={{fontSize: '12px', color: '#888', marginBottom: '8px'}}>Total Network Size</div>
+                            <div style={{fontSize: '24px', color: '#32CD32', fontWeight: 'bold'}}>
+                              {activeUsers.reduce((sum: number, u: any) => sum + ((u as any).networkCount || (u as any).totalNetwork || 0), 0).toLocaleString()}
+                            </div>
+                          </div>
+
+                          <div style={{background: '#0a0a0a', border: '1px solid #333', borderRadius: '10px', padding: '15px'}}>
+                            <div style={{fontSize: '12px', color: '#888', marginBottom: '8px'}}>Half Million Club</div>
+                            <div style={{fontSize: '24px', color: '#FF6B6B', fontWeight: 'bold'}}>
+                              {halfMillionUsers.length}
+                            </div>
+                            <div style={{fontSize: '11px', color: '#666', marginTop: '5px'}}>500K+ members</div>
+                          </div>
+
+                          <div style={{background: '#0a0a0a', border: '1px solid #333', borderRadius: '10px', padding: '15px'}}>
+                            <div style={{fontSize: '12px', color: '#888', marginBottom: '8px'}}>Verified Leaders</div>
+                            <div style={{fontSize: '24px', color: '#32CD32', fontWeight: 'bold'}}>
+                              {verifiedUsers.length}
+                            </div>
+                            <div style={{fontSize: '11px', color: '#666', marginTop: '5px'}}>11+ verified</div>
+                          </div>
+
+                          <div style={{background: '#0a0a0a', border: '1px solid #FFD700', borderRadius: '10px', padding: '15px'}}>
+                            <div style={{fontSize: '12px', color: '#888', marginBottom: '8px'}}>🏆 Million Club</div>
+                            <div style={{fontSize: '24px', color: '#FFD700', fontWeight: 'bold'}}>
+                              {millionClubUsers.length}
+                            </div>
+                            <div style={{fontSize: '11px', color: '#666', marginTop: '5px'}}>1M+ members</div>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
