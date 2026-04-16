@@ -1002,33 +1002,85 @@ useEffect(() => {
             {(activationStatus === 'not_requested' || activationStatus === 'pending' || activationStatus === 'approved') && (
               <div style={styles.alertBox}>
                 <h2 style={{color: 'gold', margin: '0 0 10px 0'}}>ACTIVATE CHAIN</h2>
-                <div style={styles.paymentRow}>
-                  <p><b>JazzCash/EasyPaisa/Bank:</b> {settings.jazzcash} / {settings.easypaisa}</p>
+                <div style={{display: 'flex', gap: '30px', alignItems: 'flex-start', flexWrap: 'wrap'}}>
+                  {/* Left Side - Payment Form */}
+                  <div style={{flex: 1, minWidth: '280px'}}>
+                    <div style={styles.paymentRow}>
+                      <p><b>JazzCash/EasyPaisa/Bank:</b> {settings.jazzcash} / {settings.easypaisa}</p>
+                    </div>
+                    <input type="text" placeholder="Enter Transaction ID (TID)" style={styles.tidInput} id="activationTid" />
+                    <input type="file" accept="image/*" style={{marginBottom: '10px'}} id="activationScreenshot" />
+                    <p style={{fontSize: '14px', color: '#888'}}>Amount Required: RS. 10</p>
+                    <button 
+                      onClick={() => {
+                        const tid = (document.getElementById('activationTid') as HTMLInputElement).value;
+                        const screenshotInput = document.getElementById('activationScreenshot') as HTMLInputElement;
+                        const screenshotFile = screenshotInput.files?.[0];
+                        if (tid) handleRequestActivation(tid, screenshotFile);
+                        else alert('Enter TID');
+                      }}
+                      disabled={paymentStatus === 'pending' || paymentStatus === 'approved'}
+                      style={{
+                        ...styles.goldBtnLarge,
+                        opacity: paymentStatus === 'pending' || paymentStatus === 'approved' ? 0.5 : 1,
+                        cursor: paymentStatus === 'pending' || paymentStatus === 'approved' ? 'not-allowed' : 'pointer',
+                        backgroundColor: paymentStatus === 'approved' ? '#32CD32' : paymentStatus === 'rejected' ? '#FF6347' : 'gold'
+                      }}
+                    >
+                      {paymentStatus === 'not_requested' ? 'SEND REQUEST' : 
+                       paymentStatus === 'pending' ? 'PENDING' : 
+                       paymentStatus === 'approved' ? 'APPROVED' : 
+                       paymentStatus === 'rejected' ? 'REJECTED' : 'SEND REQUEST'}
+                    </button>
+                  </div>
+
+                  {/* Right Side - Payment Image */}
+                  <div style={{flex: 1, minWidth: '250px', textAlign: 'center', background: 'rgba(255,215,0,0.05)', padding: '20px', borderRadius: '12px', border: '2px solid rgba(255,215,0,0.2)'}}>
+                    <h3 style={{color: '#FFD700', margin: '0 0 15px 0', fontSize: '16px'}}>📱 Scan and Pay</h3>
+                    <img 
+                      src="/Million Hub Payment .jpeg" 
+                      alt="Million Hub Payment QR Code" 
+                      style={{
+                        maxWidth: '100%',
+                        height: 'auto',
+                        maxHeight: '300px',
+                        borderRadius: '10px',
+                        border: '2px solid #FFD700',
+                        marginBottom: '15px',
+                        boxShadow: '0 0 15px rgba(255,215,0,0.3)'
+                      }}
+                    />
+                    <p style={{fontSize: '12px', color: '#888', margin: '10px 0'}}>Scan the QR code with your phone camera to pay instantly</p>
+                    <a 
+                      href="/Million Hub Payment .jpeg" 
+                      download="Million-Hub-Payment-QR.jpeg"
+                      style={{
+                        display: 'inline-block',
+                        background: '#FFD700',
+                        color: '#000',
+                        padding: '10px 20px',
+                        borderRadius: '8px',
+                        textDecoration: 'none',
+                        fontWeight: 'bold',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        border: 'none',
+                        marginTop: '5px'
+                      }}
+                      onMouseOver={(e) => {
+                        (e.target as HTMLAnchorElement).style.background = '#FFA500';
+                        (e.target as HTMLAnchorElement).style.transform = 'scale(1.05)';
+                      }}
+                      onMouseOut={(e) => {
+                        (e.target as HTMLAnchorElement).style.background = '#FFD700';
+                        (e.target as HTMLAnchorElement).style.transform = 'scale(1)';
+                      }}
+                    >
+                      ⬇️ Download Payment QR
+                    </a>
+                  </div>
                 </div>
-                <input type="text" placeholder="Enter Transaction ID (TID)" style={styles.tidInput} id="activationTid" />
-                <input type="file" accept="image/*" style={{marginBottom: '10px'}} id="activationScreenshot" />
-                <p style={{fontSize: '14px', color: '#888'}}>Amount Required: RS. 10</p>
-                <button 
-                  onClick={() => {
-                    const tid = (document.getElementById('activationTid') as HTMLInputElement).value;
-                    const screenshotInput = document.getElementById('activationScreenshot') as HTMLInputElement;
-                    const screenshotFile = screenshotInput.files?.[0];
-                    if (tid) handleRequestActivation(tid, screenshotFile);
-                    else alert('Enter TID');
-                  }}
-                  disabled={paymentStatus === 'pending' || paymentStatus === 'approved'}
-                  style={{
-                    ...styles.goldBtnLarge,
-                    opacity: paymentStatus === 'pending' || paymentStatus === 'approved' ? 0.5 : 1,
-                    cursor: paymentStatus === 'pending' || paymentStatus === 'approved' ? 'not-allowed' : 'pointer',
-                    backgroundColor: paymentStatus === 'approved' ? '#32CD32' : paymentStatus === 'rejected' ? '#FF6347' : 'gold'
-                  }}
-                >
-                  {paymentStatus === 'not_requested' ? 'SEND REQUEST' : 
-                   paymentStatus === 'pending' ? 'PENDING' : 
-                   paymentStatus === 'approved' ? 'APPROVED' : 
-                   paymentStatus === 'rejected' ? 'REJECTED' : 'SEND REQUEST'}
-                </button>
                 {paymentStatus === 'approved' && timerEndTime && (
                   <div style={{marginTop: '20px', textAlign: 'center', background: '#0a0a0a', padding: '15px', borderRadius: '10px', border: '1px solid #333'}}>
                     <h3 style={{color: 'gold', margin: '0 0 10px 0'}}>⏱️ TIMER - Complete 11 Referrals</h3>
