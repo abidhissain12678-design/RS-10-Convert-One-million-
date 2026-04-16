@@ -22,6 +22,7 @@ const getTaskIcon = (taskType: string) => {
     case 'tiktok': return '🎵';
     case 'twitter': return '🐦';
     case 'whatsapp': return '💬';
+    case 'video review': return '🎬';
     default: return '🔗';
   }
 };
@@ -1056,73 +1057,170 @@ const MicroTasks: React.FC = () => {
                 <p style={{ color: '#fff', marginBottom: '20px' }}>
                   Your task link has been opened in a new tab. Submit proof or claim reward below after completion.
                 </p>
-                    {currentTask?.requiresProof ? (
-                      <>
-                        <p style={{ color: '#fff', marginBottom: '20px' }}>
-                          Submit up to 3 screenshots as proof to claim your reward.
+                
+                {/* VIDEO REVIEW TASK - VIDEO UPLOAD */}
+                {currentTask?.taskType?.toLowerCase() === 'video review' ? (
+                  <>
+                    <p style={{ color: '#fff', marginBottom: '20px' }}>
+                      📹 Upload your video proof (max 500MB):
+                    </p>
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) {
+                          setProofFiles([]);
+                          return;
+                        }
+                        
+                        const maxSize = 500 * 1024 * 1024; // 500MB
+                        if (file.size > maxSize) {
+                          alert('Video file is too large. Maximum size: 500MB');
+                          e.target.value = '';
+                          setProofFiles([]);
+                          return;
+                        }
+                        
+                        setProofFiles([file]);
+                      }}
+                      style={{
+                        marginBottom: '20px',
+                        padding: '10px',
+                        background: '#000',
+                        border: '2px solid #FFD700',
+                        color: '#fff',
+                        borderRadius: '5px',
+                        width: '100%',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    {proofFiles.length > 0 && (
+                      <div style={{ marginBottom: '20px', padding: '15px', background: '#1a1a1a', borderRadius: '8px', border: '1px solid #FFD700' }}>
+                        <p style={{ color: '#32CD32', fontSize: '14px', margin: '0 0 10px 0', fontWeight: 'bold' }}>
+                          ✅ Video selected: {(proofFiles[0].size / (1024 * 1024)).toFixed(2)}MB
                         </p>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={(e) => {
-                            const files = Array.from(e.target.files || []);
-                            if (files.length > 3) {
-                              alert('Maximum 3 screenshots allowed');
-                              e.target.value = '';
-                              setProofFiles([]);
-                            } else {
-                              setProofFiles(files);
-                            }
-                          }}
+                        <video 
+                          src={URL.createObjectURL(proofFiles[0])} 
                           style={{
-                            marginBottom: '20px',
-                            padding: '10px',
-                            background: '#000',
-                            border: '1px solid #333',
-                            color: '#fff',
+                            width: '100%',
+                            maxHeight: '300px',
                             borderRadius: '5px',
-                            width: '100%'
+                            background: '#000'
                           }}
+                          controls
                         />
-                        {proofFiles.length > 0 && (
-                          <p style={{ color: '#ccc', fontSize: '14px', marginBottom: '20px' }}>
-                            {proofFiles.length} file{proofFiles.length > 1 ? 's' : ''} selected
-                          </p>
-                        )}
-                        <div>
-                          <button
-                            onClick={handleSubmitProof}
-                            disabled={proofFiles.length === 0 || submitting}
-                            style={{
-                              background: 'gold',
-                              color: 'black',
-                              border: 'none',
-                              padding: '10px 20px',
-                              borderRadius: '8px',
-                              fontWeight: 'bold',
-                              cursor: proofFiles.length > 0 && !submitting ? 'pointer' : 'not-allowed',
-                              marginRight: '10px'
-                            }}
-                          >
-                            {submitting ? 'Submitting...' : 'Submit Proof'}
-                          </button>
-                          <button
-                            onClick={() => setShowModal(false)}
-                            style={{
-                              background: '#666',
-                              color: 'white',
-                              border: 'none',
-                              padding: '10px 20px',
-                              borderRadius: '8px',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </>
-                    ) : (
+                      </div>
+                    )}
+                    <div>
+                      <button
+                        onClick={handleSubmitProof}
+                        disabled={proofFiles.length === 0 || submitting}
+                        style={{
+                          background: proofFiles.length > 0 ? 'gold' : '#666',
+                          color: proofFiles.length > 0 ? 'black' : '#999',
+                          border: 'none',
+                          padding: '12px 24px',
+                          borderRadius: '8px',
+                          fontWeight: 'bold',
+                          cursor: proofFiles.length > 0 && !submitting ? 'pointer' : 'not-allowed',
+                          marginBottom: '10px',
+                          width: '100%'
+                        }}
+                      >
+                        {submitting ? '⏳ Uploading...' : '🎬 Upload Video & Claim Reward'}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowModal(false);
+                          setProofFiles([]);
+                        }}
+                        style={{
+                          background: '#666',
+                          color: 'white',
+                          border: 'none',
+                          padding: '10px 20px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          width: '100%'
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  /* NON-VIDEO TASKS - Check if proof required */
+                  <>
+                    {currentTask?.requiresProof ? (
+                      /* SCREENSHOT TASKS */
+                      <>
+                    <p style={{ color: '#fff', marginBottom: '20px' }}>
+                      Submit up to 3 screenshots as proof to claim your reward.
+                    </p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        if (files.length > 3) {
+                          alert('Maximum 3 screenshots allowed');
+                          e.target.value = '';
+                          setProofFiles([]);
+                        } else {
+                          setProofFiles(files);
+                        }
+                      }}
+                      style={{
+                        marginBottom: '20px',
+                        padding: '10px',
+                        background: '#000',
+                        border: '1px solid #333',
+                        color: '#fff',
+                        borderRadius: '5px',
+                        width: '100%'
+                      }}
+                    />
+                    {proofFiles.length > 0 && (
+                      <p style={{ color: '#ccc', fontSize: '14px', marginBottom: '20px' }}>
+                        {proofFiles.length} file{proofFiles.length > 1 ? 's' : ''} selected
+                      </p>
+                    )}
+                    <div>
+                      <button
+                        onClick={handleSubmitProof}
+                        disabled={proofFiles.length === 0 || submitting}
+                        style={{
+                          background: 'gold',
+                          color: 'black',
+                          border: 'none',
+                          padding: '10px 20px',
+                          borderRadius: '8px',
+                          fontWeight: 'bold',
+                          cursor: proofFiles.length > 0 && !submitting ? 'pointer' : 'not-allowed',
+                          marginRight: '10px'
+                        }}
+                      >
+                        {submitting ? 'Submitting...' : 'Submit Proof'}
+                      </button>
+                      <button
+                        onClick={() => setShowModal(false)}
+                        style={{
+                          background: '#666',
+                          color: 'white',
+                          border: 'none',
+                          padding: '10px 20px',
+                          borderRadius: '8px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                  ) : (
+                    /* NO PROOF REQUIRED - Direct claim button */
                     <div>
                       <button
                         onClick={handleClaimReward}
@@ -1155,13 +1253,13 @@ const MicroTasks: React.FC = () => {
                       </button>
                     </div>
                   )}
-                </>
-              )}
+                    </>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
-
-      {/* Withdraw Modal */}
       {showWithdrawModal && (
         <div style={{
           position: 'fixed',

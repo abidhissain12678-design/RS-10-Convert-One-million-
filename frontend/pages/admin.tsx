@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getApiBaseUrl } from '../utils/api';
+import { API_BASE_URL, apiGet, apiPost, apiPut } from '../utils/apiConfig';
 import dynamic from 'next/dynamic';
 
 const ManageBlogs = dynamic(() => import('./admin/manage-blogs'), { ssr: false });
@@ -47,14 +48,8 @@ const AdminPanel = () => {
     const fetchUsers = async () => {
       setIsLoadingUsers(true);
       setErrorUsers(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const baseUrl = getApiBaseUrl();
-        const response = await fetch(`${baseUrl}/api/admin/users`, { headers });
+        const response = await apiGet('/api/admin/users');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -80,14 +75,8 @@ const AdminPanel = () => {
     const fetchPayments = async () => {
       setIsLoadingPayments(true);
       setErrorPayments(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const baseUrl = getApiBaseUrl();
-        const response = await fetch(`${baseUrl}/api/admin/pending-payments`, { headers });
+        const response = await apiGet('/api/admin/pending-payments');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -117,14 +106,8 @@ const AdminPanel = () => {
     const fetchAllPayments = async () => {
       setIsLoadingAllPayments(true);
       setErrorAllPayments(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const baseUrl = getApiBaseUrl();
-        const response = await fetch(`${baseUrl}/api/admin/all-payments`, { headers });
+        const response = await apiGet('/api/admin/all-payments');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -152,14 +135,8 @@ const AdminPanel = () => {
     const fetchLockedAccounts = async () => {
       setIsLoadingLockedAccounts(true);
       setErrorLockedAccounts(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const baseUrl = getApiBaseUrl();
-        const response = await fetch(`${baseUrl}/api/admin/locked-accounts`, { headers });
+        const response = await apiGet('/api/admin/locked-accounts');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -187,14 +164,8 @@ const AdminPanel = () => {
     const fetchTaskSubmissions = async () => {
       setIsLoadingTaskSubmissions(true);
       setErrorTaskSubmissions(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const baseUrl = getApiBaseUrl();
-        const response = await fetch(`${baseUrl}/api/admin/task-submissions`, { headers });
+        const response = await apiGet('/api/admin/task-submissions');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -224,13 +195,8 @@ const AdminPanel = () => {
     const fetchUsers = async () => {
       setIsLoadingUsers(true);
       setErrorUsers(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/users', { headers });
+        const response = await apiGet('/api/admin/users');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -255,14 +221,8 @@ const AdminPanel = () => {
     const fetchPayments = async () => {
       setIsLoadingPayments(true);
       setErrorPayments(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const baseUrl = getApiBaseUrl();
-        const response = await fetch(`${baseUrl}/api/admin/pending-payments`, { headers });
+        const response = await apiGet('/api/admin/pending-payments');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -289,13 +249,8 @@ const AdminPanel = () => {
     const fetchAllPayments = async () => {
       setIsLoadingAllPayments(true);
       setErrorAllPayments(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/all-payments', { headers });
+        const response = await apiGet('/api/admin/all-payments');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -320,13 +275,8 @@ const AdminPanel = () => {
     const fetchLockedAccounts = async () => {
       setIsLoadingLockedAccounts(true);
       setErrorLockedAccounts(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/locked-accounts', { headers });
+        const response = await apiGet('/api/admin/locked-accounts');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -351,13 +301,8 @@ const AdminPanel = () => {
     const fetchTaskSubmissions = async () => {
       setIsLoadingTaskSubmissions(true);
       setErrorTaskSubmissions(null);
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Cache-Control': 'no-cache' };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
       try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/task-submissions', { headers });
+        const response = await apiGet('/api/admin/task-submissions');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -415,17 +360,7 @@ const AdminPanel = () => {
   const handlePaymentAction = async (id: string, action: string, type: string) => {
     if (action === 'approve') {
       try {
-        const token = localStorage.getItem('token');
-        const headers: any = { 'Content-Type': 'application/json' };
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        // All payment types (Activation, 1st Chance, 2nd Chance) use approve-payment endpoint
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/approve-payment', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ paymentId: id })
-        });
+        const response = await apiPost('/api/admin/approve-payment', { paymentId: id });
         if (response.ok) {
           alert('✅ Payment approved!');
           // Refresh the list
@@ -439,17 +374,7 @@ const AdminPanel = () => {
       }
     } else if (action === 'reject') {
       try {
-        const token = localStorage.getItem('token');
-        const headers: any = { 'Content-Type': 'application/json' };
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-        // Call reject-payment endpoint
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/reject-payment', {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ paymentId: id })
-        });
+        const response = await apiPost('/api/admin/reject-payment', { paymentId: id });
         if (response.ok) {
           alert('✅ Payment rejected!');
           // Refresh the list
@@ -466,13 +391,7 @@ const AdminPanel = () => {
 
   const banUser = async (id: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      await fetch(`https://rs-10-convert-one-million.onrender.com/api/admin/ban-user/${id}`, {
-        method: 'PUT',
-        headers
-      });
+      await apiPut(`/api/admin/ban-user/${id}`, {});
       alert("User Banned!");
       // Refresh users
       window.location.reload();
@@ -483,13 +402,7 @@ const AdminPanel = () => {
 
   const reactiveUser = async (id: string) => {
     try {
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      await fetch(`https://rs-10-convert-one-million.onrender.com/api/admin/unban-user/${id}`, {
-        method: 'PUT',
-        headers
-      });
+      await apiPut(`/api/admin/unban-user/${id}`, {});
       alert("User Unbanned!");
       // Refresh users
       window.location.reload();
@@ -500,14 +413,7 @@ const AdminPanel = () => {
 
   const updateUser = async (userId: string, updatedData: any) => {
     try {
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/update-user', {
-        method: 'PUT',
-        headers,
-        body: JSON.stringify({ userId, ...updatedData })
-      });
+      await apiPut('/api/admin/update-user', { userId, ...updatedData });
       alert("User Updated!");
       // Refresh users
       window.location.reload();
@@ -519,16 +425,7 @@ const AdminPanel = () => {
   const handleSaveSettings = async () => {
     console.log('Saving Settings:', settings);
     try {
-        const token = localStorage.getItem('token');
-        const headers: any = { 'Content-Type': 'application/json' };
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/update-settings', {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(settings)
-        });
-
+        const response = await apiPost('/api/admin/update-settings', settings);
         const data = await response.json();
         console.log('Update settings response:', response.status, data);
 
@@ -556,15 +453,7 @@ const AdminPanel = () => {
       return;
     }
     try {
-        const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/post-news', {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ content: newsText })
-        });
-        
+        const response = await apiPost('/api/admin/post-news', { content: newsText });
         const data = await response.json();
         console.log('Post news response:', response.status, data);
         
@@ -587,11 +476,7 @@ const AdminPanel = () => {
 
   const handleAdminLogin = async () => {
     try {
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/admin-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: adminPass })
-      });
+      const response = await apiPost('/api/auth/admin-login', { key: adminPass });
       const data = await response.json();
       if (response.ok) {
         localStorage.setItem('token', data.token);
@@ -608,13 +493,7 @@ const AdminPanel = () => {
   const handleBackfillLockedAccounts = async () => {
     if (!confirm('This will create missing LockedAccount records for all locked users. Continue?')) return;
     try {
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/backfill-locked-accounts', {
-        method: 'POST',
-        headers
-      });
+      const response = await apiPost('/api/admin/backfill-locked-accounts', {});
       const data = await response.json();
       if (response.ok) {
         alert(`✅ Backfill Complete!\nCreated: ${data.created}\nSkipped: ${data.skipped}\nTotal: ${data.total}`);
@@ -631,13 +510,7 @@ const AdminPanel = () => {
   const handleExpireOverdueUsers = async () => {
     if (!confirm('This will lock users whose 2-hour timer has expired and referral count < 11. Continue?')) return;
     try {
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/expire-overdue-users', {
-        method: 'POST',
-        headers
-      });
+      const response = await apiPost('/api/admin/expire-overdue-users', {});
       const data = await response.json();
       if (response.ok) {
         alert(`✅ Processing Complete!\nUsers Processed: ${data.processed}`);
@@ -652,13 +525,8 @@ const AdminPanel = () => {
 
   // Refresh locked accounts list
   const handleRefreshLockedAccounts = async () => {
-    const token = localStorage.getItem('token');
-    const headers: any = {};
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
     try {
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/locked-accounts', { headers });
+      const response = await apiGet('/api/admin/locked-accounts');
       const data = await response.json();
       if (Array.isArray(data)) {
         setLockedAccounts(data);
@@ -673,13 +541,7 @@ const AdminPanel = () => {
   const handleCreateTestLockedAccount = async () => {
     if (!confirm('This will create a LockedAccount record for the first locked user in database. Continue?')) return;
     try {
-      const token = localStorage.getItem('token');
-      const headers: any = { 'Content-Type': 'application/json' };
-      if (token) headers['Authorization'] = `Bearer ${token}`;
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/admin/create-test-locked-account', {
-        method: 'POST',
-        headers
-      });
+      const response = await apiPost('/api/admin/create-test-locked-account', {});
       const data = await response.json();
       if (response.ok) {
         alert(`✅ Test record created!\nUsername: ${data.record.username}`);

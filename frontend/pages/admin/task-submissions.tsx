@@ -63,6 +63,16 @@ const TaskSubmissions: React.FC = () => {
     : 'http://localhost:5000');
   const getImageUrl = (url: string) => url.startsWith('http') ? url : `${baseUrl}${url}`;
 
+  const isVideoFile = (url: string) => {
+    const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv', '.flv', '.m3u8'];
+    return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+  };
+
+  const isImageFile = (url: string) => {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'];
+    return imageExtensions.some(ext => url.toLowerCase().includes(ext));
+  };
+
   useEffect(() => {
     loadSubmissions();
     loadWithdrawals();
@@ -400,39 +410,99 @@ const TaskSubmissions: React.FC = () => {
                 </div>
                 
                 <div>
-                  <h4 style={{ color: '#FFD700', margin: '0 0 10px 0', fontSize: '16px' }}>Screenshots ({(submission.proofUrls || []).length})</h4>
+                  <h4 style={{ color: '#FFD700', margin: '0 0 10px 0', fontSize: '16px' }}>Submissions ({(submission.proofUrls || []).length})</h4>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
-                    {(submission.proofUrls || []).map((url, index) => (
-                      <div key={index} style={{
-                        border: '1px solid rgba(255,255,255,0.2)',
-                        borderRadius: '8px',
-                        overflow: 'hidden',
-                        background: '#000'
-                      }}>
-                        <img
-                          src={getImageUrl(url)}
-                          alt={`Screenshot ${index + 1}`}
-                          style={{
-                            width: '100%',
-                            height: '150px',
-                            objectFit: 'cover',
-                            display: 'block'
-                          }}
-                          onError={(e) => {
-                            e.currentTarget.src = '/placeholder-image.png'; // Fallback image
-                          }}
-                        />
-                        <div style={{
-                          padding: '8px',
-                          background: 'rgba(0,0,0,0.7)',
-                          textAlign: 'center',
-                          fontSize: '12px',
-                          color: '#ccc'
+                    {(submission.proofUrls || []).map((url, index) => {
+                      const fullUrl = getImageUrl(url);
+                      const isVideo = isVideoFile(fullUrl);
+                      const isImage = isImageFile(fullUrl);
+                      
+                      return (
+                        <div key={index} style={{
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          background: '#000',
+                          display: 'flex',
+                          flexDirection: 'column'
                         }}>
-                          Screenshot {index + 1}
+                          {isVideo ? (
+                            <div style={{
+                              width: '100%',
+                              height: '150px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: '#1a1a1a',
+                              fontSize: '48px'
+                            }}>
+                              🎬
+                            </div>
+                          ) : isImage ? (
+                            <img
+                              src={fullUrl}
+                              alt={`Submission ${index + 1}`}
+                              style={{
+                                width: '100%',
+                                height: '150px',
+                                objectFit: 'cover',
+                                display: 'block',
+                                cursor: 'pointer'
+                              }}
+                              onClick={() => window.open(fullUrl, '_blank')}
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                                e.currentTarget.parentElement!.innerHTML = '<div style="width: 100%; height: 150px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; font-size: 40px;">📄</div>';
+                              }}
+                            />
+                          ) : (
+                            <div style={{
+                              width: '100%',
+                              height: '150px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              background: '#1a1a1a',
+                              fontSize: '40px'
+                            }}>
+                              📄
+                            </div>
+                          )}
+                          <div style={{
+                            padding: '8px',
+                            background: 'rgba(0,0,0,0.7)',
+                            textAlign: 'center',
+                            fontSize: '12px',
+                            color: '#ccc'
+                          }}>
+                            {isVideo ? '🎬 Video' : isImage ? '🖼️ Screenshot' : '📄 File'} {index + 1}
+                          </div>
+                          <div style={{
+                            padding: '8px',
+                            background: 'rgba(255,215,0,0.1)',
+                            textAlign: 'center'
+                          }}>
+                            <a
+                              href={fullUrl}
+                              download={`submission-${index + 1}-${Date.now()}`}
+                              style={{
+                                display: 'inline-block',
+                                padding: '6px 12px',
+                                background: '#FFD700',
+                                color: '#000',
+                                textDecoration: 'none',
+                                borderRadius: '4px',
+                                fontSize: '11px',
+                                fontWeight: 'bold',
+                                cursor: 'pointer'
+                              }}
+                            >
+                              ⬇️ Download
+                            </a>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
                 

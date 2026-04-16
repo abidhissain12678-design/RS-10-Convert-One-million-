@@ -1006,7 +1006,7 @@ useEffect(() => {
                   {/* Left Side - Payment Form */}
                   <div style={{flex: 1, minWidth: '280px'}}>
                     <div style={styles.paymentRow}>
-                      <p><b>JazzCash/EasyPaisa/Bank:</b> {settings.jazzcash} / {settings.easypaisa}</p>
+                      <p><b>JazzCash/03299545214:</b> {settings.jazzcash} / {settings.easypaisa}</p>
                     </div>
                     <input type="text" placeholder="Enter Transaction ID (TID)" style={styles.tidInput} id="activationTid" />
                     <input type="file" accept="image/*" style={{marginBottom: '10px'}} id="activationScreenshot" />

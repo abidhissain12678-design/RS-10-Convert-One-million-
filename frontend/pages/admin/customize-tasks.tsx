@@ -16,7 +16,7 @@ interface Task {
   createdAt: string;
 }
 
-const taskTypes = ['YouTube', 'Facebook', 'Instagram', 'TikTok', 'Twitter', 'WhatsApp', 'Website', 'Other'];
+const taskTypes = ['YouTube', 'Facebook', 'Instagram', 'TikTok', 'Twitter', 'WhatsApp', 'Website', 'Video Review', 'Other'];
 
 const CustomizeTasks: React.FC = () => {
   const [taskType, setTaskType] = useState('YouTube');
