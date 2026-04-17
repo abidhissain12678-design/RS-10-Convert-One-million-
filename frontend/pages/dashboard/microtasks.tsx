@@ -472,14 +472,18 @@ const MicroTasks: React.FC = () => {
           const errorData = await response.json();
           errorMessage = errorData?.message || errorData?.error || `Server error (${response.status})`;
           console.error('❌ Server error details:', errorData);
+          // Show full error details in alert
+          const details = errorData?.details ? `\n\nDetails: ${errorData.details.substring(0, 200)}` : '';
+          const errorName = errorData?.errorName ? `\nError: ${errorData.errorName}` : '';
+          alert(`${errorMessage}${errorName}${details}`);
         } catch (parseErr) {
           const text = await response.text().catch(() => '');
           if (text) {
             errorMessage = `Server error (${response.status}): ${text.substring(0, 100)}`;
             console.error('❌ Raw error response:', text);
           }
+          alert(errorMessage);
         }
-        alert(errorMessage);
         throw new Error(errorMessage);
       }
 
