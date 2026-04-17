@@ -1,4 +1,5 @@
 import React from 'react';
+import { getApiBaseUrl } from '../utils/api';
 
 const Index: React.FC = () => {
   const navButton = (href: string, label: string) => (
@@ -709,7 +710,7 @@ const RegisterForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/register', {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -986,7 +987,7 @@ const LoginForm: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/login', {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -2394,11 +2395,7 @@ const BlogSection: React.FC = () => {
   React.useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        const baseUrl = process.env.NODE_ENV === 'production' 
-          ? 'https://rs-10-convert-one-million.onrender.com' 
-          : 'http://localhost:5000';
-        
-        const response = await fetch(`${baseUrl}/api/blogs`, {
+        const response = await fetch(`${getApiBaseUrl()}/api/blogs`, {
           cache: 'no-cache'
         });
         

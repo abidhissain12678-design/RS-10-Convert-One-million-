@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getApiBaseUrl } from '../../utils/api';
 
 interface UserTask {
   _id: string;
@@ -58,10 +59,7 @@ const TaskSubmissions: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'tasks' | 'withdrawals'>('tasks');
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production'
-    ? 'https://rs-10-convert-one-million.onrender.com'
-    : 'http://localhost:5000');
-  const getImageUrl = (url: string) => url.startsWith('http') ? url : `${baseUrl}${url}`;
+  const getImageUrl = (url: string) => url.startsWith('http') ? url : `${getApiBaseUrl()}${url}`;
 
   const isVideoFile = (url: string) => {
     const videoExtensions = ['.mp4', '.webm', '.mov', '.avi', '.mkv', '.flv', '.m3u8'];
@@ -87,11 +85,7 @@ const TaskSubmissions: React.FC = () => {
     }
 
     try {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
-      
-      const response = await fetch(`${baseUrl}/api/tasks/admin/submissions`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/submissions`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache'
@@ -116,11 +110,7 @@ const TaskSubmissions: React.FC = () => {
     if (!token) return;
 
     try {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
-      
-      const response = await fetch(`${baseUrl}/api/payment/pending-payments`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/payment/pending-payments`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache'
@@ -146,11 +136,7 @@ const TaskSubmissions: React.FC = () => {
     }
 
     try {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
-      
-      const response = await fetch(`${baseUrl}/api/tasks/admin/approve-payment`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/approve-payment`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -186,11 +172,7 @@ const TaskSubmissions: React.FC = () => {
     }
 
     try {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
-      
-      const response = await fetch(`${baseUrl}/api/tasks/admin/reject-payment`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/reject-payment`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -222,11 +204,7 @@ const TaskSubmissions: React.FC = () => {
     }
 
     try {
-      const baseUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://rs-10-convert-one-million.onrender.com' 
-        : 'http://localhost:5000';
-      
-      const response = await fetch(`${baseUrl}/api/payment/approve-payment`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/payment/approve-payment`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

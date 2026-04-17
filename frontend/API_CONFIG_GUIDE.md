@@ -37,7 +37,7 @@ In your Vercel dashboard:
 1. Go to **Settings** → **Environment Variables**
 2. Add a new variable:
    - **Name**: `NEXT_PUBLIC_API_URL`
-   - **Value**: `https://rs-10-convert-one-million.onrender.com`
+   - **Value**: `https://rs-10-convert-one-million-production.up.railway.app`
    - **Environments**: Select all (or Production)
 3. Click **Save**
 4. Go to **Deployments** and redeploy to apply changes

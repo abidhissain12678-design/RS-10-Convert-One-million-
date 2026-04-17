@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { getApiBaseUrl } from '../utils/api';
 
 const Register = () => {
   const router = useRouter();
@@ -73,7 +74,7 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/register', {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

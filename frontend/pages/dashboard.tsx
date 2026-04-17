@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { getApiBaseUrl } from '../utils/api';
 
 const styles = {
   sidebar: { width: '200px', background: '#0a0a0a', padding: '30px', borderRight: '1px solid #222', height: '100vh', position: 'fixed' as const, zIndex: 10, overflowY: 'auto' as const, paddingBottom: '50px', scrollbarWidth: 'none' as const },
@@ -221,7 +222,7 @@ const Dashboard = () => {
           window.location.href = '/login';
           return;
         }
-        fetch(`https://rs-10-convert-one-million.onrender.com/api/auth/user/${user._id}`, {
+        fetch(`${getApiBaseUrl()}/api/auth/user/${user._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
           .then(res => {
@@ -341,7 +342,7 @@ const Dashboard = () => {
     const fetchPaymentStatus = () => {
       const token = localStorage.getItem('token');
       if (token) {
-        fetch('https://rs-10-convert-one-million.onrender.com/api/payment/user-payments', {
+        fetch(`${getApiBaseUrl()}/api/payment/user-payments`, {
           headers: { 'Authorization': `Bearer ${token}` }
         })
           .then(res => res.json())
@@ -390,7 +391,7 @@ const [news, setNews] = useState<any[]>([]);
 
 useEffect(() => {
   const fetchSettings = () => {
-    fetch('https://rs-10-convert-one-million.onrender.com/api/admin/get-settings')
+    fetch(`${getApiBaseUrl()}/api/admin/get-settings`)
       .then(res => res.json())
       .then(data => {
         console.log("Settings Data:", data);
@@ -408,7 +409,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  fetch('https://rs-10-convert-one-million.onrender.com/api/admin/notifications-history')
+  fetch(`${getApiBaseUrl()}/api/admin/notifications-history`)
     .then(res => res.json())
     .then(data => {
       console.log("Notifications History:", data);
@@ -418,7 +419,7 @@ useEffect(() => {
 }, []);
 
 useEffect(() => {
-  fetch('https://rs-10-convert-one-million.onrender.com/api/admin/get-news')
+  fetch(`${getApiBaseUrl()}/api/admin/get-news`)
     .then(res => res.json())
     .then(data => {
       console.log("News:", data);
@@ -475,7 +476,7 @@ useEffect(() => {
 
   const handleBuyChance = (tid: string) => {
     const amount = chanceLevel === 0 ? 50 : 100;
-    fetch('https://rs-10-convert-one-million.onrender.com/api/admin/buy-chance', {
+    fetch(`${getApiBaseUrl()}/api/admin/buy-chance`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId: user._id, tid, amount })
@@ -511,7 +512,7 @@ useEffect(() => {
 
       console.log('Submitting activation request with TID:', tid, 'Token:', token.substring(0, 20) + '...');
 
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/payment/request-activation', {
+      const response = await fetch(`${getApiBaseUrl()}/api/payment/request-activation`, {
         method: 'POST',
         headers: { 
           'Authorization': `Bearer ${token}`
@@ -525,7 +526,7 @@ useEffect(() => {
       if (response.ok) {
         alert('Payment request submitted successfully! Waiting for admin approval...');
         // Refresh user data and payments
-        const userRes = await fetch(`https://rs-10-convert-one-million.onrender.com/api/auth/user/${user._id}`, {
+        const userRes = await fetch(`${getApiBaseUrl()}/api/auth/user/${user._id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (userRes.ok) {
@@ -566,7 +567,7 @@ useEffect(() => {
     setWithdrawalMessage('Sending withdrawal request, wait...');
 
     try {
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/payment/request-withdrawal', {
+      const response = await fetch(`${getApiBaseUrl()}/api/payment/request-withdrawal`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -610,7 +611,7 @@ useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) return;
     
-    fetch('https://rs-10-convert-one-million.onrender.com/api/auth/referred-users', {
+    fetch(`${getApiBaseUrl()}/api/auth/referred-users`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -625,11 +626,7 @@ useEffect(() => {
   // Fetch dashboard blogs
   const fetchDashboardBlogs = () => {
     setBlogsLoading(true);
-    const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://rs-10-convert-one-million.onrender.com' 
-      : 'http://localhost:5000';
-    
-    fetch(`${baseUrl}/api/blogs`, {
+    fetch(`${getApiBaseUrl()}/api/blogs`, {
       cache: 'no-cache'
     })
       .then(res => res.json())
@@ -1190,7 +1187,7 @@ useEffect(() => {
                     return;
                   }
                   try {
-                    const res = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/update-password', {
+                    const res = await fetch(`${getApiBaseUrl()}/api/auth/update-password`, {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ email: user.email, oldPassword, newPassword })

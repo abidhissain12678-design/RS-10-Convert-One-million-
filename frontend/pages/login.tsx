@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { getApiBaseUrl } from '../utils/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -34,7 +35,7 @@ const Login = () => {
     }
 
     try {
-      const response = await fetch('https://rs-10-convert-one-million.onrender.com/api/auth/login', {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
