@@ -288,8 +288,10 @@ export const approveTaskPayment = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Submission not found' });
     }
 
+    // Prevent double-approval
     if (userTask.completed) {
-      return res.status(400).json({ error: 'Payment already approved' });
+      console.warn(`⚠️ Attempt to approve already-completed task: ${submissionId}`);
+      return res.status(400).json({ error: 'Payment already approved - cannot approve twice' });
     }
 
     // Update user balance
@@ -298,7 +300,8 @@ export const approveTaskPayment = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    user.balance += parseFloat(userTask.taskId.reward);
+    const rewardAmount = parseFloat(userTask.taskId.reward);
+    user.balance += rewardAmount;
     await user.save();
 
     // Mark task as completed
@@ -319,9 +322,11 @@ export const approveTaskPayment = async (req: Request, res: Response) => {
       await task.save();
     }
 
+    console.log(`✅ Task approved - User: ${(user as any).username}, Reward: RS ${rewardAmount}, New Balance: ${user.balance}`);
     res.status(200).json({ message: 'Payment approved successfully', newBalance: user.balance });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+  } catch (error: any) {
+    console.error('approveTaskPayment error:', error?.message);
+    res.status(500).json({ message: 'Server error', error: error?.message });
   }
 };
 
