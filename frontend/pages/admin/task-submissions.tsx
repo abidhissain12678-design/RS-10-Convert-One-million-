@@ -240,7 +240,7 @@ const TaskSubmissions: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`${baseUrl}/api/payment/reject-payment`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/payment/reject-payment`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
