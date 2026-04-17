@@ -13,8 +13,9 @@ const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: 'MillionHub_Proofs',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    transformation: [{ width: 800, height: 600, crop: 'limit' }]
+    // Allow both image and video formats
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'mp4', 'mov', 'avi', 'webm', 'mkv', 'flv'],
+    resource_type: 'auto' // Auto-detect if it's image, video, or other
   } as any
 });
 

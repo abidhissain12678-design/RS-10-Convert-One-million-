@@ -115,14 +115,21 @@ export const submitProof = [
 
       res.status(200).json({ message: 'Proof submitted successfully', submissionId: savedUserTask._id });
     } catch (error: any) {
-      console.error('submitProof error:', error);
-      const errorMessage = error?.message || error?.toString() || 'Server error';
-      console.error('Error details:', { name: error?.name, message: error?.message, stack: error?.stack, fullError: JSON.stringify(error) });
+      // Extract error message properly - avoid [object Object] in logs
+      const errorMessage = error?.message || (typeof error === 'string' ? error : JSON.stringify(error)) || 'Unknown error';
+      const errorName = error?.name || 'Error';
+      const errorStack = error?.stack || '';
+      
+      console.error(`submitProof failed - ${errorName}: ${errorMessage}`);
+      if (errorStack) {
+        console.error('Stack trace:', errorStack);
+      }
+      
       res.status(500).json({ 
         message: 'Failed to submit proof',
         error: errorMessage,
-        errorName: error?.name,
-        details: process.env.NODE_ENV === 'development' ? error?.stack : undefined
+        errorName: errorName,
+        details: process.env.NODE_ENV === 'development' ? errorStack : undefined
       });
     }
   }
