@@ -55,10 +55,11 @@ interface WithdrawalRequest {
 
 const TaskSubmissions: React.FC = () => {
   const [submissions, setSubmissions] = useState<UserTask[]>([]);
+  const [approvedSubmissions, setApprovedSubmissions] = useState<UserTask[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'tasks' | 'withdrawals'>('tasks');
+  const [activeTab, setActiveTab] = useState<'tasks' | 'history' | 'withdrawals'>('tasks');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const getImageUrl = (url: string) => url.startsWith('http') ? url : `${getApiBaseUrl()}${url}`;
 
@@ -95,7 +96,11 @@ const TaskSubmissions: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setSubmissions(data);
+        // Separate pending and approved submissions
+        const pending = data.filter((sub: UserTask) => !sub.completed);
+        const approved = data.filter((sub: UserTask) => sub.completed);
+        setSubmissions(pending);
+        setApprovedSubmissions(approved);
       } else {
         setError('Failed to load submissions');
       }
@@ -148,11 +153,18 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
-        // Remove approved submission from list - don't keep it visible
-        setSubmissions(prevSubmissions =>
-          prevSubmissions.filter(submission => submission._id !== submissionId)
-        );
-        alert('✅ Payment approved successfully! Task removed from queue.');
+        // Move approved submission from pending to approved list
+        const approvedSubmission = submissions.find(s => s._id === submissionId);
+        if (approvedSubmission) {
+          setSubmissions(prevSubmissions =>
+            prevSubmissions.filter(submission => submission._id !== submissionId)
+          );
+          setApprovedSubmissions(prevApproved => [
+            { ...approvedSubmission, completed: true },
+            ...prevApproved
+          ]);
+        }
+        alert('✅ Payment approved successfully! Moved to history.');
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to approve payment');
@@ -318,7 +330,7 @@ const TaskSubmissions: React.FC = () => {
         </p>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
           <button
             onClick={() => setActiveTab('tasks')}
             style={{
@@ -331,7 +343,21 @@ const TaskSubmissions: React.FC = () => {
               fontWeight: 'bold'
             }}
           >
-            Task Submissions
+            Task Submissions ({submissions.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            style={{
+              background: activeTab === 'history' ? '#FFD700' : '#333',
+              color: activeTab === 'history' ? '#000' : '#fff',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontWeight: 'bold'
+            }}
+          >
+            Approval History ({approvedSubmissions.length})
           </button>
           <button
             onClick={() => setActiveTab('withdrawals')}
@@ -559,6 +585,154 @@ const TaskSubmissions: React.FC = () => {
           </div>
         )}
         </>
+        )}
+
+        {activeTab === 'history' && (
+          <>
+            <h2 style={{ color: '#FFD700', marginBottom: '20px' }}>Approval History</h2>
+            {approvedSubmissions.length === 0 ? (
+              <p>No approved submissions yet.</p>
+            ) : (
+              <div style={{ display: 'grid', gap: '20px' }}>
+                {approvedSubmissions.map((submission) => (
+                  <div key={submission._id} style={{
+                    background: 'rgba(76, 175, 80, 0.1)',
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: '2px solid #4CAF50'
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
+                      <div>
+                        <h3 style={{ color: '#FFD700', margin: '0 0 5px 0' }}>{submission.taskId.title}</h3>
+                        <p style={{ color: '#ccc', margin: 0, fontSize: '14px' }}>
+                          {submission.taskId.taskType} • Reward: RS {submission.taskId.reward}
+                        </p>
+                      </div>
+                      <div style={{
+                        padding: '8px 16px',
+                        borderRadius: '20px',
+                        background: '#4CAF50',
+                        color: 'white',
+                        fontSize: '13px',
+                        fontWeight: 'bold'
+                      }}>
+                        ✅ APPROVED
+                      </div>
+                    </div>
+                    
+                    <div style={{ marginBottom: '15px' }}>
+                      <h4 style={{ color: '#FFD700', margin: '0 0 10px 0', fontSize: '16px' }}>User Details</h4>
+                      <p style={{ color: '#ccc', margin: 0, fontSize: '14px' }}>
+                        Name: {submission.userId?.name || submission.user?.name || 'Unknown'} ({submission.userId?.username || submission.user?.username || 'N/A'})<br/>
+                        Email: {submission.userId?.email || submission.user?.email || 'N/A'}
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <h4 style={{ color: '#FFD700', margin: '0 0 10px 0', fontSize: '16px' }}>Submissions ({(submission.proofUrls || []).length})</h4>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
+                        {(submission.proofUrls || []).map((url, index) => {
+                          const fullUrl = getImageUrl(url);
+                          const isVideo = isVideoFile(fullUrl);
+                          const isImage = isImageFile(fullUrl);
+                          
+                          return (
+                            <div key={index} style={{
+                              border: '1px solid rgba(255,255,255,0.2)',
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              background: '#000',
+                              display: 'flex',
+                              flexDirection: 'column'
+                            }}>
+                              {isVideo ? (
+                                <div style={{
+                                  width: '100%',
+                                  height: '150px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  background: '#1a1a1a',
+                                  fontSize: '48px'
+                                }}>
+                                  🎬
+                                </div>
+                              ) : isImage ? (
+                                <img
+                                  src={fullUrl}
+                                  alt={`Submission ${index + 1}`}
+                                  style={{
+                                    width: '100%',
+                                    height: '150px',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                    cursor: 'pointer'
+                                  }}
+                                  onClick={() => window.open(fullUrl, '_blank')}
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.parentElement!.innerHTML = '<div style="width: 100%; height: 150px; display: flex; align-items: center; justify-content: center; background: #1a1a1a; font-size: 40px;">📄</div>';
+                                  }}
+                                />
+                              ) : (
+                                <div style={{
+                                  width: '100%',
+                                  height: '150px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  background: '#1a1a1a',
+                                  fontSize: '40px'
+                                }}>
+                                  📄
+                                </div>
+                              )}
+                              <div style={{
+                                padding: '8px',
+                                background: 'rgba(0,0,0,0.7)',
+                                textAlign: 'center',
+                                fontSize: '12px',
+                                color: '#ccc'
+                              }}>
+                                {isVideo ? '🎬 Video' : isImage ? '🖼️ Screenshot' : '📄 File'} {index + 1}
+                              </div>
+                              <div style={{
+                                padding: '8px',
+                                background: 'rgba(76, 175, 80, 0.2)',
+                                textAlign: 'center'
+                              }}>
+                                <a
+                                  href={fullUrl}
+                                  download={`submission-${index + 1}-${Date.now()}`}
+                                  style={{
+                                    display: 'inline-block',
+                                    padding: '6px 12px',
+                                    background: '#4CAF50',
+                                    color: '#fff',
+                                    textDecoration: 'none',
+                                    borderRadius: '4px',
+                                    fontSize: '11px',
+                                    fontWeight: 'bold',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  ⬇️ Download
+                                </a>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    
+                    <div style={{ marginTop: '15px', fontSize: '12px', color: '#888' }}>
+                      Approved: {new Date(submission.updatedAt).toLocaleString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
         )}
 
         {activeTab === 'withdrawals' && (
