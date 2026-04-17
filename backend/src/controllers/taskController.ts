@@ -117,10 +117,11 @@ export const submitProof = [
     } catch (error: any) {
       console.error('submitProof error:', error);
       const errorMessage = error?.message || error?.toString() || 'Server error';
-      console.error('Error details:', { name: error?.name, message: error?.message, stack: error?.stack });
+      console.error('Error details:', { name: error?.name, message: error?.message, stack: error?.stack, fullError: JSON.stringify(error) });
       res.status(500).json({ 
         message: 'Failed to submit proof',
         error: errorMessage,
+        errorName: error?.name,
         details: process.env.NODE_ENV === 'development' ? error?.stack : undefined
       });
     }
