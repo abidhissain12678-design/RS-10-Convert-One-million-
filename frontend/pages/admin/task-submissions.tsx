@@ -59,6 +59,7 @@ const TaskSubmissions: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<'tasks' | 'withdrawals'>('tasks');
+  const [processingId, setProcessingId] = useState<string | null>(null);
   const getImageUrl = (url: string) => url.startsWith('http') ? url : `${getApiBaseUrl()}${url}`;
 
   const isVideoFile = (url: string) => {
@@ -135,6 +136,7 @@ const TaskSubmissions: React.FC = () => {
       return;
     }
 
+    setProcessingId(submissionId);
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/approve-payment`, {
         method: 'POST',
@@ -161,6 +163,8 @@ const TaskSubmissions: React.FC = () => {
       }
     } catch (err) {
       alert('Failed to approve payment');
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -171,6 +175,7 @@ const TaskSubmissions: React.FC = () => {
       return;
     }
 
+    setProcessingId(submissionId);
     try {
       const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/reject-payment`, {
         method: 'POST',
@@ -193,6 +198,8 @@ const TaskSubmissions: React.FC = () => {
       }
     } catch (err) {
       alert('Failed to reject payment');
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -368,14 +375,16 @@ const TaskSubmissions: React.FC = () => {
                     </p>
                   </div>
                   <div style={{
-                    padding: '4px 12px',
+                    padding: '8px 16px',
                     borderRadius: '20px',
-                    background: submission.completed ? '#4CAF50' : '#FF9800',
+                    background: submission.completed ? '#4CAF50' : '#FF6B6B',
                     color: 'white',
-                    fontSize: '12px',
-                    fontWeight: 'bold'
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    minWidth: '120px',
+                    textAlign: 'center'
                   }}>
-                    {submission.completed ? 'Completed' : 'Pending'}
+                    {submission.completed ? '✅ APPROVED' : '⏳ PENDING'}
                   </div>
                 </div>
                 
@@ -489,42 +498,63 @@ const TaskSubmissions: React.FC = () => {
                 </div>
                 
                 {/* Payment Verification Section */}
-                <div style={{ marginTop: '15px', padding: '10px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>
-                  <h4 style={{ color: '#FFD700', margin: '0 0 10px 0', fontSize: '14px' }}>Payment Verification</h4>
+                <div style={{ marginTop: '15px', padding: '15px', background: submission.completed ? 'rgba(76, 175, 80, 0.1)' : 'rgba(255, 107, 107, 0.1)', border: `2px solid ${submission.completed ? '#4CAF50' : '#FF6B6B'}`, borderRadius: '8px' }}>
+                  <h4 style={{ color: '#FFD700', margin: '0 0 12px 0', fontSize: '14px' }}>Payment Verification</h4>
                   {submission.completed ? (
-                    <p style={{ color: '#4CAF50', fontSize: '14px', margin: 0 }}>✅ Payment Approved - Reward Claimed</p>
+                    <div style={{ 
+                      padding: '12px', 
+                      background: '#4CAF50', 
+                      borderRadius: '6px', 
+                      color: 'white', 
+                      fontWeight: 'bold',
+                      textAlign: 'center',
+                      fontSize: '14px'
+                    }}>
+                      ✅ APPROVED - Reward has been claimed by user
+                    </div>
                   ) : (
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <button
-                        onClick={() => handleApprovePayment(submission._id)}
-                        style={{
-                          background: '#4CAF50',
-                          color: 'white',
-                          border: 'none',
-                          padding: '8px 16px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          cursor: 'pointer',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        ✅ Approve Payment
-                      </button>
-                      <button
-                        onClick={() => handleRejectPayment(submission._id)}
-                        style={{
-                          background: '#f44336',
-                          color: 'white',
-                          border: 'none',
-                          padding: '8px 16px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          cursor: 'pointer',
-                          fontWeight: 'bold'
-                        }}
-                      >
-                        ❌ Reject
-                      </button>
+                    <div>
+                      <p style={{ color: '#FF6B6B', fontSize: '13px', margin: '0 0 12px 0', fontWeight: 'bold' }}>
+                        ⚠️ This submission is still PENDING approval
+                      </p>
+                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => handleApprovePayment(submission._id)}
+                          disabled={processingId === submission._id}
+                          style={{
+                            background: processingId === submission._id ? '#888' : '#4CAF50',
+                            color: 'white',
+                            border: 'none',
+                            padding: '10px 18px',
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            cursor: processingId === submission._id ? 'not-allowed' : 'pointer',
+                            fontWeight: 'bold',
+                            opacity: processingId === submission._id ? 0.6 : 1,
+                            transition: 'all 0.3s'
+                          }}
+                        >
+                          {processingId === submission._id ? '⏳ Processing...' : '✅ Approve Payment'}
+                        </button>
+                        <button
+                          onClick={() => handleRejectPayment(submission._id)}
+                          disabled={processingId === submission._id}
+                          style={{
+                            background: processingId === submission._id ? '#888' : '#f44336',
+                            color: 'white',
+                            border: 'none',
+                            padding: '10px 18px',
+                            borderRadius: '6px',
+                            fontSize: '13px',
+                            cursor: processingId === submission._id ? 'not-allowed' : 'pointer',
+                            fontWeight: 'bold',
+                            opacity: processingId === submission._id ? 0.6 : 1,
+                            transition: 'all 0.3s'
+                          }}
+                        >
+                          {processingId === submission._id ? '⏳ Processing...' : '❌ Reject'}
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
