@@ -1197,7 +1197,31 @@ const AdminPanel = () => {
                       </div>
                     ) : (
                       <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '12px', padding: '10px', background: '#1a1a1a', borderRadius: '8px'}}>
-                        <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>{req.screenshotUrl ? <a href={req.screenshotUrl.startsWith('http') ? req.screenshotUrl : `${getApiBaseUrl()}${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline'}}>View File</a> : <span style={{color: '#888'}}>N/A</span>}</div>
+                        <div><div style={{fontSize: '11px', color: '#888'}}>📸 SCREENSHOT</div>
+                          {req.screenshotUrl ? (
+                            <div style={{textAlign: 'center'}}>
+                              <img 
+                                src={req.screenshotUrl.startsWith('http') ? req.screenshotUrl : `${getApiBaseUrl()}${req.screenshotUrl}`} 
+                                alt="Payment Proof"
+                                style={{
+                                  width: '100%',
+                                  maxWidth: '150px',
+                                  height: '100px',
+                                  objectFit: 'cover',
+                                  borderRadius: '6px',
+                                  border: '1px solid #333',
+                                  cursor: 'pointer',
+                                  marginBottom: '5px'
+                                }}
+                                onClick={() => window.open(req.screenshotUrl.startsWith('http') ? req.screenshotUrl : `${getApiBaseUrl()}${req.screenshotUrl}`, '_blank')}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDE1MCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNTAiIGhlaWdodD0iMTAwIiBmaWxsPSIjMTExIi8+Cjx0ZXh0IHg9Ijc1IiB5PSI1MCIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmaWxsPSIjODg4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iMC4zZW0iPkltYWdlIE5vdCBGb3VuZDwvdGV4dD4KPC9zdmc+';
+                                }}
+                              />
+                              <a href={req.screenshotUrl.startsWith('http') ? req.screenshotUrl : `${getApiBaseUrl()}${req.screenshotUrl}`} target="_blank" rel="noopener noreferrer" style={{color: '#1e90ff', textDecoration: 'underline', fontSize: '12px'}}>Open Full</a>
+                            </div>
+                          ) : <span style={{color: '#888'}}>N/A</span>}
+                        </div>
                         <div><div style={{fontSize: '11px', color: '#888'}}>✅ STATUS</div><div style={{fontSize: '13px', color: req.status === 'Approved' ? '#32CD32' : req.status === 'Rejected' ? '#FF6347' : '#FFD700', fontWeight: 'bold'}}>{req.status}</div></div>
                         <div><div style={{fontSize: '11px', color: '#888'}}>📅 CREATED</div><div style={{fontSize: '12px', color: '#ccc'}}>{req.createdAt ? new Date(req.createdAt).toLocaleDateString() : 'N/A'}</div></div>
                       </div>
