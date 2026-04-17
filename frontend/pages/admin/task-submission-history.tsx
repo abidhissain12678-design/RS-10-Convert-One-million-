@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { getApiBaseUrl } from '../../utils/api';
 
 interface UserTask {
@@ -36,11 +35,10 @@ interface UserTask {
   updatedAt: string;
 }
 
-const TaskSubmissions: React.FC = () => {
-  const [pendingSubmissions, setPendingSubmissions] = useState<UserTask[]>([]);
+const TaskSubmissionHistory: React.FC = () => {
+  const [approvedSubmissions, setApprovedSubmissions] = useState<UserTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [processingId, setProcessingId] = useState<string | null>(null);
 
   const getImageUrl = (url: string) => url.startsWith('http') ? url : `${getApiBaseUrl()}${url}`;
 
@@ -55,10 +53,10 @@ const TaskSubmissions: React.FC = () => {
   };
 
   useEffect(() => {
-    loadPendingSubmissions();
+    loadApprovedSubmissions();
   }, []);
 
-  const loadPendingSubmissions = async () => {
+  const loadApprovedSubmissions = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
       setError('Admin authentication required');
@@ -76,82 +74,16 @@ const TaskSubmissions: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // ONLY show pending (not completed) tasks
-        const pending = data.filter((sub: UserTask) => !sub.completed);
-        setPendingSubmissions(pending);
+        // Only show completed (approved) submissions
+        const approved = data.filter((sub: UserTask) => sub.completed === true);
+        setApprovedSubmissions(approved);
       } else {
-        setError('Failed to load submissions');
+        setError('Failed to load submission history');
       }
     } catch (err) {
-      setError('Failed to load submissions');
+      setError('Failed to load submission history');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleApprovePayment = async (submissionId: string) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Admin authentication required');
-      return;
-    }
-
-    setProcessingId(submissionId);
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/approve-payment`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ submissionId })
-      });
-
-      if (response.ok) {
-        // Remove from pending list after approval
-        setPendingSubmissions(prev => prev.filter(s => s._id !== submissionId));
-        alert('✅ Payment APPROVED! Task moved to History.');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to approve payment');
-      }
-    } catch (err) {
-      alert('Failed to approve payment');
-    } finally {
-      setProcessingId(null);
-    }
-  };
-
-  const handleRejectPayment = async (submissionId: string) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Admin authentication required');
-      return;
-    }
-
-    setProcessingId(submissionId);
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/reject-payment`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ submissionId })
-      });
-
-      if (response.ok) {
-        // Remove from pending list after rejection
-        setPendingSubmissions(prev => prev.filter(s => s._id !== submissionId));
-        alert('❌ Payment REJECTED! Task moved to History.');
-      } else {
-        const errorData = await response.json();
-        alert(errorData.error || 'Failed to reject payment');
-      }
-    } catch (err) {
-      alert('Failed to reject payment');
-    } finally {
-      setProcessingId(null);
     }
   };
 
@@ -159,8 +91,8 @@ const TaskSubmissions: React.FC = () => {
     return (
       <div style={{ minHeight: '100vh', background: '#04060f', padding: '40px 20px', color: '#fff', fontFamily: 'Segoe UI, sans-serif' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h1 style={{ color: '#FFD700', marginBottom: '20px' }}>Task Submissions</h1>
-          <p>Loading submissions...</p>
+          <h1 style={{ color: '#FFD700', marginBottom: '20px' }}>Task Submission History</h1>
+          <p>Loading history...</p>
         </div>
       </div>
     );
@@ -170,7 +102,7 @@ const TaskSubmissions: React.FC = () => {
     return (
       <div style={{ minHeight: '100vh', background: '#04060f', padding: '40px 20px', color: '#fff', fontFamily: 'Segoe UI, sans-serif' }}>
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <h1 style={{ color: '#FFD700', marginBottom: '20px' }}>Task Submissions</h1>
+          <h1 style={{ color: '#FFD700', marginBottom: '20px' }}>Task Submission History</h1>
           <p style={{ color: 'red' }}>{error}</p>
         </div>
       </div>
@@ -181,11 +113,11 @@ const TaskSubmissions: React.FC = () => {
     <div style={{ minHeight: '100vh', background: '#04060f', padding: '40px 20px', color: '#fff', fontFamily: 'Segoe UI, sans-serif' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '15px', marginBottom: '20px' }}>
-          <h1 style={{ color: '#FFD700', margin: 0 }}>Admin Panel - Task Submissions</h1>
+          <h1 style={{ color: '#FFD700', margin: 0 }}>📊 Task Submission History</h1>
           <button
             onClick={() => {
               setLoading(true);
-              loadPendingSubmissions();
+              loadApprovedSubmissions();
             }}
             style={{
               background: '#1e90ff',
@@ -201,58 +133,24 @@ const TaskSubmissions: React.FC = () => {
           </button>
         </div>
 
-        {/* Navigation Tabs */}
-        <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
-          <button
-            style={{
-              background: '#FFD700',
-              color: '#000',
-              border: 'none',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              fontSize: '14px'
-            }}
-          >
-            📋 Task Submissions ({pendingSubmissions.length})
-          </button>
-          <Link href="/admin/task-submission-history">
-            <button
-              style={{
-                background: '#333',
-                color: '#fff',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: 'bold',
-                fontSize: '14px'
-              }}
-            >
-              📊 Task Submission History
-            </button>
-          </Link>
+        <div style={{ marginBottom: '20px', padding: '15px', background: 'rgba(76, 175, 80, 0.1)', borderRadius: '8px', border: '1px solid #4CAF50' }}>
+          <p style={{ color: '#ccc', margin: 0, fontSize: '14px' }}>
+            This page shows all APPROVED and COMPLETED task submissions. These tasks have already been verified and rewards have been credited to users.
+          </p>
         </div>
 
-        <p style={{ color: '#ccc', fontSize: '14px', marginBottom: '20px' }}>
-          Review pending task proof submissions below. Click <strong>Approve</strong> to verify and credit the user's account, or <strong>Reject</strong> to deny the submission.
-        </p>
-
-        <h2 style={{ color: '#FFD700', marginBottom: '20px' }}>⏳ Pending Submissions ({pendingSubmissions.length})</h2>
-
-        {pendingSubmissions.length === 0 ? (
-          <div style={{ padding: '20px', background: 'rgba(255, 215, 0, 0.1)', borderRadius: '8px', border: '1px solid #FFD700' }}>
-            <p style={{ color: '#FFD700', margin: 0 }}>✅ No pending submissions! All tasks have been reviewed.</p>
-          </div>
+        <h2 style={{ color: '#FFD700', marginBottom: '20px' }}>✅ Approved Submissions ({approvedSubmissions.length})</h2>
+        
+        {approvedSubmissions.length === 0 ? (
+          <p style={{ color: '#ccc' }}>No approved submissions in history yet.</p>
         ) : (
           <div style={{ display: 'grid', gap: '20px' }}>
-            {pendingSubmissions.map((submission) => (
+            {approvedSubmissions.map((submission) => (
               <div key={submission._id} style={{
-                background: 'rgba(255, 107, 107, 0.1)',
+                background: 'rgba(76, 175, 80, 0.1)',
                 padding: '20px',
                 borderRadius: '12px',
-                border: '2px solid #FF6B6B'
+                border: '2px solid #4CAF50'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                   <div>
@@ -264,12 +162,12 @@ const TaskSubmissions: React.FC = () => {
                   <div style={{
                     padding: '8px 16px',
                     borderRadius: '20px',
-                    background: '#FF6B6B',
+                    background: '#4CAF50',
                     color: 'white',
                     fontSize: '13px',
                     fontWeight: 'bold'
                   }}>
-                    ⏳ PENDING
+                    ✅ APPROVED
                   </div>
                 </div>
                 
@@ -282,7 +180,7 @@ const TaskSubmissions: React.FC = () => {
                 </div>
                 
                 <div>
-                  <h4 style={{ color: '#FFD700', margin: '0 0 10px 0', fontSize: '16px' }}>Proof Files ({(submission.proofUrls || []).length})</h4>
+                  <h4 style={{ color: '#FFD700', margin: '0 0 10px 0', fontSize: '16px' }}>Submissions ({(submission.proofUrls || []).length})</h4>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px' }}>
                     {(submission.proofUrls || []).map((url, index) => {
                       const fullUrl = getImageUrl(url);
@@ -291,7 +189,7 @@ const TaskSubmissions: React.FC = () => {
                       
                       return (
                         <div key={index} style={{
-                          border: '1px solid rgba(255,255,255,0.2)',
+                          border: '1px solid rgba(76, 175, 80, 0.3)',
                           borderRadius: '8px',
                           overflow: 'hidden',
                           background: '#000',
@@ -351,6 +249,7 @@ const TaskSubmissions: React.FC = () => {
                           </div>
                           <div style={{
                             padding: '8px',
+                            background: 'rgba(76, 175, 80, 0.2)',
                             textAlign: 'center'
                           }}>
                             <a
@@ -359,8 +258,8 @@ const TaskSubmissions: React.FC = () => {
                               style={{
                                 display: 'inline-block',
                                 padding: '6px 12px',
-                                background: '#FFD700',
-                                color: '#000',
+                                background: '#4CAF50',
+                                color: '#fff',
                                 textDecoration: 'none',
                                 borderRadius: '4px',
                                 fontSize: '11px',
@@ -378,48 +277,7 @@ const TaskSubmissions: React.FC = () => {
                 </div>
                 
                 <div style={{ marginTop: '15px', fontSize: '12px', color: '#888' }}>
-                  Submitted: {new Date(submission.updatedAt).toLocaleString()}
-                </div>
-
-                {/* Action Buttons */}
-                <div style={{ marginTop: '15px', padding: '15px', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>
-                  <h4 style={{ color: '#FFD700', margin: '0 0 12px 0', fontSize: '14px' }}>Action Required</h4>
-                  <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => handleApprovePayment(submission._id)}
-                      disabled={processingId === submission._id}
-                      style={{
-                        background: processingId === submission._id ? '#888' : '#4CAF50',
-                        color: 'white',
-                        border: 'none',
-                        padding: '10px 18px',
-                        borderRadius: '6px',
-                        fontSize: '13px',
-                        cursor: processingId === submission._id ? 'not-allowed' : 'pointer',
-                        fontWeight: 'bold',
-                        opacity: processingId === submission._id ? 0.6 : 1
-                      }}
-                    >
-                      {processingId === submission._id ? '⏳ Processing...' : '✅ Approve & Credit User'}
-                    </button>
-                    <button
-                      onClick={() => handleRejectPayment(submission._id)}
-                      disabled={processingId === submission._id}
-                      style={{
-                        background: processingId === submission._id ? '#888' : '#f44336',
-                        color: 'white',
-                        border: 'none',
-                        padding: '10px 18px',
-                        borderRadius: '6px',
-                        fontSize: '13px',
-                        cursor: processingId === submission._id ? 'not-allowed' : 'pointer',
-                        fontWeight: 'bold',
-                        opacity: processingId === submission._id ? 0.6 : 1
-                      }}
-                    >
-                      {processingId === submission._id ? '⏳ Processing...' : '❌ Reject'}
-                    </button>
-                  </div>
+                  ✅ Approved: {new Date(submission.updatedAt).toLocaleString()}
                 </div>
               </div>
             ))}
@@ -430,4 +288,4 @@ const TaskSubmissions: React.FC = () => {
   );
 };
 
-export default TaskSubmissions;
+export default TaskSubmissionHistory;
