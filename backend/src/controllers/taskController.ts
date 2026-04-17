@@ -37,6 +37,13 @@ export const submitProof = [
       const files = req.files as Express.Multer.File[];
       
       console.log('submitProof called:', { taskId, userId, filesCount: files?.length });
+      console.log('File details:', files?.map((f: any) => ({ 
+        fieldname: f.fieldname, 
+        filename: f.filename,
+        path: f.path,
+        secure_url: f.secure_url,
+        url: f.url
+      })));
       
       if (!taskId || !files || files.length === 0) {
         return res.status(400).json({ error: 'Task ID and at least one proof file required' });
@@ -46,7 +53,19 @@ export const submitProof = [
         return res.status(400).json({ error: 'Maximum 3 proof files allowed' });
       }
 
-      const proofUrls = files.map(file => (file as any).path); // Cloudinary returns secure_url in path property
+      // Extract file URLs - handle both Cloudinary (secure_url) and local storage (path)
+      const proofUrls = files.map((file: any) => {
+        // Cloudinary storage returns secure_url
+        if (file.secure_url) {
+          return file.secure_url;
+        }
+        // Fallback to path for other storage types
+        return file.path || file.url || '';
+      }).filter(url => url.length > 0);
+
+      if (proofUrls.length === 0) {
+        return res.status(400).json({ error: 'Failed to process uploaded files' });
+      }
 
       const task = await Task.findById(taskId);
       if (!task) {
@@ -75,7 +94,8 @@ export const submitProof = [
       console.log('📤 BEFORE saving UserTask:', {
         userId,
         taskId,
-        proofCount: proofUrls.length
+        proofCount: proofUrls.length,
+        urls: proofUrls
       });
 
       const savedUserTask = await userTask.save();
@@ -93,7 +113,7 @@ export const submitProof = [
         completedBy: savedTask.completedBy.length
       });
 
-      res.status(200).json({ message: 'Proof submitted successfully' });
+      res.status(200).json({ message: 'Proof submitted successfully', submissionId: savedUserTask._id });
     } catch (error: any) {
       console.error('submitProof error:', error);
       const errorMessage = error?.message || error?.toString() || 'Server error';
