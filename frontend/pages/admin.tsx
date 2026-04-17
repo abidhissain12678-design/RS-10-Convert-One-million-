@@ -579,7 +579,8 @@ const AdminPanel = () => {
         <button onClick={() => handleTabChange('txn_history')} style={activeTab === 'txn_history' ? styles.navBtnActive : styles.navBtn}>🧾 Transaction History</button>
         <button onClick={() => handleTabChange('register')} style={activeTab === 'register' ? styles.navBtnActive : styles.navBtn}>📝 Registered Users</button>
         <button onClick={() => handleTabChange('locked_accounts')} style={activeTab === 'locked_accounts' ? styles.navBtnActive : styles.navBtn}>🔒 Locked Accounts</button>
-        <button onClick={() => handleTabChange('task_submissions')} style={activeTab === 'task_submissions' ? styles.navBtnActive : styles.navBtn}>📋 Task Submissions</button>
+        <button onClick={() => { window.location.href = '/admin/task-submissions'; }} style={styles.navBtn}>📋 Pending Submissions</button>
+        <button onClick={() => { window.location.href = '/admin/task-submission-history'; }} style={styles.navBtn}>✅ Submission History</button>
         <button onClick={() => handleTabChange('social_settings')} style={activeTab === 'social_settings' ? styles.navBtnActive : styles.navBtn}>🌐 Social Settings</button>
         <button onClick={() => handleTabChange('manage_news')} style={activeTab === 'manage_news' ? styles.navBtnActive : styles.navBtn}>📰 Manage News</button>
         <button onClick={() => handleTabChange('manage_blogs')} style={activeTab === 'manage_blogs' ? styles.navBtnActive : styles.navBtn}>📝 Manage Blogs</button>
