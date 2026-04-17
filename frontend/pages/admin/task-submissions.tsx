@@ -148,15 +148,11 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
-        // Optimistically update submission status
+        // Remove approved submission from list - don't keep it visible
         setSubmissions(prevSubmissions =>
-          prevSubmissions.map(submission =>
-            submission._id === submissionId
-              ? { ...submission, completed: true }
-              : submission
-          )
+          prevSubmissions.filter(submission => submission._id !== submissionId)
         );
-        alert('✅ Payment approved successfully!');
+        alert('✅ Payment approved successfully! Task removed from queue.');
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to approve payment');
