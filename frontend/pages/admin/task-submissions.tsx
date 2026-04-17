@@ -31,6 +31,7 @@ interface UserTask {
   };
   proofUrls: string[];
   completed: boolean;
+  status?: 'pending' | 'approved' | 'rejected';
   createdAt: string;
   updatedAt: string;
 }
@@ -54,12 +55,12 @@ interface WithdrawalRequest {
 }
 
 const TaskSubmissions: React.FC = () => {
-  const [submissions, setSubmissions] = useState<UserTask[]>([]);
-  const [approvedSubmissions, setApprovedSubmissions] = useState<UserTask[]>([]);
+  const [pendingSubmissions, setPendingSubmissions] = useState<UserTask[]>([]);
+  const [historySubmissions, setHistorySubmissions] = useState<UserTask[]>([]);
   const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<'tasks' | 'history' | 'withdrawals'>('tasks');
+  const [activeTab, setActiveTab] = useState<'pending' | 'history' | 'withdrawals'>('pending');
   const [processingId, setProcessingId] = useState<string | null>(null);
   const getImageUrl = (url: string) => url.startsWith('http') ? url : `${getApiBaseUrl()}${url}`;
 
@@ -96,11 +97,14 @@ const TaskSubmissions: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        // Separate pending and approved submissions
+        // Separate pending (not completed) from history (completed)
         const pending = data.filter((sub: UserTask) => !sub.completed);
-        const approved = data.filter((sub: UserTask) => sub.completed);
-        setSubmissions(pending);
-        setApprovedSubmissions(approved);
+        const history = data.filter((sub: UserTask) => sub.completed).map((sub: UserTask) => ({
+          ...sub,
+          status: 'approved' as const // Mark as approved when completed
+        }));
+        setPendingSubmissions(pending);
+        setHistorySubmissions(history);
       } else {
         setError('Failed to load submissions');
       }
@@ -153,18 +157,18 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
-        // Move approved submission from pending to approved list
-        const approvedSubmission = submissions.find(s => s._id === submissionId);
-        if (approvedSubmission) {
-          setSubmissions(prevSubmissions =>
-            prevSubmissions.filter(submission => submission._id !== submissionId)
-          );
-          setApprovedSubmissions(prevApproved => [
-            { ...approvedSubmission, completed: true },
-            ...prevApproved
+        // Find the submission to move
+        const submissionToMove = pendingSubmissions.find(s => s._id === submissionId);
+        if (submissionToMove) {
+          // Remove from pending
+          setPendingSubmissions(prev => prev.filter(s => s._id !== submissionId));
+          // Add to history with approved status
+          setHistorySubmissions(prev => [
+            { ...submissionToMove, completed: true, status: 'approved' as const },
+            ...prev
           ]);
+          alert('✅ Payment APPROVED! Moved to History tab.');
         }
-        alert('✅ Payment approved successfully! Moved to history.');
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to approve payment');
@@ -195,11 +199,18 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
-        // Remove rejected submission from list
-        setSubmissions(prevSubmissions =>
-          prevSubmissions.filter(submission => submission._id !== submissionId)
-        );
-        alert('❌ Payment rejected and removed from queue');
+        // Find the submission to move
+        const submissionToMove = pendingSubmissions.find(s => s._id === submissionId);
+        if (submissionToMove) {
+          // Remove from pending
+          setPendingSubmissions(prev => prev.filter(s => s._id !== submissionId));
+          // Add to history with rejected status
+          setHistorySubmissions(prev => [
+            { ...submissionToMove, status: 'rejected' as const },
+            ...prev
+          ]);
+          alert('❌ Payment REJECTED! Moved to History tab.');
+        }
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to reject payment');
@@ -332,10 +343,10 @@ const TaskSubmissions: React.FC = () => {
         {/* Tabs */}
         <div style={{ display: 'flex', gap: '20px', marginBottom: '20px', flexWrap: 'wrap' }}>
           <button
-            onClick={() => setActiveTab('tasks')}
+            onClick={() => setActiveTab('pending')}
             style={{
-              background: activeTab === 'tasks' ? '#FFD700' : '#333',
-              color: activeTab === 'tasks' ? '#000' : '#fff',
+              background: activeTab === 'pending' ? '#FFD700' : '#333',
+              color: activeTab === 'pending' ? '#000' : '#fff',
               border: 'none',
               padding: '10px 20px',
               borderRadius: '8px',
@@ -343,7 +354,7 @@ const TaskSubmissions: React.FC = () => {
               fontWeight: 'bold'
             }}
           >
-            Task Submissions ({submissions.length})
+            📋 Task Submissions ({pendingSubmissions.length})
           </button>
           <button
             onClick={() => setActiveTab('history')}
@@ -357,7 +368,7 @@ const TaskSubmissions: React.FC = () => {
               fontWeight: 'bold'
             }}
           >
-            Approval History ({approvedSubmissions.length})
+            📊 Task Submission History ({historySubmissions.length})
           </button>
           <button
             onClick={() => setActiveTab('withdrawals')}
@@ -371,18 +382,18 @@ const TaskSubmissions: React.FC = () => {
               fontWeight: 'bold'
             }}
           >
-            Task Withdrawals ({withdrawals.length})
+            💳 Task Withdrawals ({withdrawals.length})
           </button>
         </div>
 
-        {activeTab === 'tasks' && (
+        {activeTab === 'pending' && (
           <>
-            <h2 style={{ color: '#FFD700', marginBottom: '20px' }}>Task Submissions</h2>
-            {submissions.length === 0 ? (
-              <p>No submissions found.</p>
+            <h2 style={{ color: '#FFD700', marginBottom: '20px' }}>⏳ Pending Task Submissions</h2>
+            {pendingSubmissions.length === 0 ? (
+              <p>No pending submissions found.</p>
             ) : (
               <div style={{ display: 'grid', gap: '20px' }}>
-                {submissions.map((submission) => (
+                {pendingSubmissions.map((submission) => (
                   <div key={submission._id} style={{
                     background: 'rgba(255,255,255,0.05)',
                     padding: '20px',
@@ -589,17 +600,20 @@ const TaskSubmissions: React.FC = () => {
 
         {activeTab === 'history' && (
           <>
-            <h2 style={{ color: '#FFD700', marginBottom: '20px' }}>Approval History</h2>
-            {approvedSubmissions.length === 0 ? (
-              <p>No approved submissions yet.</p>
+            <h2 style={{ color: '#FFD700', marginBottom: '20px' }}>📊 Task Submission History</h2>
+            {historySubmissions.length === 0 ? (
+              <p>No history submissions yet.</p>
             ) : (
               <div style={{ display: 'grid', gap: '20px' }}>
-                {approvedSubmissions.map((submission) => (
+                {historySubmissions.map((submission) => {
+                  const isApproved = submission.status === 'approved';
+                  const isRejected = submission.status === 'rejected';
+                  return (
                   <div key={submission._id} style={{
-                    background: 'rgba(76, 175, 80, 0.1)',
+                    background: isApproved ? 'rgba(76, 175, 80, 0.1)' : 'rgba(244, 67, 54, 0.1)',
                     padding: '20px',
                     borderRadius: '12px',
-                    border: '2px solid #4CAF50'
+                    border: `2px solid ${isApproved ? '#4CAF50' : '#f44336'}`
                   }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                       <div>
@@ -611,12 +625,12 @@ const TaskSubmissions: React.FC = () => {
                       <div style={{
                         padding: '8px 16px',
                         borderRadius: '20px',
-                        background: '#4CAF50',
+                        background: isApproved ? '#4CAF50' : '#f44336',
                         color: 'white',
                         fontSize: '13px',
                         fontWeight: 'bold'
                       }}>
-                        ✅ APPROVED
+                        {isApproved ? '✅ APPROVED' : '❌ REJECTED'}
                       </div>
                     </div>
                     
@@ -698,7 +712,7 @@ const TaskSubmissions: React.FC = () => {
                               </div>
                               <div style={{
                                 padding: '8px',
-                                background: 'rgba(76, 175, 80, 0.2)',
+                                background: isApproved ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)',
                                 textAlign: 'center'
                               }}>
                                 <a
@@ -707,7 +721,7 @@ const TaskSubmissions: React.FC = () => {
                                   style={{
                                     display: 'inline-block',
                                     padding: '6px 12px',
-                                    background: '#4CAF50',
+                                    background: isApproved ? '#4CAF50' : '#f44336',
                                     color: '#fff',
                                     textDecoration: 'none',
                                     borderRadius: '4px',
@@ -726,10 +740,11 @@ const TaskSubmissions: React.FC = () => {
                     </div>
                     
                     <div style={{ marginTop: '15px', fontSize: '12px', color: '#888' }}>
-                      Approved: {new Date(submission.updatedAt).toLocaleString()}
+                      {isApproved ? 'Approved' : 'Rejected'}: {new Date(submission.updatedAt).toLocaleString()}
                     </div>
                   </div>
-                ))}
+                );
+                })}
               </div>
             )}
           </>
