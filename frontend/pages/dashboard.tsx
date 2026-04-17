@@ -334,33 +334,25 @@ const Dashboard = () => {
   // Calculate network strength from completed referrals
   // Network grows exponentially: 1 → 11 → 121 → 1,331 → ... → 1,000,000+
   useEffect(() => {
-    if (completedUsers.length === 0) {
-      setCalculatedNetworkStrength(0);
-      return;
-    }
-
-    const totalNetwork = completedUsers.reduce((sum: number, referredUser: any) => {
-      // Get direct referrals count
+    // Start with direct referrals count (own 11 members)
+    let baseNetwork = networkReferrals.filter(r => r.paymentApproved).length;
+    
+    // Add referral team networks
+    const referralTeamNetwork = completedUsers.reduce((sum: number, referredUser: any) => {
       const directReferrals = referredUser.referralCount || 0;
-      
-      // Get approved payments for this user
       const approvedPayments = (referredUser.networkReferrals || []).filter((r: any) => r.paymentApproved).length;
-      
-      // User's network size (including themselves and downline)
       const userTeamSize = referredUser.totalNetworkSize || 0;
-      
-      // Count as active if they have completed at least their chain (11 direct + payments)
       const isChainActive = directReferrals >= 11 && approvedPayments >= 11;
-      
-      // If chain is active, add their full team size; otherwise just count as 1 if any payment approved
       const contribution = isChainActive ? userTeamSize : (approvedPayments > 0 ? 1 : 0);
       
       console.log(`User ${referredUser.username}: Direct=${directReferrals}, Approved=${approvedPayments}, TeamSize=${userTeamSize}, Contribution=${contribution}`);
       return sum + contribution;
     }, 0);
-
+    
+    const totalNetwork = baseNetwork + referralTeamNetwork;
+    console.log(`📊 Network Strength: Own=${baseNetwork}/11 + Referral Teams=${referralTeamNetwork} = Total ${totalNetwork}/1,000,000`);
     setCalculatedNetworkStrength(totalNetwork);
-  }, [completedUsers]);
+  }, [completedUsers, networkReferrals]);
 
   // Fetch payment status
   useEffect(() => {

@@ -92,8 +92,18 @@ const MicroTasks: React.FC = () => {
     }
 
     try {
+      // Get user ID from localStorage
+      const userRaw = localStorage.getItem('user');
+      const userId = userRaw ? JSON.parse(userRaw)?._id : null;
+      
+      if (!userId) {
+        console.error('User ID not found');
+        setLoadingReferralStatus(false);
+        return;
+      }
+
       const baseUrl = getApiBaseUrl();
-      const response = await fetch(`${baseUrl}/api/auth/user`, {
+      const response = await fetch(`${baseUrl}/api/auth/user/${userId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache'
@@ -115,7 +125,7 @@ const MicroTasks: React.FC = () => {
         setReferralPaymentVerified(tasksUnlocked);
       }
     } catch (err) {
-      console.error('Failed to fetch referral payment status');
+      console.error('Failed to fetch referral payment status', err);
     } finally {
       setLoadingReferralStatus(false);
     }
@@ -189,6 +199,12 @@ const MicroTasks: React.FC = () => {
     fetchTaskEarnings();
     fetchCompletedTasks();
     fetchReferralPaymentStatus();
+    
+    // Periodically check for referral payment updates (every 5 seconds)
+    // This ensures tasks unlock immediately when 11th payment is verified
+    const verificationInterval = setInterval(fetchReferralPaymentStatus, 5000);
+    
+    return () => clearInterval(verificationInterval);
   }, []);
 
   // Load YouTube API script
