@@ -214,6 +214,7 @@ const Dashboard = () => {
   }, []);
 
   // Fetch user data periodically to sync with backend
+  // Debounce network referrals updates to prevent crash on rapid changes
   useEffect(() => {
     const fetchUser = () => {
       if (user && user._id) {
@@ -268,18 +269,26 @@ const Dashboard = () => {
             setNetworkReferrals(normalizedNetworkReferrals);
             console.log('Updated networkReferrals:', normalizedNetworkReferrals);
             console.log('Referral count:', data.referralCount);
-            // Update user with latest data
-            setUser({ ...data, networkReferrals: normalizedNetworkReferrals });
-            localStorage.setItem('user', JSON.stringify({ ...data, networkReferrals: normalizedNetworkReferrals }));
+            // Update user with latest data - stable update to prevent cascading re-renders
+            setUser(prevUser => {
+              if (JSON.stringify(prevUser?.networkReferrals) === JSON.stringify(normalizedNetworkReferrals)) {
+                return prevUser; // No change, skip update
+              }
+              const updatedUser = { ...data, networkReferrals: normalizedNetworkReferrals };
+              localStorage.setItem('user', JSON.stringify(updatedUser));
+              return updatedUser;
+            });
           })
           .catch(err => console.log('Error fetching user:', err));
       }
     };
 
     fetchUser();
-    const interval = setInterval(fetchUser, 10000); // Every 10 seconds
+    // Reduce poll frequency when all 11 referrals are complete to prevent cascade re-renders
+    const pollInterval = networkReferrals.length >= 11 && approvedPaymentsCount >= 11 ? 30000 : 10000;
+    const interval = setInterval(fetchUser, pollInterval);
     return () => clearInterval(interval);
-  }, [user, hasReloadedAfterApproval]);
+  }, [user, hasReloadedAfterApproval, networkReferrals.length, approvedPaymentsCount]);
 
   // Save to localStorage
   useEffect(() => {
@@ -313,12 +322,17 @@ const Dashboard = () => {
     // Check if we just reached 11 approved payments
     if (approvedCount === 11 && approvedCount > approvedPaymentsCount) {
       setShowCongratulationsModal(true);
+      // Auto-refresh referred users to update network strength
+      if (activeTab === 'referral' || activeTab === 'home') {
+        setTimeout(() => fetchCompletedUsers(), 500);
+      }
     }
     
     setApprovedPaymentsCount(approvedCount);
-  }, [networkReferrals, approvedPaymentsCount]);
+  }, [networkReferrals, approvedPaymentsCount, activeTab]);
 
   // Calculate network strength from completed referrals
+  // Network grows exponentially: 1 → 11 → 121 → 1,331 → ... → 1,000,000+
   useEffect(() => {
     if (completedUsers.length === 0) {
       setCalculatedNetworkStrength(0);
@@ -326,12 +340,23 @@ const Dashboard = () => {
     }
 
     const totalNetwork = completedUsers.reduce((sum: number, referredUser: any) => {
-      const approvedPaymentsForUser = (referredUser.networkReferrals || []).filter((r: any) => r.paymentApproved).length;
-      const allPaymentsApproved = approvedPaymentsForUser >= 11;
-      const teamCount = referredUser.totalNetworkSize || 0;
+      // Get direct referrals count
+      const directReferrals = referredUser.referralCount || 0;
       
-      // Only count network if all 11 payments are approved
-      return sum + (allPaymentsApproved ? teamCount : 0);
+      // Get approved payments for this user
+      const approvedPayments = (referredUser.networkReferrals || []).filter((r: any) => r.paymentApproved).length;
+      
+      // User's network size (including themselves and downline)
+      const userTeamSize = referredUser.totalNetworkSize || 0;
+      
+      // Count as active if they have completed at least their chain (11 direct + payments)
+      const isChainActive = directReferrals >= 11 && approvedPayments >= 11;
+      
+      // If chain is active, add their full team size; otherwise just count as 1 if any payment approved
+      const contribution = isChainActive ? userTeamSize : (approvedPayments > 0 ? 1 : 0);
+      
+      console.log(`User ${referredUser.username}: Direct=${directReferrals}, Approved=${approvedPayments}, TeamSize=${userTeamSize}, Contribution=${contribution}`);
+      return sum + contribution;
     }, 0);
 
     setCalculatedNetworkStrength(totalNetwork);
@@ -606,7 +631,7 @@ useEffect(() => {
   window.location.href = '/login';
 };
 
-  // Fetch completed users
+  // Fetch completed users and auto-refresh network
   const fetchCompletedUsers = () => {
     const token = localStorage.getItem('token');
     if (!token) return;
@@ -618,6 +643,13 @@ useEffect(() => {
       .then(data => {
         if (Array.isArray(data)) {
           setCompletedUsers(data);
+          // Auto-check if tasks should unlock
+          const approvedPaymentsInNetwork = data.reduce((count: number, user: any) => 
+            count + ((user.networkReferrals || []).filter((r: any) => r.paymentApproved).length), 0
+          );
+          if (approvedPaymentsInNetwork >= 11) {
+            console.log('✅ 11+ referral payments approved - tasks should be unlocked');
+          }
         }
       })
       .catch(err => console.log('Error fetching referred users:', err));

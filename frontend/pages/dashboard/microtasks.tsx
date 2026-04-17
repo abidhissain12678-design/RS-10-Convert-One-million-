@@ -104,12 +104,15 @@ const MicroTasks: React.FC = () => {
         const userData = await response.json();
         setUserReferrals(userData.networkReferrals || []);
         
-        // Check if user has any referral with unlocked status and payment approved
-        const hasVerifiedReferral = (userData.networkReferrals || []).some(
+        // Tasks unlock when user has completed 11 referral payments (chain activated)
+        const approvedPaymentCount = (userData.networkReferrals || []).filter(
           (referral: any) => referral.status === 'unlocked' && referral.paymentApproved === true
-        );
+        ).length;
         
-        setReferralPaymentVerified(hasVerifiedReferral);
+        const tasksUnlocked = approvedPaymentCount >= 11;
+        console.log(`✅ Referral Payment Check: ${approvedPaymentCount}/11 payments approved - Tasks ${tasksUnlocked ? 'UNLOCKED' : 'LOCKED'}`);
+        
+        setReferralPaymentVerified(tasksUnlocked);
       }
     } catch (err) {
       console.error('Failed to fetch referral payment status');
@@ -650,7 +653,7 @@ const MicroTasks: React.FC = () => {
             let disabledButton = isFull || alreadyCompleted || isReferralNotVerified;
             
             if (isReferralNotVerified && !isFull && !alreadyCompleted) {
-              buttonLabel = 'Referral Pending';
+              buttonLabel = 'Complete 11 Referrals';
             }
 
             return (
