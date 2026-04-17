@@ -14,7 +14,8 @@ const allowedOrigins = [
   "http://localhost:3001",
   "http://127.0.0.1:3000",
   "https://rs-10-convert-one-million.vercel.app",
-  "https://rs-10-convert-one-million.onrender.com"
+  "https://rs-10-convert-one-million.onrender.com",
+  "https://rs-10-convert-one-million-production.up.railway.app"
 ];
 
 // ✅ Step 2: CORS middleware with flexible origin checking
