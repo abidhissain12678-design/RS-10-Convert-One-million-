@@ -114,6 +114,10 @@ const Dashboard = () => {
   const [withdrawalStatus, setWithdrawalStatus] = useState<'idle' | 'pending' | 'submitted' | 'failed'>('idle');
   const [withdrawalMessage, setWithdrawalMessage] = useState('');
 
+  // Withdrawal History
+  const [withdrawalHistory, setWithdrawalHistory] = useState<any[]>([]);
+  const [loadingWithdrawalHistory, setLoadingWithdrawalHistory] = useState(false);
+
   // Completed users state
   const [completedUsers, setCompletedUsers] = useState<any[]>([]);
 
@@ -155,6 +159,9 @@ const Dashboard = () => {
     }
     if (tab === 'blogs') {
       fetchDashboardBlogs();
+    }
+    if (tab === 'withdrawal_history') {
+      fetchWithdrawalHistory();
     }
   };
 
@@ -664,6 +671,33 @@ useEffect(() => {
       .finally(() => setBlogsLoading(false));
   };
 
+  const fetchWithdrawalHistory = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    setLoadingWithdrawalHistory(true);
+    try {
+      const response = await fetch(`${getApiBaseUrl()}/api/payment/my-withdrawals`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setWithdrawalHistory(Array.isArray(data) ? data : []);
+      } else {
+        setWithdrawalHistory([]);
+      }
+    } catch (error) {
+      console.log('Error fetching withdrawal history:', error);
+      setWithdrawalHistory([]);
+    } finally {
+      setLoadingWithdrawalHistory(false);
+    }
+  };
+
   const handleImageUpload = (e: any) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -825,6 +859,7 @@ useEffect(() => {
     <button onClick={() => handleTabChange('profile')} style={activeTab === 'profile' ? styles.navBtnActive : styles.navBtn}>👤 User Profile</button>
     <button onClick={() => handleTabChange('referral')} style={activeTab === 'referral' ? styles.navBtnActive : styles.navBtn}>🔗 Referral History</button>
     <button onClick={() => handleTabChange('wallet')} style={activeTab === 'wallet' ? styles.navBtnActive : styles.navBtn}>💰 Wallet</button>
+    <button onClick={() => handleTabChange('withdrawal_history')} style={activeTab === 'withdrawal_history' ? styles.navBtnActive : styles.navBtn}>🏦 Withdrawals</button>
     <button onClick={() => handleTabChange('news')} style={activeTab === 'news' ? styles.navBtnActive : styles.navBtn}>📰 Daily News</button>
     <button onClick={() => handleTabChange('blogs')} style={activeTab === 'blogs' ? styles.navBtnActive : styles.navBtn}>📚 Blogs</button>
     <button onClick={() => { window.location.href = '/dashboard/microtasks'; }} style={styles.navBtn}>🧩 Micro Tasks</button>
@@ -1403,6 +1438,82 @@ useEffect(() => {
             })()}
           </div>
         )}
+        {/* WITHDRAWAL HISTORY TAB */}
+        {activeTab === 'withdrawal_history' && (
+          <div style={styles.alertBox}>
+            <h2 style={{color: 'gold', marginBottom: '20px'}}>🏦 Withdrawal History</h2>
+            {loadingWithdrawalHistory ? (
+              <div style={{textAlign: 'center', padding: '30px', color: '#FFD700'}}>
+                <div style={{fontSize: '20px', marginBottom: '10px'}}>⏳</div>
+                <div>Loading withdrawal requests...</div>
+              </div>
+            ) : withdrawalHistory && withdrawalHistory.length > 0 ? (
+              <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '15px'}}>
+                {withdrawalHistory.map((withdrawal: any) => (
+                  <div key={withdrawal._id} style={{
+                    background: '#0a0a0a',
+                    border: `2px solid ${
+                      withdrawal.status === 'Pending' ? '#FFD700' :
+                      withdrawal.status === 'Approved' ? '#32CD32' :
+                      withdrawal.status === 'Rejected' ? '#FF6347' :
+                      '#888'
+                    }`,
+                    borderRadius: '12px',
+                    padding: '18px',
+                    boxShadow: '0 0 10px rgba(255,215,0,0.1)'
+                  }}>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px', marginBottom: '15px', paddingBottom: '15px', borderBottom: '1px solid #333'}}>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>💰 AMOUNT</div>
+                        <div style={{fontSize: '18px', color: '#FFD700', fontWeight: 'bold'}}>Rs {withdrawal.amount?.toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>🏦 METHOD</div>
+                        <div style={{fontSize: '14px', color: '#ccc', fontWeight: 'bold'}}>{withdrawal.method || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>✅ STATUS</div>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          color: withdrawal.status === 'Pending' ? '#FFD700' :
+                                 withdrawal.status === 'Approved' ? '#32CD32' :
+                                 withdrawal.status === 'Rejected' ? '#FF6347' :
+                                 '#888'
+                        }}>
+                          {withdrawal.status || 'Unknown'}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>💳 ACCOUNT</div>
+                        <div style={{fontSize: '13px', color: '#ccc'}}>{withdrawal.account || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <div style={{fontSize: '11px', color: '#888', marginBottom: '5px'}}>📅 DATE</div>
+                        <div style={{fontSize: '13px', color: '#ccc'}}>
+                          {withdrawal.createdAt ? new Date(withdrawal.createdAt).toLocaleDateString('en-US', {year: 'numeric', month: 'short', day: 'numeric'}) : 'N/A'}
+                        </div>
+                      </div>
+                    </div>
+                    {withdrawal.status === 'Rejected' && withdrawal.reason && (
+                      <div style={{marginTop: '12px', padding: '10px', background: '#ff4444', borderRadius: '6px', fontSize: '12px', color: '#fff'}}>
+                        <strong>Reason:</strong> {withdrawal.reason}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div style={{textAlign: 'center', padding: '40px', color: '#666'}}>
+                <div style={{fontSize: '30px', marginBottom: '10px'}}>📭</div>
+                <div>No withdrawal requests yet</div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* DAILY NEWS TAB */}
         {activeTab === 'news' && (
           <div style={styles.card}>
