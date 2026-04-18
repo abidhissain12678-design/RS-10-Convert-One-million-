@@ -303,11 +303,21 @@ export const getCurrentUserSubmissions = async (req: Request, res: Response) => 
 export const approveTaskPayment = async (req: Request, res: Response) => {
   try {
     const { submissionId } = req.body;
+    console.log('🔍 approveTaskPayment called with submissionId:', submissionId);
 
     const userTask = await UserTask.findById(submissionId).populate('userId').populate('taskId');
     if (!userTask) {
+      console.log('❌ Submission not found:', submissionId);
       return res.status(404).json({ error: 'Submission not found' });
     }
+
+    console.log('📋 Found UserTask:', {
+      id: userTask._id,
+      userId: userTask.userId._id,
+      taskId: userTask.taskId._id,
+      taskReward: userTask.taskId.reward,
+      completed: userTask.completed
+    });
 
     // Prevent double-approval
     if (userTask.completed) {
@@ -318,12 +328,25 @@ export const approveTaskPayment = async (req: Request, res: Response) => {
     // Update user balance
     const user = await User.findById(userTask.userId);
     if (!user) {
+      console.log('❌ User not found:', userTask.userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
     const rewardAmount = parseFloat(userTask.taskId.reward);
+    console.log('💰 Adding reward to user balance:', {
+      userId: user._id,
+      username: user.username,
+      currentBalance: user.balance,
+      rewardAmount: rewardAmount
+    });
+
     user.balance += rewardAmount;
     await user.save();
+
+    console.log('✅ User balance updated:', {
+      userId: user._id,
+      newBalance: user.balance
+    });
 
     // Mark task as completed
     userTask.completed = true;
@@ -341,12 +364,20 @@ export const approveTaskPayment = async (req: Request, res: Response) => {
         task.active = false;
       }
       await task.save();
+
+      console.log('✅ Task updated:', {
+        taskId: task._id,
+        completedQuantity: task.completedQuantity,
+        totalQuantity: task.totalQuantity,
+        active: task.active
+      });
     }
 
     console.log(`✅ Task approved - User: ${(user as any).username}, Reward: RS ${rewardAmount}, New Balance: ${user.balance}`);
     res.status(200).json({ message: 'Payment approved successfully', newBalance: user.balance });
   } catch (error: any) {
     console.error('approveTaskPayment error:', error?.message);
+    console.error('Stack trace:', error?.stack);
     res.status(500).json({ message: 'Server error', error: error?.message });
   }
 };

@@ -1636,18 +1636,19 @@ const AdminPanel = () => {
                     <div style={{display: 'flex', gap: '10px', flexWrap: 'wrap', paddingTop: '15px', borderTop: '1px solid #333'}}>
                       <button 
                         onClick={async () => {
-                          if (!confirm('Approve this task submission?')) return;
+                          if (!confirm('Approve this task submission? This will add the reward to user balance.')) return;
                           try {
                             const token = localStorage.getItem('token');
                             const headers: any = { 'Content-Type': 'application/json' };
                             if (token) headers['Authorization'] = `Bearer ${token}`;
-                            const response = await fetch(`${getApiBaseUrl()}/api/admin/approve-task-submission`, {
+                            const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/approve-payment`, {
                               method: 'POST',
                               headers,
                               body: JSON.stringify({ submissionId: submission._id })
                             });
                             if (response.ok) {
-                              alert('✅ Task submission approved!');
+                              const data = await response.json();
+                              alert(`✅ Task submission approved! User balance updated to RS ${data.newBalance}`);
                               // Refresh the list
                               window.location.reload();
                             } else {
@@ -1669,7 +1670,7 @@ const AdminPanel = () => {
                             const token = localStorage.getItem('token');
                             const headers: any = { 'Content-Type': 'application/json' };
                             if (token) headers['Authorization'] = `Bearer ${token}`;
-                            const response = await fetch(`${getApiBaseUrl()}/api/admin/reject-task-submission`, {
+                            const response = await fetch(`${getApiBaseUrl()}/api/tasks/admin/reject-payment`, {
                               method: 'POST',
                               headers,
                               body: JSON.stringify({ submissionId: submission._id })
