@@ -108,9 +108,10 @@ const TaskSubmissions: React.FC = () => {
       });
 
       if (response.ok) {
+        const data = await response.json();
         // Remove from pending list after approval
         setPendingSubmissions(prev => prev.filter(s => s._id !== submissionId));
-        alert('✅ Payment APPROVED! Task moved to History.');
+        alert(`✅ Payment APPROVED! Task earnings added to user account (RS ${data.taskEarnings || 'updated'})`);
       } else {
         const errorData = await response.json();
         alert(errorData.error || 'Failed to approve payment');
