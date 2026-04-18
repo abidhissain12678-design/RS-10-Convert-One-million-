@@ -919,6 +919,106 @@ const AdminPanel = () => {
                   </div>
                 </div>
 
+                {/* Active Chains Section */}
+                <div style={{marginBottom: '40px'}}>
+                  <h3 style={{color: '#FFD700', marginBottom: '20px', fontSize: '20px'}}>⛓️ Active Chains</h3>
+                  <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '12px'}}>
+                    {Array.isArray(users) && users.length > 0 ? (
+                      users
+                        .filter((u: any) => u.chainActive === true)
+                        .sort((a: any, b: any) => {
+                          const aPayments = (a as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
+                          const bPayments = (b as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
+                          return bPayments - aPayments;
+                        })
+                        .map((user: any) => {
+                          const approvedPayments = (user as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
+                          const totalReferrals = (user as any).networkReferrals?.length || 0;
+                          const networkCount = (user as any).networkCount || (user as any).totalNetwork || 0;
+                          const chainStatus = approvedPayments >= 11 ? '✅ Completed' : '🔄 In Progress';
+                          
+                          return (
+                            <div key={user._id} style={{
+                              background: approvedPayments >= 11 ? 'linear-gradient(135deg, #0f600f 0%, #0a3a0a 100%)' : '#0a0a0a',
+                              border: approvedPayments >= 11 ? '2px solid #32CD32' : '2px solid #FFD700',
+                              borderRadius: '12px',
+                              padding: '15px',
+                              boxShadow: approvedPayments >= 11 ? '0 0 20px rgba(50,205,50,0.3)' : '0 0 20px rgba(255,215,0,0.2)'
+                            }}>
+                              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px'}}>
+                                <div>
+                                  <div style={{fontSize: '14px', color: '#FFD700', fontWeight: 'bold'}}>
+                                    {user.username}
+                                  </div>
+                                  <div style={{fontSize: '12px', color: '#666', marginTop: '2px'}}>{user.email}</div>
+                                </div>
+                                <div style={{
+                                  background: approvedPayments >= 11 ? '#32CD32' : '#FFD700',
+                                  color: approvedPayments >= 11 ? '#0a0a0a' : '#000',
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: 'bold',
+                                  textAlign: 'center'
+                                }}>
+                                  {chainStatus}
+                                </div>
+                              </div>
+
+                              {/* Payment Progress */}
+                              <div style={{marginBottom: '12px'}}>
+                                <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '5px'}}>
+                                  <div style={{fontSize: '11px', color: '#888'}}>Referral Payments Approved</div>
+                                  <div style={{fontSize: '12px', color: '#FFD700', fontWeight: 'bold'}}>
+                                    {approvedPayments}/11
+                                  </div>
+                                </div>
+                                <div style={{
+                                  background: '#1a1a1a',
+                                  borderRadius: '8px',
+                                  height: '12px',
+                                  overflow: 'hidden',
+                                  border: '1px solid #333'
+                                }}>
+                                  <div style={{
+                                    background: approvedPayments >= 11 ? '#32CD32' : '#FFD700',
+                                    height: '100%',
+                                    width: `${(approvedPayments / 11) * 100}%`,
+                                    transition: 'width 0.3s ease'
+                                  }}></div>
+                                </div>
+                              </div>
+
+                              {/* Network Stats */}
+                              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', paddingTop: '12px', borderTop: '1px solid #333'}}>
+                                <div style={{textAlign: 'center'}}>
+                                  <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>Total Network</div>
+                                  <div style={{fontSize: '14px', color: '#00D9FF', fontWeight: 'bold'}}>
+                                    {networkCount.toLocaleString()}
+                                  </div>
+                                </div>
+                                <div style={{textAlign: 'center'}}>
+                                  <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>Total Referrals</div>
+                                  <div style={{fontSize: '14px', color: '#FFD700', fontWeight: 'bold'}}>{totalReferrals}</div>
+                                </div>
+                                <div style={{textAlign: 'center'}}>
+                                  <div style={{fontSize: '11px', color: '#888', marginBottom: '3px'}}>Status</div>
+                                  <div style={{fontSize: '14px', color: approvedPayments >= 11 ? '#32CD32' : '#FFD700', fontWeight: 'bold'}}>
+                                    {approvedPayments >= 11 ? 'Complete' : 'Pending'}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })
+                    ) : (
+                      <div style={{textAlign: 'center', padding: '20px', color: '#666'}}>
+                        No active chains found
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 {/* Top Members List */}
                 <div style={{marginBottom: '40px'}}>
                   <h3 style={{color: '#FFD700', marginBottom: '20px', fontSize: '20px'}}>👑 Top Network Members</h3>
