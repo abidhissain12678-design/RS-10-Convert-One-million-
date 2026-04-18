@@ -18,5 +18,6 @@ router.get('/pending-payments', getPendingPayments);
 router.post('/approve-payment', approvePayment);
 router.post('/reject-payment', rejectPayment);
 router.get('/user-payments', authMiddleware, getUserPayments);
+router.get('/my-withdrawals', authMiddleware, getMyWithdrawals);
 
 export default router;
