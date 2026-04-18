@@ -48,6 +48,7 @@ const MicroTasks: React.FC = () => {
     accountHolderName: ''
   });
   const [withdrawSubmitting, setWithdrawSubmitting] = useState(false);
+  const [pendingWithdrawals, setPendingWithdrawals] = useState<any[]>([]);
   const [referralPaymentVerified, setReferralPaymentVerified] = useState(false);
   const [userReferrals, setUserReferrals] = useState<any[]>([]);
   const [loadingReferralStatus, setLoadingReferralStatus] = useState(true);
@@ -81,6 +82,32 @@ const MicroTasks: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to fetch task earnings');
+    }
+  };
+
+  const fetchPendingWithdrawals = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+
+    try {
+      const baseUrl = getApiBaseUrl();
+      const response = await fetch(`${baseUrl}/api/payment/my-withdrawals`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Only show pending withdrawals (Task Withdraw type)
+        const pending = (Array.isArray(data) ? data : []).filter(
+          (w: any) => w.type === 'Task Withdraw' && w.status === 'Pending'
+        );
+        setPendingWithdrawals(pending);
+      }
+    } catch (err) {
+      console.error('Failed to fetch pending withdrawals');
     }
   };
 
@@ -204,6 +231,7 @@ const MicroTasks: React.FC = () => {
     fetchTaskEarnings();
     fetchCompletedTasks();
     fetchReferralPaymentStatus();
+    fetchPendingWithdrawals();
     
     // Periodically check for referral payment updates (every 5 seconds)
     // This ensures tasks unlock immediately when 11th payment is verified
@@ -599,8 +627,9 @@ const MicroTasks: React.FC = () => {
       alert('Withdrawal request submitted successfully!');
       setShowWithdrawModal(false);
       setWithdrawData({ amount: '', method: '', accountNumber: '', accountHolderName: '' });
-      // Refresh earnings
+      // Refresh earnings and pending withdrawals
       fetchTaskEarnings();
+      fetchPendingWithdrawals();
     } catch (err: any) {
       alert(err.message);
     } finally {
@@ -646,22 +675,55 @@ const MicroTasks: React.FC = () => {
         <p style={{ color: '#ccc', fontSize: '14px', margin: '10px 0 20px 0' }}>
           Minimum withdrawal amount is RS 100. Complete more tasks to increase your balance!
         </p>
-        <button
-          onClick={() => setShowWithdrawModal(true)}
-          disabled={taskEarnings < 100}
-          style={{
-            background: taskEarnings >= 100 ? 'gold' : '#555',
-            color: taskEarnings >= 100 ? 'black' : '#ccc',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '8px',
-            fontWeight: 'bold',
-            cursor: taskEarnings >= 100 ? 'pointer' : 'not-allowed',
-            width: '100%'
-          }}
-        >
-          Withdraw Earnings
-        </button>
+        {pendingWithdrawals.length > 0 ? (
+          <div style={{
+            background: '#1a1a1a',
+            border: '2px solid #FFD700',
+            padding: '12px',
+            borderRadius: '8px'
+          }}>
+            <div style={{
+              background: '#FFD700',
+              color: 'black',
+              padding: '10px',
+              borderRadius: '6px',
+              fontWeight: 'bold',
+              marginBottom: '8px',
+              textAlign: 'center'
+            }}>
+              ⏳ Pending Approval
+            </div>
+            {pendingWithdrawals.map((wd: any) => (
+              <div key={wd._id} style={{
+                fontSize: '13px',
+                color: '#FFD700',
+                marginBottom: '5px'
+              }}>
+                RS {wd.amount?.toLocaleString()} via {wd.withdrawMethod}
+              </div>
+            ))}
+            <p style={{ fontSize: '12px', color: '#ccc', margin: '8px 0 0 0' }}>
+              Your withdrawal request is being reviewed by admin. Check back soon!
+            </p>
+          </div>
+        ) : (
+          <button
+            onClick={() => setShowWithdrawModal(true)}
+            disabled={taskEarnings < 100}
+            style={{
+              background: taskEarnings >= 100 ? 'gold' : '#555',
+              color: taskEarnings >= 100 ? 'black' : '#ccc',
+              border: 'none',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              fontWeight: 'bold',
+              cursor: taskEarnings >= 100 ? 'pointer' : 'not-allowed',
+              width: '100%'
+            }}
+          >
+            Withdraw Earnings
+          </button>
+        )}
       </div>
       
       {tasks.length === 0 ? (
