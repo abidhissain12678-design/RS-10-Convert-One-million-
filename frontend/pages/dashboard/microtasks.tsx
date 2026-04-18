@@ -137,7 +137,7 @@ const MicroTasks: React.FC = () => {
 
     try {
       const baseUrl = getApiBaseUrl();
-      const response = await fetch(`${baseUrl}/api/tasks/user/submissions`, {
+      const response = await fetch(`${baseUrl}/api/tasks/user/my-submissions`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Cache-Control': 'no-cache'
@@ -146,8 +146,13 @@ const MicroTasks: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
+        // Only mark tasks as completed if they are actually completed by this user
         const completedIds: Set<string> = new Set(data.filter((task: any) => task.completed).map((task: any) => String(task.taskId._id || task.taskId)));
+        // Also track pending submissions for status display
+        const pendingIds: Set<string> = new Set(data.filter((task: any) => !task.completed && task.proofSubmitted).map((task: any) => String(task.taskId._id || task.taskId)));
         setCompletedTaskIds(completedIds);
+        // Store pending submissions for UI display
+        setTaskHistory(data);
       }
     } catch (err) {
       console.error('Failed to fetch completed tasks');
@@ -669,10 +674,14 @@ const MicroTasks: React.FC = () => {
             const alreadyCompleted = completedTaskIds.has(task._id);
             const isReferralNotVerified = !referralPaymentVerified;
             
-            let buttonLabel = isFull ? 'Task Full' : alreadyCompleted ? 'Already Completed' : 'Start Task';
-            let disabledButton = isFull || alreadyCompleted || isReferralNotVerified;
+            // Check if user has a pending submission for this task
+            const userSubmission = taskHistory.find((sub: any) => String(sub.taskId._id || sub.taskId) === task._id);
+            const hasPendingSubmission = userSubmission && !userSubmission.completed && userSubmission.proofSubmitted;
             
-            if (isReferralNotVerified && !isFull && !alreadyCompleted) {
+            let buttonLabel = isFull ? 'Task Full' : alreadyCompleted ? 'Already Completed' : hasPendingSubmission ? 'Approve Pending' : 'Start Task';
+            let disabledButton = isFull || alreadyCompleted || isReferralNotVerified || hasPendingSubmission;
+            
+            if (isReferralNotVerified && !isFull && !alreadyCompleted && !hasPendingSubmission) {
               buttonLabel = 'Complete 11 Referrals';
             }
 
@@ -710,9 +719,14 @@ const MicroTasks: React.FC = () => {
                     {task.completedQuantity}/{task.totalQuantity} ({progress}%)
                   </p>
                 </div>
-                {isReferralNotVerified && !isFull && !alreadyCompleted && (
+                {isReferralNotVerified && !isFull && !alreadyCompleted && !hasPendingSubmission && (
                   <p style={{ color: '#ffa500', fontSize: '12px', marginBottom: '10px', padding: '8px', background: '#1a1a1a', borderRadius: '5px' }}>
                     ⏳ Complete 11 referral verification to unlock tasks
+                  </p>
+                )}
+                {hasPendingSubmission && (
+                  <p style={{ color: '#1e90ff', fontSize: '12px', marginBottom: '10px', padding: '8px', background: '#1a1a1a', borderRadius: '5px' }}>
+                    ⏳ Your submission is pending admin approval
                   </p>
                 )}
                 <button
