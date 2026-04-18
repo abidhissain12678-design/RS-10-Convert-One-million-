@@ -306,3 +306,16 @@ export const getUserPayments = async (req: Request, res: Response) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const getMyWithdrawals = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id; // Get user ID from auth middleware
+    const withdrawals = await Payment.find({ 
+      userId, 
+      type: { $in: ['Withdraw', 'Task Withdraw'] } 
+    }).sort({ createdAt: -1 });
+    res.json(withdrawals);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};

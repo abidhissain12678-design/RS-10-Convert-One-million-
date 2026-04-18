@@ -1,5 +1,5 @@
 import express from 'express';
-import { requestActivation, requestWithdrawal, requestTaskWithdrawal, getPendingPayments, approvePayment, rejectPayment, getUserPayments } from '../controllers/paymentController';
+import { requestActivation, requestWithdrawal, requestTaskWithdrawal, getPendingPayments, approvePayment, rejectPayment, getUserPayments, getMyWithdrawals } from '../controllers/paymentController';
 import { authMiddleware } from '../middleware/authmiddleware';
 import multer from 'multer';
 
