@@ -857,12 +857,12 @@ useEffect(() => {
   <div style={{display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px'}}>
     <button onClick={() => handleTabChange('home')} style={activeTab === 'home' ? styles.navBtnActive : styles.navBtn}>🏠 Dashboard</button>
     <button onClick={() => handleTabChange('profile')} style={activeTab === 'profile' ? styles.navBtnActive : styles.navBtn}>👤 User Profile</button>
+    <button onClick={() => { window.location.href = '/dashboard/microtasks'; }} style={styles.navBtn}>🧩 Micro Tasks</button>
     <button onClick={() => handleTabChange('referral')} style={activeTab === 'referral' ? styles.navBtnActive : styles.navBtn}>🔗 Referral History</button>
     <button onClick={() => handleTabChange('wallet')} style={activeTab === 'wallet' ? styles.navBtnActive : styles.navBtn}>💰 Wallet</button>
     <button onClick={() => handleTabChange('withdrawal_history')} style={activeTab === 'withdrawal_history' ? styles.navBtnActive : styles.navBtn}>🏦 Withdrawals</button>
     <button onClick={() => handleTabChange('news')} style={activeTab === 'news' ? styles.navBtnActive : styles.navBtn}>📰 Daily News</button>
     <button onClick={() => handleTabChange('blogs')} style={activeTab === 'blogs' ? styles.navBtnActive : styles.navBtn}>📚 Blogs</button>
-    <button onClick={() => { window.location.href = '/dashboard/microtasks'; }} style={styles.navBtn}>🧩 Micro Tasks</button>
   </div>
 
   {/* DYNAMIC SOCIAL LINKS & SLOGANS (Connected with Admin) */}
