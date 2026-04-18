@@ -303,19 +303,17 @@ export const getCurrentUserSubmissions = async (req: Request, res: Response) => 
 export const approveTaskPayment = async (req: Request, res: Response) => {
   try {
     const { submissionId } = req.body;
-    console.log('🔍 approveTaskPayment called with submissionId:', submissionId);
 
     const userTask = await UserTask.findById(submissionId).populate('userId').populate('taskId');
     if (!userTask) {
-      console.log('❌ Submission not found:', submissionId);
       return res.status(404).json({ error: 'Submission not found' });
     }
 
-    console.log('📋 Found UserTask:', {
-      id: userTask._id,
-      userId: userTask.userId._id,
-      taskId: userTask.taskId._id,
-      taskReward: userTask.taskId.reward,
+    console.log('📋 approveTaskPayment - userTask details:', {
+      submissionId,
+      userId: userTask.userId?._id || userTask.userId,
+      taskId: userTask.taskId?._id || userTask.taskId,
+      reward: userTask.taskId?.reward,
       completed: userTask.completed
     });
 
@@ -325,59 +323,52 @@ export const approveTaskPayment = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Payment already approved - cannot approve twice' });
     }
 
+    // Get userId - handle both populated object and string ID
+    const userId = typeof userTask.userId === 'string' ? userTask.userId : userTask.userId?._id;
+    
     // Update user balance
-    const user = await User.findById(userTask.userId);
+    const user = await User.findById(userId);
     if (!user) {
-      console.log('❌ User not found:', userTask.userId);
+      console.error('❌ User not found for userId:', userId);
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const rewardAmount = parseFloat(userTask.taskId.reward);
-    console.log('💰 Adding reward to user balance:', {
-      userId: user._id,
-      username: user.username,
-      currentBalance: user.balance,
-      rewardAmount: rewardAmount
-    });
-
-    user.balance += rewardAmount;
+    // Get reward amount - handle as number or string
+    const rewardAmount = typeof userTask.taskId?.reward === 'string' 
+      ? parseFloat(userTask.taskId.reward) 
+      : Number(userTask.taskId?.reward || 0);
+    
+    console.log('💰 Updating earnings - User:', user.username, 'Current taskEarnings:', user.taskEarnings, 'Reward:', rewardAmount);
+    
+    // Update task earnings (not balance - taskEarnings is for approved task rewards)
+    user.taskEarnings = (user.taskEarnings || 0) + rewardAmount;
     await user.save();
-
-    console.log('✅ User balance updated:', {
-      userId: user._id,
-      newBalance: user.balance
-    });
+    
+    console.log('✅ Task earnings updated - New taskEarnings:', user.taskEarnings);
 
     // Mark task as completed
     userTask.completed = true;
     await userTask.save();
 
     // Update task completedQuantity
-    const task = await Task.findById(userTask.taskId);
+    const taskId = typeof userTask.taskId === 'string' ? userTask.taskId : userTask.taskId?._id;
+    const task = await Task.findById(taskId);
     if (task) {
       task.completedQuantity += 1;
       task.completedBy = task.completedBy || [];
-      if (!task.completedBy.includes(userTask.userId.toString())) {
-        task.completedBy.push(userTask.userId.toString());
+      if (!task.completedBy.includes(userId)) {
+        task.completedBy.push(userId);
       }
       if (task.completedQuantity >= task.totalQuantity) {
         task.active = false;
       }
       await task.save();
-
-      console.log('✅ Task updated:', {
-        taskId: task._id,
-        completedQuantity: task.completedQuantity,
-        totalQuantity: task.totalQuantity,
-        active: task.active
-      });
     }
 
-    console.log(`✅ Task approved - User: ${(user as any).username}, Reward: RS ${rewardAmount}, New Balance: ${user.balance}`);
-    res.status(200).json({ message: 'Payment approved successfully', newBalance: user.balance });
+    console.log(`✅ Task approved - User: ${user.username}, Reward: RS ${rewardAmount}, New Task Earnings: ${user.taskEarnings}`);
+    res.status(200).json({ message: 'Payment approved successfully', taskEarnings: user.taskEarnings });
   } catch (error: any) {
     console.error('approveTaskPayment error:', error?.message);
-    console.error('Stack trace:', error?.stack);
     res.status(500).json({ message: 'Server error', error: error?.message });
   }
 };
