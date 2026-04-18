@@ -1,5 +1,5 @@
 import express from 'express';
-import { getActiveTasks, submitProof, claimReward, getAllTasks, updateTask, deleteTask, getUserTaskSubmissions, approveTaskPayment, rejectTaskPayment, getUserTaskEarnings } from '../controllers/taskController';
+import { getActiveTasks, submitProof, claimReward, getAllTasks, updateTask, deleteTask, getUserTaskSubmissions, approveTaskPayment, rejectTaskPayment, getUserTaskEarnings, getCurrentUserSubmissions } from '../controllers/taskController';
 import { authMiddleware } from '../middleware/authmiddleware';
 import { adminMiddleware } from '../middleware/authmiddleware';
 
@@ -9,6 +9,7 @@ router.get('/active', authMiddleware, getActiveTasks);
 router.post('/submit-proof', authMiddleware, submitProof);
 router.post('/claim-reward', authMiddleware, claimReward);
 router.get('/user/submissions', authMiddleware, getUserTaskSubmissions);
+router.get('/user/my-submissions', authMiddleware, getCurrentUserSubmissions);
 router.get('/user/earnings', authMiddleware, getUserTaskEarnings);
 
 // Admin routes

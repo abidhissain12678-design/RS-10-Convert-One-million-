@@ -279,6 +279,27 @@ export const getUserTaskSubmissions = async (req: Request, res: Response) => {
   }
 };
 
+export const getCurrentUserSubmissions = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.id;
+    console.log('🔍 getCurrentUserSubmissions - Querying for user:', userId);
+
+    const userTasks = await UserTask.find({ userId })
+      .populate('taskId', 'title taskType reward')
+      .sort({ updatedAt: -1 });
+    
+    console.log('📋 getCurrentUserSubmissions - Query result:', {
+      count: userTasks.length,
+      submissions: userTasks.map(ut => ({ id: ut._id, taskId: ut.taskId, completed: ut.completed, status: ut.status }))
+    });
+    
+    res.status(200).json(userTasks);
+  } catch (error) {
+    console.error('getCurrentUserSubmissions error:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 export const approveTaskPayment = async (req: Request, res: Response) => {
   try {
     const { submissionId } = req.body;
