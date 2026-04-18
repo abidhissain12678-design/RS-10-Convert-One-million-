@@ -1030,13 +1030,13 @@ const AdminPanel = () => {
 
                 {/* Top Members List */}
                 <div style={{marginBottom: '40px'}}>
-                  <h3 style={{color: '#FFD700', marginBottom: '20px', fontSize: '20px'}}>👑 Top Network Members</h3>
+                  <h3 style={{color: '#FFD700', marginBottom: '20px', fontSize: '20px'}}>👑 Top Network Members (11+ Completed)</h3>
                   <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '12px'}}>
                     {Array.isArray(users) && users.length > 0 ? (
                       users
                         .filter((u: any) => {
                           const approvedPayments = (u as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
-                          return approvedPayments >= 1;
+                          return approvedPayments >= 11;
                         })
                         .sort((a: any, b: any) => {
                           const aNetwork = (a as any).networkCount || (a as any).totalNetwork || 0;
