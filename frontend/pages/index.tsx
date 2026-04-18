@@ -2619,12 +2619,12 @@ const BlogSection: React.FC = () => {
             gap: '24px'
           }}>
             {[
-              { q: "Million Hub kya hai?", a: "Million Hub ek digital platform hai jo online earning aur skills ke liye banaya gaya hai. Yahan aap free mein seekh sakte hain aur referral, simple task complete karte hue paise kama sakte hain." },
-              { q: "How to join Million Hub?", a: "Just sign up on our website, complete your profile, nonrefendable RS10 entry fee submit and complete 11 referral member within 2 hours.Start earning from day one with our step-by-step guides." },
-              { q: "Kya 1 million referral mukamal hony par 10 lakh mily gy?", a: "Bilkul! jab ap 11 referral apny within 2 hours complete karein or ap ki referral team  apny apny 11 referral iss tarha 1 million referral par ap ko 10 lakh paise mily gy." },
-              { q: "kya sirf 1 user ko 10 lakh mily gy?", a: "NHI! har join hony wala user jab apny referral jab apny 11 referral complete karta ha to oss ka network banna shiru ho jata 1 million user ke bad 10 mily gy" },
-              { q: "1 Million kesy mukamal hn gy?", a: "LEVEL 1 ap ky 11 referrals, LEVEL 2 ap ky 11 referrals ky 11*11 referrals 121, LEVEL 3 121 referrals ky apny apny 11 referrals 121*11=1331, LEVEL 4 1331 referrals ky apny apny 11 referrals 1331*11=14641, LEVEL 5 14641 referrals ky apny apny 11 referrals 14641*11=161051, LEVEL 6 referrals 1000000." },
-              { q: "2 hours may 11 referral complete na ho?", a: "Accout blocked, 2 hour iss liya zarori ha kunky jab har user 2 hours mein 11 referral complete karein to oss ky 1 million referral complete ho jain gy or ossy 10 lakh paise mily gy." },
+              { q: "Million Hub kya hai?", a: "Million Hub ek digital platform hai jo online earning aur skills ke liye banaya gaya hai." },
+              { q: "How to join Million Hub?", a: "Just sign up on our website, complete your profile and more information read blog." },
+              { q: "Kya 1 million referral mukamal hony par 10 lakh mily gy?", a: "Bilkul! jab ap ki team network progress 1 million ho jay gi." },
+              { q: "kya sirf 1 user ko 10 lakh mily gy?", a: "NHI! har us user ko jis ni network progress 1 million ho jay gi." },
+              { q: "1 Million kesy mukamal hn gy?", a: "ap ny sirf 11 referrals krny ha,baki ap ki team apni be chain banay gi to ap ky network progress 1 million ho jay ge." },
+              { q: "2 hours may 11 referral complete na ho?", a: "Accout blocked,kunky iss tarha network progress jaldi complete ho jay gi." },
               { q: "Referral ky ilwa be earning kr skty?", a: "Bilkul! jab ap ky 11 referrals complete ho jay to microtask sy daily 100-500 earning kr skty" },
               { q: "Minimum withdraw kitna ha or konsy account?", a: "Minimum microtask earning withdraw 100 ha. jazzcah, easypaisa, bank account. 48 hours recived." }
             ].map((faq, index) => (
