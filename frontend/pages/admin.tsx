@@ -902,13 +902,19 @@ const AdminPanel = () => {
                   <div style={{background: '#0a0a0a', border: '1px solid #FFD700', borderRadius: '10px', padding: '15px', textAlign: 'center'}}>
                     <div style={{fontSize: '12px', color: '#888', marginBottom: '5px'}}>Active Chain Users</div>
                     <div style={{fontSize: '28px', color: '#00D9FF', fontWeight: 'bold'}}>
-                      {users.filter((u: any) => u.chainActive === true || (u as any).verifiedUsers?.length >= 1).length}
+                      {users.filter((u: any) => {
+                        const approvedPayments = (u as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
+                        return approvedPayments >= 11;
+                      }).length}
                     </div>
                   </div>
                   <div style={{background: '#0a0a0a', border: '1px solid #32CD32', borderRadius: '10px', padding: '15px', textAlign: 'center'}}>
                     <div style={{fontSize: '12px', color: '#888', marginBottom: '5px'}}>Verified 11+ Users</div>
                     <div style={{fontSize: '28px', color: '#32CD32', fontWeight: 'bold'}}>
-                      {users.filter((u: any) => (u as any).verifiedUsers?.length >= 11).length}
+                      {users.filter((u: any) => {
+                        const approvedPayments = (u as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
+                        return approvedPayments >= 11;
+                      }).length}
                     </div>
                   </div>
                   <div style={{background: '#0a0a0a', border: '1px solid #FFD700', borderRadius: '10px', padding: '15px', textAlign: 'center'}}>
@@ -925,7 +931,10 @@ const AdminPanel = () => {
                   <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '12px'}}>
                     {Array.isArray(users) && users.length > 0 ? (
                       users
-                        .filter((u: any) => u.chainActive === true)
+                        .filter((u: any) => {
+                          const approvedPayments = (u as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
+                          return approvedPayments >= 11;
+                        })
                         .sort((a: any, b: any) => {
                           const aPayments = (a as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
                           const bPayments = (b as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
@@ -1025,7 +1034,10 @@ const AdminPanel = () => {
                   <div style={{display: 'grid', gridTemplateColumns: '1fr', gap: '12px'}}>
                     {Array.isArray(users) && users.length > 0 ? (
                       users
-                        .filter((u: any) => (u as any).verifiedUsers?.length >= 1 || u.chainActive === true)
+                        .filter((u: any) => {
+                          const approvedPayments = (u as any).networkReferrals?.filter((r: any) => r.paymentApproved)?.length || 0;
+                          return approvedPayments >= 1;
+                        })
                         .sort((a: any, b: any) => {
                           const aNetwork = (a as any).networkCount || (a as any).totalNetwork || 0;
                           const bNetwork = (b as any).networkCount || (b as any).totalNetwork || 0;
